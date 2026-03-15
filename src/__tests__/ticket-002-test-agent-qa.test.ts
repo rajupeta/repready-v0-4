@@ -106,6 +106,7 @@ describe('AC: All TypeScript interfaces export cleanly from src/types/index.ts',
       status: 'idle',
       fixtureId: 'demo-call',
       transcript: [],
+      events: [],
     };
     expect(session.scorecard).toBeUndefined();
 
@@ -125,6 +126,7 @@ describe('AC: All TypeScript interfaces export cleanly from src/types/index.ts',
         status: s,
         fixtureId: 'f',
         transcript: [],
+        events: [],
       };
       expect(session.status).toBe(s);
     });

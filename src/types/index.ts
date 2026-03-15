@@ -1,3 +1,5 @@
+import type { SSEEvent } from './sse';
+
 export interface TranscriptLine {
   speaker: 'rep' | 'prospect';
   text: string;
