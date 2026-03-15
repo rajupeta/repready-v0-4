@@ -13,6 +13,8 @@ function makeRule(overrides: Partial<CoachingRule> = {}): CoachingRule {
     name: "Test Rule",
     description: "A test rule",
     cooldownMs: 10000,
+    callTypes: ["discovery", "demo", "objection-handling", "follow-up"],
+    severity: "medium",
     detect: () => true,
     ...overrides,
   };

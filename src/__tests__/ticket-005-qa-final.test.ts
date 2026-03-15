@@ -22,9 +22,9 @@ function getRule(ruleId: string): CoachingRule {
 // AC: 6 coaching rules exported from coaching-rules.ts
 // =============================================================================
 describe("AC: coaching-rules.ts exports", () => {
-  it("exports exactly 6 rules as an array", () => {
+  it("exports exactly 8 rules as an array", () => {
     expect(Array.isArray(coachingRules)).toBe(true);
-    expect(coachingRules).toHaveLength(6);
+    expect(coachingRules).toHaveLength(8);
   });
 
   const expectedRuleIds = [
@@ -34,6 +34,8 @@ describe("AC: coaching-rules.ts exports", () => {
     "filler-words",
     "feature-dump",
     "no-next-steps",
+    "objection-deflected",
+    "competitor-not-explored",
   ];
 
   it("contains all expected ruleIds", () => {
@@ -396,6 +398,8 @@ describe("AC: RulesEngine.evaluate()", () => {
       name: "Always",
       description: "Always triggers",
       cooldownMs: 60000,
+      callTypes: ["discovery"],
+      severity: "medium",
       detect: () => true,
     };
     const never: CoachingRule = {
@@ -403,6 +407,8 @@ describe("AC: RulesEngine.evaluate()", () => {
       name: "Never",
       description: "Never triggers",
       cooldownMs: 60000,
+      callTypes: ["discovery"],
+      severity: "medium",
       detect: () => false,
     };
     const engine = new RulesEngine([always, never]);
@@ -417,6 +423,8 @@ describe("AC: RulesEngine.evaluate()", () => {
       name: "CD",
       description: "Cooldown test",
       cooldownMs: 60000,
+      callTypes: ["discovery"],
+      severity: "medium",
       detect: () => true,
     };
     const engine = new RulesEngine([rule]);
@@ -433,6 +441,8 @@ describe("AC: RulesEngine.evaluate()", () => {
       name: "Short",
       description: "Short cooldown",
       cooldownMs: 100,
+      callTypes: ["discovery"],
+      severity: "medium",
       detect: () => true,
     };
     const engine = new RulesEngine([rule]);
@@ -460,6 +470,8 @@ describe("AC: cooldown tracking per-ruleId", () => {
       name: "A",
       description: "A",
       cooldownMs: 60000,
+      callTypes: ["discovery"],
+      severity: "medium",
       detect: () => true,
     };
     const ruleB: CoachingRule = {
@@ -467,6 +479,8 @@ describe("AC: cooldown tracking per-ruleId", () => {
       name: "B",
       description: "B",
       cooldownMs: 60000,
+      callTypes: ["discovery"],
+      severity: "medium",
       detect: () => true,
     };
     const engine = new RulesEngine([ruleA, ruleB]);
@@ -485,6 +499,8 @@ describe("AC: cooldown tracking per-ruleId", () => {
       name: "A",
       description: "A",
       cooldownMs: 60000,
+      callTypes: ["discovery"],
+      severity: "medium",
       detect: () => {
         aCount++;
         return aCount === 1; // only first call
@@ -495,6 +511,8 @@ describe("AC: cooldown tracking per-ruleId", () => {
       name: "B",
       description: "B",
       cooldownMs: 60000,
+      callTypes: ["discovery"],
+      severity: "medium",
       detect: () => true,
     };
     const engine = new RulesEngine([ruleA, ruleB]);
@@ -517,6 +535,8 @@ describe("AC: resetCooldowns()", () => {
       name: "R",
       description: "R",
       cooldownMs: 60000,
+      callTypes: ["discovery"],
+      severity: "medium",
       detect: () => true,
     };
     const engine = new RulesEngine([rule]);
@@ -534,6 +554,8 @@ describe("AC: resetCooldowns()", () => {
       name: id,
       description: id,
       cooldownMs: 60000,
+      callTypes: ["discovery"] as CoachingRule["callTypes"],
+      severity: "medium" as CoachingRule["severity"],
       detect: () => true,
     }));
     const engine = new RulesEngine(rules);
