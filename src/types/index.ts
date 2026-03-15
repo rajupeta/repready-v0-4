@@ -1,3 +1,5 @@
+import type { SSEEvent } from './sse';
+
 export interface TranscriptLine {
   speaker: 'rep' | 'prospect';
   text: string;
@@ -29,6 +31,7 @@ export interface Session {
   status: 'idle' | 'active' | 'completed';
   fixtureId: string;
   transcript: TranscriptLine[];
+  events: SSEEvent[];
   scorecard?: Scorecard;
 }
 

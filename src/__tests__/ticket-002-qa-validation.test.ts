@@ -78,6 +78,7 @@ describe('Domain types — edge cases', () => {
         status,
         fixtureId: 'demo-call',
         transcript: [],
+        events: [],
       };
       expect(s.status).toBe(status);
     });
