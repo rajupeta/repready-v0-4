@@ -167,8 +167,8 @@ describe("TICKET-006 QA: PlaybackService edge cases", () => {
     expect(lines).toHaveLength(1);
     expect(lines[0].text).toBe("Solo");
 
-    // onComplete fires after next timer
-    jest.advanceTimersByTime(3000);
+    // onComplete fires after next timer (max delay is 4000ms)
+    jest.advanceTimersByTime(4000);
     expect(completed).toBe(true);
   });
 

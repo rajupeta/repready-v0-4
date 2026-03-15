@@ -53,6 +53,7 @@ describe('TICKET-002: Domain types, fixture data, and fixtures API', () => {
         fixtureId: 'discovery-call-001',
         callType: 'discovery',
         transcript: [{ speaker: 'rep', text: 'Hello' }],
+        events: [],
       };
       expect(session.status).toBe('active');
       expect(session.scorecard).toBeUndefined();
@@ -63,6 +64,7 @@ describe('TICKET-002: Domain types, fixture data, and fixtures API', () => {
         fixtureId: 'objection-handling-001',
         callType: 'objection-handling',
         transcript: [],
+        events: [],
         scorecard: {
           entries: [],
           overallScore: 85,

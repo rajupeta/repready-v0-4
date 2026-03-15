@@ -1,3 +1,5 @@
+import type { SSEEvent } from './sse';
+
 export interface TranscriptLine {
   speaker: 'rep' | 'prospect';
   text: string;
@@ -30,6 +32,7 @@ export interface Session {
   fixtureId: string;
   callType: CallType;
   transcript: TranscriptLine[];
+  events: SSEEvent[];
   scorecard?: Scorecard;
 }
 

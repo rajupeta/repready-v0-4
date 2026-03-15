@@ -79,6 +79,7 @@ describe('Domain types — edge cases', () => {
         fixtureId: 'objection-handling-001',
         callType: 'objection-handling',
         transcript: [],
+        events: [],
       };
       expect(s.status).toBe(status);
     });

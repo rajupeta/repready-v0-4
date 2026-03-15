@@ -6,7 +6,6 @@ import {
   CoachingPrompt,
   Session,
   Scorecard,
-  CallType,
 } from '@/types';
 
 export interface IRulesEngine {
@@ -56,20 +55,21 @@ export interface SessionManagerDeps {
 
 export class SessionManager {
   private sessions: Map<string, Session> = new Map();
+  private playbackServices: Map<string, IPlaybackService> = new Map();
   private deps: SessionManagerDeps;
 
   constructor(deps: SessionManagerDeps) {
     this.deps = deps;
   }
 
-  createSession(fixtureId: string, callType?: CallType): string {
+  createSession(fixtureId: string): string {
     const id = crypto.randomUUID();
     const session: Session = {
       id,
       status: 'idle',
       fixtureId,
-      callType: callType ?? 'discovery',
       transcript: [],
+      events: [],
     };
     this.sessions.set(id, session);
     return id;
@@ -89,29 +89,31 @@ export class SessionManager {
     session.status = 'active';
     this.deps.rulesEngine.resetCooldowns();
 
+    const emitAndStore = (event: SSEEvent) => {
+      session.events.push(event);
+      this.deps.eventBus.emit(sessionId, event);
+    };
+
     const transcriptService = this.deps.createTranscriptService(
       (line: TranscriptLine, window: TranscriptLine[]) => {
         session.transcript.push(line);
 
-        this.deps.eventBus.emit(sessionId, {
+        emitAndStore({
           type: 'transcript',
           data: { line },
-        } as SSEEvent);
+        });
 
-        const allTriggered = this.deps.rulesEngine.evaluate(window);
-        const triggered = allTriggered.filter((r) =>
-          r.callTypes.includes(session.callType),
-        );
+        const triggered = this.deps.rulesEngine.evaluate(window);
 
         if (triggered.length > 0) {
           this.deps.coachingService
             .processTriggeredRules(triggered, window)
             .then((prompts) => {
               for (const prompt of prompts) {
-                this.deps.eventBus.emit(sessionId, {
+                emitAndStore({
                   type: 'coaching_prompt',
                   data: { prompt },
-                } as SSEEvent);
+                });
               }
             })
             .catch(() => {
@@ -122,38 +124,82 @@ export class SessionManager {
     );
 
     const playbackService = this.deps.createPlaybackService(session.fixtureId);
+    this.playbackServices.set(sessionId, playbackService);
     playbackService.loadFixture();
 
     playbackService.start(
       (line: TranscriptLine) => transcriptService.addLine(line),
       () => {
-        const applicableRules = this.deps.rules.filter((r) =>
-          r.callTypes.includes(session.callType),
-        );
+        this.playbackServices.delete(sessionId);
         this.deps.scorecardService
-          .generate(session.transcript, applicableRules)
+          .generate(session.transcript, this.deps.rules)
           .then((scorecard) => {
             session.scorecard = scorecard;
             session.status = 'completed';
 
-            this.deps.eventBus.emit(sessionId, {
+            emitAndStore({
               type: 'session_complete',
               data: { scorecard },
-            } as SSEEvent);
+            });
           })
           .catch(() => {
             session.status = 'completed';
-            this.deps.eventBus.emit(sessionId, {
+            emitAndStore({
               type: 'session_complete',
               data: { error: 'Scorecard generation failed' },
-            } as SSEEvent);
+            });
           });
       },
     );
   }
 
+  async endSession(sessionId: string): Promise<void> {
+    const session = this.sessions.get(sessionId);
+    if (!session) {
+      throw new Error(`Session ${sessionId} not found`);
+    }
+    if (session.status !== 'active') {
+      throw new Error(
+        `Session ${sessionId} is not active (status: ${session.status})`,
+      );
+    }
+
+    const playbackService = this.playbackServices.get(sessionId);
+    if (playbackService) {
+      playbackService.stop();
+      this.playbackServices.delete(sessionId);
+    }
+
+    try {
+      const scorecard = await this.deps.scorecardService.generate(
+        session.transcript,
+        this.deps.rules,
+      );
+      session.scorecard = scorecard;
+      session.status = 'completed';
+      this.deps.eventBus.emit(sessionId, {
+        type: 'session_complete',
+        data: { scorecard },
+      } as SSEEvent);
+    } catch {
+      session.status = 'completed';
+      this.deps.eventBus.emit(sessionId, {
+        type: 'session_complete',
+        data: { error: 'Scorecard generation failed' },
+      } as SSEEvent);
+    }
+  }
+
   getSession(sessionId: string): Session | undefined {
     return this.sessions.get(sessionId);
+  }
+
+  getEvents(sessionId: string): SSEEvent[] | undefined {
+    const session = this.sessions.get(sessionId);
+    if (!session) {
+      return undefined;
+    }
+    return [...session.events];
   }
 
   getScorecard(sessionId: string): Scorecard | undefined {

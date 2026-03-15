@@ -111,6 +111,7 @@ describe('AC: All TypeScript interfaces export cleanly from src/types/index.ts',
       fixtureId: 'objection-handling-001',
       callType: 'objection-handling',
       transcript: [],
+      events: [],
     };
     expect(session.scorecard).toBeUndefined();
 
@@ -131,6 +132,7 @@ describe('AC: All TypeScript interfaces export cleanly from src/types/index.ts',
         fixtureId: 'f',
         callType: 'discovery',
         transcript: [],
+        events: [],
       };
       expect(session.status).toBe(s);
     });

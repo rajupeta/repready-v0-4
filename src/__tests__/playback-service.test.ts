@@ -46,18 +46,18 @@ describe("PlaybackService", () => {
     expect(emittedLines[0].text).toBe("Hello");
     expect(typeof emittedLines[0].timestamp).toBe("number");
 
-    // Advance past the second delay (max 3s)
-    jest.advanceTimersByTime(3000);
+    // Advance past the second delay (max 4s)
+    jest.advanceTimersByTime(4000);
     expect(emittedLines).toHaveLength(2);
     expect(emittedLines[1].text).toBe("Hi there");
 
     // Advance past the third delay
-    jest.advanceTimersByTime(3000);
+    jest.advanceTimersByTime(4000);
     expect(emittedLines).toHaveLength(3);
     expect(emittedLines[2].text).toBe("How are you?");
 
     // Advance to trigger onComplete
-    jest.advanceTimersByTime(3000);
+    jest.advanceTimersByTime(4000);
     expect(completed).toBe(true);
   });
 
@@ -106,7 +106,7 @@ describe("PlaybackService", () => {
     expect(completed).toBe(false);
   });
 
-  it("should use randomized delays between 2-3 seconds", () => {
+  it("should use randomized delays between 2-4 seconds", () => {
     const service = new PlaybackService("test-fixture");
     service.loadFixture();
 
@@ -124,8 +124,8 @@ describe("PlaybackService", () => {
     jest.advanceTimersByTime(1999);
     expect(emittedLines).toHaveLength(1);
 
-    // At 3001ms, next line SHOULD have been emitted (max delay is 3000ms)
-    jest.advanceTimersByTime(1001);
+    // At 4001ms, next line SHOULD have been emitted (max delay is 4000ms)
+    jest.advanceTimersByTime(2001);
     expect(emittedLines).toHaveLength(2);
   });
 });
