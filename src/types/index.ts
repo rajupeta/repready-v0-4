@@ -6,11 +6,16 @@ export interface TranscriptLine {
   timestamp?: number;
 }
 
+export type CallType = 'discovery' | 'demo' | 'objection-handling' | 'follow-up';
+export type Severity = 'low' | 'medium' | 'high';
+
 export interface CoachingRule {
   ruleId: string;
   name: string;
   description: string;
   cooldownMs: number;
+  callTypes: CallType[];
+  severity: Severity;
   detect: (window: TranscriptLine[]) => boolean;
 }
 

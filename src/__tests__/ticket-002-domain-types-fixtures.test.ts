@@ -26,6 +26,8 @@ describe('TICKET-002: Domain types, fixture data, and fixtures API', () => {
         name: 'Test Rule',
         description: 'A test rule',
         cooldownMs: 5000,
+        callTypes: ['discovery'],
+        severity: 'medium',
         detect: (window: TranscriptLine[]) => window.length > 0,
       };
       expect(rule.ruleId).toBe('rule-1');

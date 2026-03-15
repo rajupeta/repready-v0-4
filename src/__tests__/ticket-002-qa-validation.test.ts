@@ -43,6 +43,8 @@ describe('Domain types — edge cases', () => {
       name: 'Monologue detector',
       description: 'Fires when rep speaks 3+ times in a row',
       cooldownMs: 10000,
+      callTypes: ['discovery'],
+      severity: 'medium',
       detect: (w) => {
         let consecutive = 0;
         for (const line of w) {
