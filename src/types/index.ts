@@ -24,6 +24,7 @@ export interface Session {
   status: 'idle' | 'active' | 'completed';
   fixtureId: string;
   transcript: TranscriptLine[];
+  events: SSEEvent[];
   scorecard?: Scorecard;
 }
 

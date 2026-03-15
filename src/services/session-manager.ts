@@ -68,6 +68,7 @@ export class SessionManager {
       status: 'idle',
       fixtureId,
       transcript: [],
+      events: [],
     };
     this.sessions.set(id, session);
     return id;
@@ -87,14 +88,19 @@ export class SessionManager {
     session.status = 'active';
     this.deps.rulesEngine.resetCooldowns();
 
+    const emitAndStore = (event: SSEEvent) => {
+      session.events.push(event);
+      this.deps.eventBus.emit(sessionId, event);
+    };
+
     const transcriptService = this.deps.createTranscriptService(
       (line: TranscriptLine, window: TranscriptLine[]) => {
         session.transcript.push(line);
 
-        this.deps.eventBus.emit(sessionId, {
+        emitAndStore({
           type: 'transcript',
           data: { line },
-        } as SSEEvent);
+        });
 
         const triggered = this.deps.rulesEngine.evaluate(window);
 
@@ -103,10 +109,10 @@ export class SessionManager {
             .processTriggeredRules(triggered, window)
             .then((prompts) => {
               for (const prompt of prompts) {
-                this.deps.eventBus.emit(sessionId, {
+                emitAndStore({
                   type: 'coaching_prompt',
                   data: { prompt },
-                } as SSEEvent);
+                });
               }
             })
             .catch(() => {
@@ -128,17 +134,17 @@ export class SessionManager {
             session.scorecard = scorecard;
             session.status = 'completed';
 
-            this.deps.eventBus.emit(sessionId, {
+            emitAndStore({
               type: 'session_complete',
               data: { scorecard },
-            } as SSEEvent);
+            });
           })
           .catch(() => {
             session.status = 'completed';
-            this.deps.eventBus.emit(sessionId, {
+            emitAndStore({
               type: 'session_complete',
               data: { error: 'Scorecard generation failed' },
-            } as SSEEvent);
+            });
           });
       },
     );
@@ -146,6 +152,14 @@ export class SessionManager {
 
   getSession(sessionId: string): Session | undefined {
     return this.sessions.get(sessionId);
+  }
+
+  getEvents(sessionId: string): SSEEvent[] | undefined {
+    const session = this.sessions.get(sessionId);
+    if (!session) {
+      return undefined;
+    }
+    return [...session.events];
   }
 
   getScorecard(sessionId: string): Scorecard | undefined {
