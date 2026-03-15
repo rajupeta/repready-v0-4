@@ -133,3 +133,80 @@ describe('SessionManager.getEvents', () => {
     expect(lastEvent.type).toBe('session_complete');
   });
 });
+
+describe('GET /api/sessions/[id]/events — HTTP method and error handling', () => {
+  it('returns JSON content-type header on 200', async () => {
+    const sessionId = sessionManager.createSession('discovery-call');
+    const response = await getEvents(
+      new NextRequest('http://localhost:3000'),
+      makeParams(sessionId),
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('content-type')).toContain('application/json');
+  });
+
+  it('returns JSON content-type header on 404', async () => {
+    const response = await getEvents(
+      new NextRequest('http://localhost:3000'),
+      makeParams('no-such-session'),
+    );
+
+    expect(response.status).toBe(404);
+    expect(response.headers.get('content-type')).toContain('application/json');
+  });
+
+  it('handles multiple sequential requests to the same session', async () => {
+    const sessionId = sessionManager.createSession('discovery-call');
+
+    const response1 = await getEvents(
+      new NextRequest('http://localhost:3000'),
+      makeParams(sessionId),
+    );
+    const response2 = await getEvents(
+      new NextRequest('http://localhost:3000'),
+      makeParams(sessionId),
+    );
+
+    const json1 = await response1.json();
+    const json2 = await response2.json();
+
+    expect(json1).toEqual(json2);
+    expect(response1.status).toBe(200);
+    expect(response2.status).toBe(200);
+  });
+
+  it('returns events with correct type field values', async () => {
+    const sessionId = sessionManager.createSession('discovery-call');
+    sessionManager.startSession(sessionId);
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    const response = await getEvents(
+      new NextRequest('http://localhost:3000'),
+      makeParams(sessionId),
+    );
+    const json = await response.json();
+
+    const validTypes = ['transcript', 'coaching_prompt', 'session_complete', 'heartbeat'];
+    for (const event of json.events) {
+      expect(validTypes).toContain(event.type);
+    }
+  });
+
+  it('returns events containing data property for every event', async () => {
+    const sessionId = sessionManager.createSession('discovery-call');
+    sessionManager.startSession(sessionId);
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    const response = await getEvents(
+      new NextRequest('http://localhost:3000'),
+      makeParams(sessionId),
+    );
+    const json = await response.json();
+
+    expect(json.events.length).toBeGreaterThan(0);
+    for (const event of json.events) {
+      expect(event).toHaveProperty('data');
+    }
+  });
+});

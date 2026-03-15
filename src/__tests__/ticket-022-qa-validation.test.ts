@@ -6,7 +6,6 @@ import {
 } from '@/services/session-manager';
 import { EventBus } from '@/services/event-bus';
 import { TranscriptLine, CoachingRule } from '@/types';
-import { SSEEvent } from '@/types/sse';
 
 function makeParams(id: string) {
   return { params: Promise.resolve({ id }) };
