@@ -1,6 +1,7 @@
 import { readFileSync } from "fs";
 import { join } from "path";
-import type { FixtureLine, TranscriptLine } from "@/types/transcript";
+import type { FixtureLine } from "@/types/transcript";
+import type { TranscriptLine } from "@/types";
 
 export class PlaybackService {
   private fixtureId: string;

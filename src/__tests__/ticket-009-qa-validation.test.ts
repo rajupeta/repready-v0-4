@@ -238,7 +238,7 @@ describe('TICKET-009 QA — GET /api/sessions/[id]/scorecard', () => {
     const sessionId = sessionManager.createSession('discovery-call');
     // startSession will transition through active, but with stubs it completes fast
     // We still test: the route checks status !== 'completed'
-    const session = sessionManager.getSession(sessionId)!;
+    sessionManager.getSession(sessionId)!;
     // Session is idle — scorecard route should return 400
     const res = await getScorecard(new NextRequest('http://localhost'), makeParams(sessionId));
     expect(res.status).toBe(400);

@@ -65,6 +65,8 @@ describe('AC: All TypeScript interfaces export cleanly from src/types/index.ts',
       name: 'Test',
       description: 'Desc',
       cooldownMs: 1000,
+      callTypes: ['discovery'],
+      severity: 'medium',
       detect: () => false,
     };
     expect(rule.ruleId).toBe('test');
@@ -77,6 +79,8 @@ describe('AC: All TypeScript interfaces export cleanly from src/types/index.ts',
       name: 'Echo',
       description: 'Always true',
       cooldownMs: 0,
+      callTypes: ['discovery'],
+      severity: 'medium',
       detect: (window: TranscriptLine[]) => window.length > 0,
     };
     expect(rule.detect([])).toBe(false);
@@ -154,25 +158,25 @@ describe('AC: All TypeScript interfaces export cleanly from src/types/index.ts',
     expect(typeof sc.summary).toBe('string');
   });
 
-  it('SSEEvent.event union includes all four event types', () => {
-    const types: SSEEvent['event'][] = [
+  it('SSEEvent.type union includes all four event types', () => {
+    const types: SSEEvent['type'][] = [
       'transcript',
       'coaching_prompt',
       'session_complete',
       'heartbeat',
     ];
     types.forEach((t) => {
-      const evt: SSEEvent = { event: t, data: null };
-      expect(evt.event).toBe(t);
+      const evt: SSEEvent = { type: t, data: {} };
+      expect(evt.type).toBe(t);
     });
   });
 
-  it('SSEEvent.data is typed as unknown (accepts any value)', () => {
+  it('SSEEvent.data is typed as Record<string, unknown>', () => {
     const events: SSEEvent[] = [
-      { event: 'transcript', data: 'string' },
-      { event: 'heartbeat', data: 123 },
-      { event: 'session_complete', data: { key: 'value' } },
-      { event: 'coaching_prompt', data: null },
+      { type: 'transcript', data: { text: 'string' } },
+      { type: 'heartbeat', data: { count: 123 } },
+      { type: 'session_complete', data: { key: 'value' } },
+      { type: 'coaching_prompt', data: {} },
     ];
     expect(events).toHaveLength(4);
   });

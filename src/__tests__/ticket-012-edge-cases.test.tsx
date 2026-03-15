@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import Home from '@/app/page';
 
@@ -71,7 +71,7 @@ describe('TICKET-012 edge cases', () => {
     mockUseSSE.mockReturnValue({ ...defaultSSE(), isConnected: true });
     mockFetch
       .mockResolvedValueOnce({ json: () => Promise.resolve(['discovery-call']) })
-      .mockResolvedValueOnce({ json: () => Promise.resolve({ id: 's1' }) })
+      .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 's1' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: true }) });
 
     render(<Home />);
@@ -93,7 +93,7 @@ describe('TICKET-012 edge cases', () => {
     mockUseSSE.mockImplementation(() => sseReturn);
     mockFetch
       .mockResolvedValueOnce({ json: () => Promise.resolve(['discovery-call']) })
-      .mockResolvedValueOnce({ json: () => Promise.resolve({ id: 's1' }) })
+      .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 's1' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: true }) });
 
     const { rerender } = render(<Home />);

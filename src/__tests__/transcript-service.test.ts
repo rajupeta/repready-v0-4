@@ -1,5 +1,5 @@
 import { TranscriptService } from "@/services/transcript-service";
-import type { TranscriptLine } from "@/types/transcript";
+import type { TranscriptLine } from "@/types";
 
 function makeLine(index: number): TranscriptLine {
   return {
