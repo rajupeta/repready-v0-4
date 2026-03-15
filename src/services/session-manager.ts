@@ -55,6 +55,7 @@ export interface SessionManagerDeps {
 
 export class SessionManager {
   private sessions: Map<string, Session> = new Map();
+  private playbackServices: Map<string, IPlaybackService> = new Map();
   private deps: SessionManagerDeps;
 
   constructor(deps: SessionManagerDeps) {
@@ -117,6 +118,7 @@ export class SessionManager {
     );
 
     const playbackService = this.deps.createPlaybackService(session.fixtureId);
+    this.playbackServices.set(sessionId, playbackService);
     playbackService.loadFixture();
 
     playbackService.start(
@@ -142,6 +144,42 @@ export class SessionManager {
           });
       },
     );
+  }
+
+  endSession(sessionId: string): void {
+    const session = this.sessions.get(sessionId);
+    if (!session) {
+      throw new Error(`Session ${sessionId} not found`);
+    }
+    if (session.status !== 'active') {
+      throw new Error(
+        `Session ${sessionId} is not active (status: ${session.status})`,
+      );
+    }
+
+    const playbackService = this.playbackServices.get(sessionId);
+    if (playbackService) {
+      playbackService.stop();
+      this.playbackServices.delete(sessionId);
+    }
+
+    session.status = 'completed';
+
+    this.deps.scorecardService
+      .generate(session.transcript, this.deps.rules)
+      .then((scorecard) => {
+        session.scorecard = scorecard;
+        this.deps.eventBus.emit(sessionId, {
+          type: 'session_complete',
+          data: { scorecard },
+        } as SSEEvent);
+      })
+      .catch(() => {
+        this.deps.eventBus.emit(sessionId, {
+          type: 'session_complete',
+          data: { error: 'Scorecard generation failed' },
+        } as SSEEvent);
+      });
   }
 
   getSession(sessionId: string): Session | undefined {

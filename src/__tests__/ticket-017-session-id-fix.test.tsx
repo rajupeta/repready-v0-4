@@ -4,7 +4,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import Home from '@/app/page';
+import Home from '@/app/session/page';
 
 // Mock useSSE hook
 const mockUseSSE = jest.fn();
@@ -32,15 +32,10 @@ afterEach(() => {
 describe('TICKET-017: page.tsx reads sessionId from API response', () => {
   it('reads sessionId (not id) from POST /api/sessions response', async () => {
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['discovery-call']) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'sess-abc-123' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ status: 'started' }) });
 
     render(<Home />);
-
-    await waitFor(() => {
-      expect(screen.getByRole('option', { name: 'discovery-call' })).toBeInTheDocument();
-    });
 
     fireEvent.click(screen.getByText('Start Session'));
 
@@ -58,15 +53,10 @@ describe('TICKET-017: page.tsx reads sessionId from API response', () => {
 
   it('does not crash when API returns sessionId instead of id', async () => {
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['demo-call']) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'sess-xyz-789' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ status: 'started' }) });
 
     render(<Home />);
-
-    await waitFor(() => {
-      expect(screen.getByRole('option', { name: 'demo-call' })).toBeInTheDocument();
-    });
 
     fireEvent.click(screen.getByText('Start Session'));
 
@@ -87,15 +77,10 @@ describe('TICKET-017: page.tsx reads sessionId from API response', () => {
 
   it('session ID is correctly used in subsequent API calls', async () => {
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['test-call']) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'sess-correct-id' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ status: 'started' }) });
 
     render(<Home />);
-
-    await waitFor(() => {
-      expect(screen.getByRole('option', { name: 'test-call' })).toBeInTheDocument();
-    });
 
     fireEvent.click(screen.getByText('Start Session'));
 
@@ -103,7 +88,7 @@ describe('TICKET-017: page.tsx reads sessionId from API response', () => {
       // Verify the session create call
       expect(mockFetch).toHaveBeenCalledWith('/api/sessions', expect.objectContaining({
         method: 'POST',
-        body: JSON.stringify({ fixtureId: 'test-call' }),
+        body: JSON.stringify({ fixtureId: 'discovery-call' }),
       }));
 
       // Verify the start call uses the sessionId from response, not undefined

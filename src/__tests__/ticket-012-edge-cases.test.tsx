@@ -4,7 +4,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import Home from '@/app/page';
+import Home from '@/app/session/page';
 
 const mockUseSSE = jest.fn();
 jest.mock('@/hooks/useSSE', () => ({
@@ -25,9 +25,6 @@ function defaultSSE() {
 
 beforeEach(() => {
   mockUseSSE.mockReturnValue(defaultSSE());
-  mockFetch.mockResolvedValue({
-    json: () => Promise.resolve(['discovery-call']),
-  });
 });
 
 afterEach(() => {
@@ -35,27 +32,20 @@ afterEach(() => {
 });
 
 describe('TICKET-012 edge cases', () => {
-  it('handles fixture fetch failure gracefully — no crash, empty dropdown', async () => {
-    mockFetch.mockRejectedValueOnce(new Error('Network error'));
+  it('always shows static call type options — no fetch needed', async () => {
     render(<Home />);
     // Should still render without crashing
     expect(screen.getByText('RepReady')).toBeInTheDocument();
     expect(screen.getByText('Start Session')).toBeInTheDocument();
-    // No options in the dropdown
-    await waitFor(() => {
-      expect(screen.queryAllByRole('option')).toHaveLength(0);
-    });
+    // Static call type options are always present
+    expect(screen.getAllByRole('option')).toHaveLength(4);
   });
 
   it('returns to idle state on session creation failure', async () => {
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['discovery-call']) })
       .mockRejectedValueOnce(new Error('Server error'));
 
     render(<Home />);
-    await waitFor(() => {
-      expect(screen.getByRole('option', { name: 'discovery-call' })).toBeInTheDocument();
-    });
 
     fireEvent.click(screen.getByText('Start Session'));
 
@@ -67,22 +57,18 @@ describe('TICKET-012 edge cases', () => {
     expect(screen.getByText('Start Session')).not.toBeDisabled();
   });
 
-  it('disables fixture selector and start button during active session', async () => {
+  it('disables call type selector and start button during active session', async () => {
     mockUseSSE.mockReturnValue({ ...defaultSSE(), isConnected: true });
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['discovery-call']) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 's1' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: true }) });
 
     render(<Home />);
-    await waitFor(() => {
-      expect(screen.getByRole('option', { name: 'discovery-call' })).toBeInTheDocument();
-    });
 
     fireEvent.click(screen.getByText('Start Session'));
 
     await waitFor(() => {
-      const select = screen.getByLabelText('Select fixture');
+      const select = screen.getByLabelText('Select call type');
       expect(select).toBeDisabled();
     });
   });
@@ -92,14 +78,10 @@ describe('TICKET-012 edge cases', () => {
     let sseReturn = { ...defaultSSE(), isConnected: false };
     mockUseSSE.mockImplementation(() => sseReturn);
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['discovery-call']) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 's1' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: true }) });
 
     const { rerender } = render(<Home />);
-    await waitFor(() => {
-      expect(screen.getByRole('option', { name: 'discovery-call' })).toBeInTheDocument();
-    });
 
     fireEvent.click(screen.getByText('Start Session'));
     await waitFor(() => {
@@ -129,16 +111,10 @@ describe('TICKET-012 edge cases', () => {
     expect(screen.getByText('Session Complete')).toBeInTheDocument();
   });
 
-  it('Start Session button is disabled when no fixture is selected', async () => {
-    mockFetch.mockResolvedValueOnce({
-      json: () => Promise.resolve([]),
-    });
+  it('Start Session button is NOT disabled since call type is always selected', () => {
     render(<Home />);
-    await waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith('/api/fixtures');
-    });
-    // With empty fixtures, selectedFixture is '' which is falsy
-    expect(screen.getByText('Start Session')).toBeDisabled();
+    // Call type options are always present and default is selected
+    expect(screen.getByText('Start Session')).not.toBeDisabled();
   });
 
   it('accumulates multiple coaching prompts', () => {
@@ -156,7 +132,7 @@ describe('TICKET-012 edge cases', () => {
     expect(screen.getByText('Discovery')).toBeInTheDocument();
   });
 
-  it('scorecard overlay renders with backdrop that covers full viewport', () => {
+  it('scorecard renders inline (not as overlay)', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
       scorecard: {
@@ -168,10 +144,8 @@ describe('TICKET-012 edge cases', () => {
       },
     });
     render(<Home />);
-    // Check overlay has fixed positioning and covers full viewport
-    const overlay = document.querySelector('.fixed.inset-0.z-50');
-    expect(overlay).not.toBeNull();
-    // Check backdrop has semi-transparent bg
-    expect(overlay?.className).toContain('bg-black/50');
+    // Scorecard content renders inline
+    expect(screen.getByText('90')).toBeInTheDocument();
+    expect(screen.getByText('Excellent')).toBeInTheDocument();
   });
 });

@@ -17,7 +17,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import Home from '@/app/page';
+import Home from '@/app/session/page';
 import { useSSE } from '@/hooks/useSSE';
 
 // ----- Mock useSSE -----
@@ -207,42 +207,34 @@ describe('useSSE hook — QA validation', () => {
 describe('Main page — QA validation', () => {
   beforeEach(() => {
     mockUseSSE.mockReturnValue(defaultSSE());
-    mockFetch.mockResolvedValue({
-      json: () => Promise.resolve(['discovery-call', 'objection-handling']),
-    });
   });
 
   afterEach(() => jest.restoreAllMocks());
 
-  // --- AC 1: Page loads with fixture dropdown populated from /api/fixtures ---
-  it('AC1: fetches /api/fixtures on mount and renders options in dropdown', async () => {
+  // --- AC 1: Page loads with static call type options ---
+  it('AC1: renders static call type options in dropdown', async () => {
     render(<Home />);
-    await waitFor(() => expect(mockFetch).toHaveBeenCalledWith('/api/fixtures'));
-    await waitFor(() => {
-      const options = screen.getAllByRole('option');
-      expect(options).toHaveLength(2);
-      expect(options[0]).toHaveTextContent('discovery-call');
-      expect(options[1]).toHaveTextContent('objection-handling');
-    });
+    const options = screen.getAllByRole('option');
+    expect(options).toHaveLength(4);
+    expect(options[0]).toHaveTextContent('Discovery Call');
+    expect(options[1]).toHaveTextContent('Demo Call');
+    expect(options[2]).toHaveTextContent('Objection Handling');
+    expect(options[3]).toHaveTextContent('Follow-up Call');
   });
 
-  it('AC1: auto-selects first fixture', async () => {
+  it('AC1: dropdown has "Select call type" aria-label', async () => {
     render(<Home />);
-    await waitFor(() => {
-      const select = screen.getByLabelText('Select fixture') as HTMLSelectElement;
-      expect(select.value).toBe('discovery-call');
-    });
+    const select = screen.getByLabelText('Select call type') as HTMLSelectElement;
+    expect(select.value).toBe('discovery');
   });
 
   // --- AC 2: Start Session button creates and starts a session ---
   it('AC2: clicking Start Session calls POST /api/sessions then POST /api/sessions/:id/start', async () => {
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['discovery-call']) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'sess-99' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: true }) });
 
     render(<Home />);
-    await waitFor(() => expect(screen.getByRole('option')).toBeInTheDocument());
 
     fireEvent.click(screen.getByText('Start Session'));
 
@@ -260,14 +252,12 @@ describe('Main page — QA validation', () => {
   // --- AC 3: SSE hook connects and receives real-time events ---
   it('AC3: useSSE is called with null initially, then sessionId after start', async () => {
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['fix1']) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'sid' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({}) });
 
     render(<Home />);
     expect(mockUseSSE).toHaveBeenCalledWith(null);
 
-    await waitFor(() => expect(screen.getByRole('option')).toBeInTheDocument());
     fireEvent.click(screen.getByText('Start Session'));
     await waitFor(() => expect(mockUseSSE).toHaveBeenCalledWith('sid'));
   });
@@ -309,8 +299,8 @@ describe('Main page — QA validation', () => {
     expect(screen.getByText('No coaching prompts yet')).toBeInTheDocument();
   });
 
-  // --- AC 6: ScorecardView appears as overlay when session completes ---
-  it('AC6: scorecard overlay appears with correct data', () => {
+  // --- AC 6: ScorecardView appears inline when session completes ---
+  it('AC6: scorecard renders inline with correct data', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
       scorecard: {
@@ -324,11 +314,6 @@ describe('Main page — QA validation', () => {
     });
     render(<Home />);
 
-    // Overlay structure
-    const overlay = document.querySelector('.fixed.inset-0.z-50');
-    expect(overlay).not.toBeNull();
-    expect(overlay!.className).toContain('bg-black/50');
-
     // Score and summary
     expect(screen.getByText('72')).toBeInTheDocument();
     expect(screen.getByText('Solid performance')).toBeInTheDocument();
@@ -340,7 +325,7 @@ describe('Main page — QA validation', () => {
     expect(screen.getByText('needs-work')).toBeInTheDocument();
   });
 
-  it('AC6: Close button hides the scorecard overlay', () => {
+  it('AC6: Close button resets state (starts new session)', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
       scorecard: { overallScore: 50, summary: 'OK', entries: [] },
@@ -376,20 +361,17 @@ describe('Main page — QA validation', () => {
     expect(screen.getByText('AI Sales Coaching').tagName).toBe('P');
   });
 
-  it('fixture fetch failure does not crash page', async () => {
-    mockFetch.mockRejectedValueOnce(new Error('Network down'));
+  it('call type options are always rendered (no fetch needed)', () => {
     render(<Home />);
     expect(screen.getByText('RepReady')).toBeInTheDocument();
-    await waitFor(() => expect(screen.queryAllByRole('option')).toHaveLength(0));
+    expect(screen.getAllByRole('option')).toHaveLength(4);
   });
 
   it('session creation failure resets to idle', async () => {
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['fix1']) })
       .mockRejectedValueOnce(new Error('500'));
 
     render(<Home />);
-    await waitFor(() => expect(screen.getByRole('option')).toBeInTheDocument());
 
     fireEvent.click(screen.getByText('Start Session'));
     await waitFor(() => {
@@ -399,11 +381,9 @@ describe('Main page — QA validation', () => {
 
   it('button shows "Starting..." during loading state', async () => {
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['fix1']) })
       .mockImplementationOnce(() => new Promise(() => {})); // never resolves
 
     render(<Home />);
-    await waitFor(() => expect(screen.getByRole('option')).toBeInTheDocument());
     fireEvent.click(screen.getByText('Start Session'));
     expect(screen.getByText('Starting...')).toBeInTheDocument();
   });
@@ -411,16 +391,14 @@ describe('Main page — QA validation', () => {
   it('dropdown and button are disabled during active session', async () => {
     mockUseSSE.mockReturnValue({ ...defaultSSE(), isConnected: true });
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['fix1']) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 's' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({}) });
 
     render(<Home />);
-    await waitFor(() => expect(screen.getByRole('option')).toBeInTheDocument());
 
     fireEvent.click(screen.getByText('Start Session'));
     await waitFor(() => {
-      expect(screen.getByLabelText('Select fixture')).toBeDisabled();
+      expect(screen.getByLabelText('Select call type')).toBeDisabled();
     });
   });
 
@@ -433,10 +411,8 @@ describe('Main page — QA validation', () => {
     expect(screen.getByText('Session Complete')).toBeInTheDocument();
   });
 
-  it('Start Session disabled when fixture list is empty', async () => {
-    mockFetch.mockResolvedValueOnce({ json: () => Promise.resolve([]) });
+  it('Start Session NOT disabled since call type is always selected', () => {
     render(<Home />);
-    await waitFor(() => expect(mockFetch).toHaveBeenCalled());
-    expect(screen.getByText('Start Session')).toBeDisabled();
+    expect(screen.getByText('Start Session')).not.toBeDisabled();
   });
 });

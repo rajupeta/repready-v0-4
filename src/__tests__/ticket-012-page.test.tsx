@@ -4,7 +4,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import Home from '@/app/page';
+import Home from '@/app/session/page';
 
 // Mock useSSE hook
 const mockUseSSE = jest.fn();
@@ -27,9 +27,6 @@ function defaultSSE() {
 
 beforeEach(() => {
   mockUseSSE.mockReturnValue(defaultSSE());
-  mockFetch.mockResolvedValue({
-    json: () => Promise.resolve(['discovery-call', 'objection-handling']),
-  });
 });
 
 afterEach(() => {
@@ -43,15 +40,14 @@ describe('Main page — acceptance criteria', () => {
     expect(screen.getByText('AI Sales Coaching')).toBeInTheDocument();
   });
 
-  it('fetches fixtures on mount and populates dropdown', async () => {
+  it('renders static call type options in dropdown', async () => {
     render(<Home />);
-    await waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith('/api/fixtures');
-    });
-    await waitFor(() => {
-      expect(screen.getByRole('option', { name: 'discovery-call' })).toBeInTheDocument();
-      expect(screen.getByRole('option', { name: 'objection-handling' })).toBeInTheDocument();
-    });
+    const options = screen.getAllByRole('option');
+    expect(options).toHaveLength(4);
+    expect(screen.getByRole('option', { name: 'Discovery Call' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Demo Call' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Objection Handling' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Follow-up Call' })).toBeInTheDocument();
   });
 
   it('renders Start Session button', () => {
@@ -61,15 +57,10 @@ describe('Main page — acceptance criteria', () => {
 
   it('Start Session button creates and starts a session', async () => {
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['discovery-call']) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'session-1' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: true }) });
 
     render(<Home />);
-
-    await waitFor(() => {
-      expect(screen.getByRole('option', { name: 'discovery-call' })).toBeInTheDocument();
-    });
 
     fireEvent.click(screen.getByText('Start Session'));
 
@@ -108,7 +99,7 @@ describe('Main page — acceptance criteria', () => {
     expect(screen.getByText('Reflect back')).toBeInTheDocument();
   });
 
-  it('shows ScorecardView as overlay when scorecard arrives', () => {
+  it('shows ScorecardView inline when scorecard arrives', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
       scorecard: {
@@ -122,7 +113,7 @@ describe('Main page — acceptance criteria', () => {
     expect(screen.getByText('Great call')).toBeInTheDocument();
   });
 
-  it('scorecard overlay has Close button that hides it', () => {
+  it('scorecard Close button starts new session (resets state)', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
       scorecard: {
@@ -135,6 +126,7 @@ describe('Main page — acceptance criteria', () => {
     expect(screen.getByText('80')).toBeInTheDocument();
 
     fireEvent.click(screen.getByText('Close'));
+    // Scorecard disappears because state is reset
     expect(screen.queryByText('80')).not.toBeInTheDocument();
   });
 
@@ -152,13 +144,9 @@ describe('Main page — acceptance criteria', () => {
   it('disables Start Session button when loading', async () => {
     // Make fetch never resolve for session creation to keep loading state
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['discovery-call']) })
       .mockImplementationOnce(() => new Promise(() => {}));
 
     render(<Home />);
-    await waitFor(() => {
-      expect(screen.getByRole('option', { name: 'discovery-call' })).toBeInTheDocument();
-    });
 
     fireEvent.click(screen.getByText('Start Session'));
     expect(screen.getByText('Starting...')).toBeInTheDocument();
