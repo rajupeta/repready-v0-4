@@ -1,0 +1,18 @@
+[
+  { "speaker": "rep", "text": "Hi, thanks for taking the time to chat today. I'd love to learn more about your current setup." },
+  { "speaker": "prospect", "text": "Sure, happy to chat. We've been looking at a few options." },
+  { "speaker": "rep", "text": "Great! What's driving the evaluation right now?" },
+  { "speaker": "prospect", "text": "Honestly, our current tool is just too slow. Our team spends more time fighting the software than selling." },
+  { "speaker": "rep", "text": "That's a pain point we hear a lot. How many reps are on your team?" },
+  { "speaker": "prospect", "text": "About 15 SDRs and 5 AEs." },
+  { "speaker": "rep", "text": "Got it. And what does your typical outbound workflow look like?" },
+  { "speaker": "prospect", "text": "We do a mix of cold calls and email sequences. Mostly phone though." },
+  { "speaker": "rep", "text": "Makes sense. When you say the tool is slow, can you give me a specific example?" },
+  { "speaker": "prospect", "text": "Yeah, logging a call takes like 3 minutes. By then the rep has forgotten half the details." },
+  { "speaker": "rep", "text": "That's brutal. So you're losing call intelligence because of the friction?" },
+  { "speaker": "prospect", "text": "Exactly. And our managers can't coach effectively because the notes are incomplete." },
+  { "speaker": "rep", "text": "What would it look like if that problem was solved?" },
+  { "speaker": "prospect", "text": "Honestly, if calls were auto-logged and our managers could review them, that alone would be huge." },
+  { "speaker": "rep", "text": "We actually do exactly that. Would it make sense to show you a quick demo?" },
+  { "speaker": "prospect", "text": "Yeah, let's do it. Can we schedule something for next week?" }
+]
