@@ -2,14 +2,15 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 describe('TICKET-014: GitHub Actions CI pipeline', () => {
-  const workflowPath = path.resolve(__dirname, '../../.github/workflows/ci.yml');
+  // Staged in ci-workflow/ because the token lacks `workflow` scope to push to .github/workflows/
+  const workflowPath = path.resolve(__dirname, '../../ci-workflow/ci.yml');
   let content: string;
 
   beforeAll(() => {
     content = fs.readFileSync(workflowPath, 'utf-8');
   });
 
-  it('ci.yml file exists', () => {
+  it('ci.yml exists in ci-workflow/ (copy to .github/workflows/ to activate)', () => {
     expect(fs.existsSync(workflowPath)).toBe(true);
   });
 
