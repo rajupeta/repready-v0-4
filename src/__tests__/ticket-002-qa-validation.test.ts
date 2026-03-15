@@ -103,14 +103,14 @@ describe('Domain types — edge cases', () => {
 
   it('SSEEvent data field accepts diverse payload types', () => {
     const events: SSEEvent[] = [
-      { event: 'transcript', data: { speaker: 'rep', text: 'hi' } },
-      { event: 'coaching_prompt', data: { ruleId: 'r1' } },
-      { event: 'session_complete', data: null },
-      { event: 'heartbeat', data: undefined },
+      { type: 'transcript', data: { speaker: 'rep', text: 'hi' } },
+      { type: 'coaching_prompt', data: { ruleId: 'r1' } },
+      { type: 'session_complete', data: {} },
+      { type: 'heartbeat', data: {} },
     ];
     expect(events).toHaveLength(4);
-    expect(events[2].data).toBeNull();
-    expect(events[3].data).toBeUndefined();
+    expect(events[2].data).toEqual({});
+    expect(events[3].data).toEqual({});
   });
 });
 

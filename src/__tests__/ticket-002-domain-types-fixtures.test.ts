@@ -91,12 +91,12 @@ describe('TICKET-002: Domain types, fixture data, and fixtures API', () => {
 
     it('SSEEvent accepts valid event types', () => {
       const events: SSEEvent[] = [
-        { event: 'transcript', data: { speaker: 'rep', text: 'hi' } },
-        { event: 'coaching_prompt', data: { ruleId: 'r1', message: 'ask more' } },
-        { event: 'session_complete', data: { sessionId: 's1' } },
-        { event: 'heartbeat', data: null },
+        { type: 'transcript', data: { speaker: 'rep', text: 'hi' } },
+        { type: 'coaching_prompt', data: { ruleId: 'r1', message: 'ask more' } },
+        { type: 'session_complete', data: { sessionId: 's1' } },
+        { type: 'heartbeat', data: {} },
       ];
-      expect(events.map((e) => e.event)).toEqual([
+      expect(events.map((e) => e.type)).toEqual([
         'transcript',
         'coaching_prompt',
         'session_complete',

@@ -46,7 +46,4 @@ export interface RuleDefinition {
   description: string;
 }
 
-export interface SSEEvent {
-  event: 'transcript' | 'coaching_prompt' | 'session_complete' | 'heartbeat';
-  data: unknown;
-}
+export type { SSEEvent } from './sse';
