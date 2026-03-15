@@ -9,6 +9,32 @@
  */
 
 import { NextRequest } from 'next/server';
+
+// Mock PlaybackService to complete synchronously (no real file I/O or timers)
+jest.mock('@/services/playback-service', () => ({
+  PlaybackService: jest.fn().mockImplementation(() => ({
+    loadFixture: jest.fn(),
+    start: jest.fn().mockImplementation(
+      (_onLine: unknown, onComplete: () => void) => {
+        onComplete();
+      }
+    ),
+    stop: jest.fn(),
+  })),
+}));
+
+// Mock ClaudeService to avoid needing an API key
+jest.mock('@/services/claude-service', () => ({
+  ClaudeService: jest.fn().mockImplementation(() => ({
+    getCoachingPrompts: jest.fn().mockResolvedValue([]),
+    generateScorecard: jest.fn().mockResolvedValue({
+      entries: [],
+      overallScore: 75,
+      summary: 'Test scorecard summary',
+    }),
+  })),
+}));
+
 import { sessionManager } from '@/lib/session-manager-instance';
 
 import { POST as createSession } from '@/app/api/sessions/route';

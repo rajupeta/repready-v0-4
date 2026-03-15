@@ -4,53 +4,34 @@ import {
   SessionManagerDeps,
 } from '@/services/session-manager';
 import { eventBus } from '@/lib/event-bus-instance';
+import { RulesEngine } from '@/services/rules-engine';
+import { CoachingService } from '@/services/coaching-service';
+import { ScorecardService } from '@/services/scorecard-service';
+import { PlaybackService } from '@/services/playback-service';
+import { TranscriptService } from '@/services/transcript-service';
+import { ClaudeService } from '@/services/claude-service';
+import { coachingRules } from '@/rules/coaching-rules';
 
 const globalForSessionManager = globalThis as unknown as {
   sessionManager?: SessionManager;
 };
 
-/**
- * Stub dependencies — replaced once TICKET-005 (RulesEngine),
- * TICKET-006 (PlaybackService/TranscriptService), and
- * TICKET-007 (CoachingService/ScorecardService) merge to main.
- */
 function createDeps(): SessionManagerDeps {
+  const claudeService = new ClaudeService();
+  const rulesEngine = new RulesEngine(coachingRules);
+  const coachingService = new CoachingService(claudeService);
+  const scorecardService = new ScorecardService(claudeService);
+
   return {
     eventBus,
-    rulesEngine: {
-      evaluate: () => [],
-      resetCooldowns: () => {},
-    },
-    coachingService: {
-      processTriggeredRules: async () => [],
-    },
-    scorecardService: {
-      generate: async () => ({
-        entries: [],
-        overallScore: 0,
-        summary: '',
-      }),
-    },
-    rules: [],
-    createPlaybackService: () => ({
-      loadFixture: () => {},
-      start: (_onLine: (line: TranscriptLine) => void, onComplete: () => void) => {
-        onComplete();
-      },
-      stop: () => {},
-    }),
+    rulesEngine,
+    coachingService,
+    scorecardService,
+    rules: coachingRules,
+    createPlaybackService: (fixtureId: string) => new PlaybackService(fixtureId),
     createTranscriptService: (
       onLineAdded: (line: TranscriptLine, window: TranscriptLine[]) => void,
-    ) => {
-      const transcript: TranscriptLine[] = [];
-      return {
-        addLine: (line: TranscriptLine) => {
-          transcript.push(line);
-          onLineAdded(line, transcript.slice(-10));
-        },
-        getTranscript: () => [...transcript],
-      };
-    },
+    ) => new TranscriptService(onLineAdded),
   };
 }
 
