@@ -1,7 +1,5 @@
-import { SessionManager, SessionManagerDeps } from '@/services/session-manager';
+import { SessionManager } from '@/services/session-manager';
 import { EventBus } from '@/services/event-bus';
-import { TranscriptLine } from '@/types';
-
 // Mock the singleton instances before importing the route
 const mockSessionManager = {
   getSession: jest.fn(),

@@ -1,14 +1,12 @@
 import { PlaybackService } from "@/services/playback-service";
 import { TranscriptService } from "@/services/transcript-service";
 import type { TranscriptLine } from "@/types/transcript";
+import fs from "fs";
 
 // Mock fs for PlaybackService tests
-jest.mock("fs", () => ({
-  readFileSync: jest.fn(),
-}));
+jest.mock("fs");
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const { readFileSync } = require("fs") as { readFileSync: jest.Mock };
+const readFileSync = fs.readFileSync as jest.Mock;
 
 function makeLine(index: number): TranscriptLine {
   return {
