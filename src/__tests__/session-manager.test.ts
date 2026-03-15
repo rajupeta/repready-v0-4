@@ -12,7 +12,6 @@ import {
   ICoachingService,
   IScorecardService,
   IPlaybackService,
-  ITranscriptService,
 } from '@/services/session-manager';
 
 function createMockRule(overrides: Partial<CoachingRule> = {}): CoachingRule {
@@ -84,15 +83,6 @@ function createMockDeps(overrides: Partial<SessionManagerDeps> = {}): SessionMan
     }),
     stop: jest.fn(),
   };
-
-  const mockTranscriptLines: TranscriptLine[] = [];
-  const mockTranscriptService: ITranscriptService = {
-    addLine: jest.fn((line: TranscriptLine) => {
-      mockTranscriptLines.push(line);
-    }),
-    getTranscript: jest.fn(() => [...mockTranscriptLines]),
-  };
-  void mockTranscriptService;
 
   return {
     eventBus: mockEventBus as unknown as SessionManagerDeps['eventBus'],
