@@ -59,6 +59,10 @@ describe('GET /api/sessions/[id]/stream', () => {
     expect(response.headers.get('Cache-Control')).toBe('no-cache, no-transform');
     expect(response.headers.get('Connection')).toBe('keep-alive');
     expect(response.headers.get('X-Accel-Buffering')).toBe('no');
+
+    // Clean up stream to prevent open handle from heartbeat interval
+    const reader = response.body!.getReader();
+    await reader.cancel();
   });
 
   it('returns a readable stream body', async () => {
@@ -75,6 +79,10 @@ describe('GET /api/sessions/[id]/stream', () => {
     });
 
     expect(response.body).toBeInstanceOf(ReadableStream);
+
+    // Clean up stream to prevent open handle from heartbeat interval
+    const reader = response.body!.getReader();
+    await reader.cancel();
   });
 
   it('stream delivers events in valid SSE format', async () => {
@@ -199,5 +207,59 @@ describe('GET /api/sessions/[id]/stream', () => {
     ]);
 
     jest.useRealTimers();
+  });
+
+  it('returns 404 with JSON content type for missing session', async () => {
+    (mockSessionManager.getSession as jest.Mock).mockReturnValue(undefined);
+
+    const request = createRequest('/api/sessions/missing-id/stream');
+    const response = await GET(request, {
+      params: Promise.resolve({ id: 'missing-id' }),
+    });
+
+    expect(response.status).toBe(404);
+    expect(response.headers.get('Content-Type')).toContain('application/json');
+  });
+
+  it('uses the session ID from route params, not URL path', async () => {
+    (mockSessionManager.getSession as jest.Mock).mockReturnValue(undefined);
+
+    const request = createRequest('/api/sessions/url-id/stream');
+    await GET(request, {
+      params: Promise.resolve({ id: 'param-id' }),
+    });
+
+    expect(mockSessionManager.getSession).toHaveBeenCalledWith('param-id');
+  });
+
+  it('coaching_prompt events include rule data in valid SSE format', async () => {
+    (mockSessionManager.getSession as jest.Mock).mockReturnValue({
+      id: 'session-6',
+      status: 'active',
+      fixtureId: 'discovery-call',
+      transcript: [],
+    });
+
+    const request = createRequest('/api/sessions/session-6/stream');
+    const response = await GET(request, {
+      params: Promise.resolve({ id: 'session-6' }),
+    });
+
+    const reader = response.body!.getReader();
+    const decoder = new TextDecoder();
+
+    mockEventBus.emit('session-6', {
+      type: 'coaching_prompt',
+      data: { ruleId: 'open-ended-questions', message: 'Try asking an open-ended question' },
+    });
+
+    const { value } = await reader.read();
+    const chunk = decoder.decode(value);
+
+    expect(chunk).toContain('event: coaching_prompt');
+    expect(chunk).toContain('"ruleId":"open-ended-questions"');
+    expect(chunk).toContain('"message":"Try asking an open-ended question"');
+
+    await reader.cancel();
   });
 });
