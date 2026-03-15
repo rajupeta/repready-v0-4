@@ -41,7 +41,7 @@ export class PlaybackService {
       onLine(transcriptLine);
       index++;
 
-      const delay = 2000 + Math.random() * 1000; // 2-3 seconds
+      const delay = 2000 + Math.random() * 2000; // 2-4 seconds
       this.pendingTimeout = setTimeout(emitNext, delay);
     };
 
