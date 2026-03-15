@@ -17,8 +17,8 @@ function getRule(ruleId: string): CoachingRule {
 describe("TICKET-005 QA Validation — Acceptance Criteria", () => {
   // AC: 6 coaching rules exported from coaching-rules.ts
   describe("coaching-rules.ts exports", () => {
-    it("exports exactly 6 rules", () => {
-      expect(coachingRules).toHaveLength(6);
+    it("exports exactly 8 rules", () => {
+      expect(coachingRules).toHaveLength(8);
     });
 
     it("exports rules as an array", () => {
@@ -32,6 +32,8 @@ describe("TICKET-005 QA Validation — Acceptance Criteria", () => {
       { ruleId: "filler-words", cooldownMs: 20000 },
       { ruleId: "feature-dump", cooldownMs: 45000 },
       { ruleId: "no-next-steps", cooldownMs: 90000 },
+      { ruleId: "objection-deflected", cooldownMs: 60000 },
+      { ruleId: "competitor-not-explored", cooldownMs: 60000 },
     ];
 
     it.each(expectedRules)(
@@ -352,6 +354,8 @@ describe("TICKET-005 QA Validation — Acceptance Criteria", () => {
         name: "Always",
         description: "Always triggers",
         cooldownMs: 60000,
+        callTypes: ["discovery"],
+        severity: "medium",
         detect: () => true,
       };
       const never: CoachingRule = {
@@ -359,6 +363,8 @@ describe("TICKET-005 QA Validation — Acceptance Criteria", () => {
         name: "Never",
         description: "Never triggers",
         cooldownMs: 60000,
+        callTypes: ["discovery"],
+        severity: "medium",
         detect: () => false,
       };
       const engine = new RulesEngine([always, never]);
@@ -373,6 +379,8 @@ describe("TICKET-005 QA Validation — Acceptance Criteria", () => {
         name: "Cooldown Rule",
         description: "Tests cooldown",
         cooldownMs: 60000,
+        callTypes: ["discovery"],
+        severity: "medium",
         detect: () => true,
       };
       const engine = new RulesEngine([rule]);
@@ -388,6 +396,8 @@ describe("TICKET-005 QA Validation — Acceptance Criteria", () => {
         name: "Track",
         description: "Tracks trigger time",
         cooldownMs: 60000,
+        callTypes: ["discovery"],
+        severity: "medium",
         detect: () => true,
       };
       const engine = new RulesEngine([rule]);
@@ -407,6 +417,8 @@ describe("TICKET-005 QA Validation — Acceptance Criteria", () => {
         name: "A",
         description: "Rule A",
         cooldownMs: 60000,
+        callTypes: ["discovery"],
+        severity: "medium",
         detect: () => true,
       };
       const ruleB: CoachingRule = {
@@ -414,6 +426,8 @@ describe("TICKET-005 QA Validation — Acceptance Criteria", () => {
         name: "B",
         description: "Rule B",
         cooldownMs: 60000,
+        callTypes: ["discovery"],
+        severity: "medium",
         detect: () => true,
       };
       const engine = new RulesEngine([ruleA, ruleB]);
@@ -433,6 +447,8 @@ describe("TICKET-005 QA Validation — Acceptance Criteria", () => {
         name: "A",
         description: "Rule A",
         cooldownMs: 60000,
+        callTypes: ["discovery"],
+        severity: "medium",
         detect: () => {
           callCount++;
           return callCount <= 1; // Only triggers first time
@@ -443,6 +459,8 @@ describe("TICKET-005 QA Validation — Acceptance Criteria", () => {
         name: "B",
         description: "Rule B",
         cooldownMs: 60000,
+        callTypes: ["discovery"],
+        severity: "medium",
         detect: () => true,
       };
       const engine = new RulesEngine([ruleA, ruleB]);
@@ -464,6 +482,8 @@ describe("TICKET-005 QA Validation — Acceptance Criteria", () => {
         name: "Reset Test",
         description: "Tests reset",
         cooldownMs: 60000,
+        callTypes: ["discovery"],
+        severity: "medium",
         detect: () => true,
       };
       const engine = new RulesEngine([rule]);
@@ -477,9 +497,9 @@ describe("TICKET-005 QA Validation — Acceptance Criteria", () => {
 
     it("resets cooldowns for multiple rules at once", () => {
       const rules: CoachingRule[] = [
-        { ruleId: "x", name: "X", description: "X", cooldownMs: 60000, detect: () => true },
-        { ruleId: "y", name: "Y", description: "Y", cooldownMs: 60000, detect: () => true },
-        { ruleId: "z", name: "Z", description: "Z", cooldownMs: 60000, detect: () => true },
+        { ruleId: "x", name: "X", description: "X", cooldownMs: 60000, callTypes: ["discovery"], severity: "medium", detect: () => true },
+        { ruleId: "y", name: "Y", description: "Y", cooldownMs: 60000, callTypes: ["discovery"], severity: "medium", detect: () => true },
+        { ruleId: "z", name: "Z", description: "Z", cooldownMs: 60000, callTypes: ["discovery"], severity: "medium", detect: () => true },
       ];
       const engine = new RulesEngine(rules);
 

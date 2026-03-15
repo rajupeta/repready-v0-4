@@ -26,6 +26,8 @@ function createRule(overrides?: Partial<CoachingRule>): CoachingRule {
     name: 'Test Rule',
     description: 'A test rule',
     cooldownMs: 5000,
+    callTypes: ['discovery', 'demo', 'objection-handling', 'follow-up'],
+    severity: 'medium',
     detect: () => true,
     ...overrides,
   };

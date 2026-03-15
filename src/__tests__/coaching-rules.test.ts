@@ -14,8 +14,8 @@ function getRule(ruleId: string) {
 }
 
 describe("coaching-rules", () => {
-  it("exports 6 coaching rules", () => {
-    expect(coachingRules).toHaveLength(6);
+  it("exports 8 coaching rules", () => {
+    expect(coachingRules).toHaveLength(8);
   });
 
   it("each rule has required fields", () => {
