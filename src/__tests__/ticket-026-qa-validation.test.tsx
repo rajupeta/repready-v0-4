@@ -14,6 +14,8 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import fs from 'fs';
+import path from 'path';
 import SessionPage from '@/app/session/page';
 import { Scorecard, CallType } from '@/types';
 
@@ -140,8 +142,6 @@ describe('AC2: Session page at /session route', () => {
   });
 
   it('root page.tsx uses redirect to /session', () => {
-    const fs = require('fs');
-    const path = require('path');
     const rootPage = fs.readFileSync(
       path.resolve(__dirname, '../app/page.tsx'),
       'utf-8'
@@ -151,8 +151,6 @@ describe('AC2: Session page at /session route', () => {
   });
 
   it('session/page.tsx starts with "use client" directive', () => {
-    const fs = require('fs');
-    const path = require('path');
     const sessionPage = fs.readFileSync(
       path.resolve(__dirname, '../app/session/page.tsx'),
       'utf-8'
@@ -161,8 +159,6 @@ describe('AC2: Session page at /session route', () => {
   });
 
   it('root page.tsx no longer has client-side code', () => {
-    const fs = require('fs');
-    const path = require('path');
     const rootPage = fs.readFileSync(
       path.resolve(__dirname, '../app/page.tsx'),
       'utf-8'
@@ -174,8 +170,6 @@ describe('AC2: Session page at /session route', () => {
   });
 
   it('session/page.tsx imports useSSE hook', () => {
-    const fs = require('fs');
-    const path = require('path');
     const source = fs.readFileSync(
       path.resolve(__dirname, '../app/session/page.tsx'),
       'utf-8'
