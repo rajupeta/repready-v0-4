@@ -76,7 +76,8 @@ describe('Domain types — edge cases', () => {
       const s: Session = {
         id: `s-${status}`,
         status,
-        fixtureId: 'demo-call',
+        fixtureId: 'objection-handling-001',
+        callType: 'objection-handling',
         transcript: [],
       };
       expect(s.status).toBe(status);
@@ -125,20 +126,20 @@ describe('Fixture data — content quality', () => {
   const loadFixture = (name: string): TranscriptLine[] =>
     JSON.parse(fs.readFileSync(path.join(fixturesDir, `${name}.json`), 'utf-8'));
 
-  it('discovery-call has exactly the expected line count (25-27)', () => {
-    const data = loadFixture('discovery-call');
+  it('discovery-call-001 has exactly the expected line count (25-27)', () => {
+    const data = loadFixture('discovery-call-001');
     expect(data.length).toBeGreaterThanOrEqual(25);
     expect(data.length).toBeLessThanOrEqual(27);
   });
 
-  it('demo-call has exactly the expected line count (25-28)', () => {
-    const data = loadFixture('demo-call');
+  it('objection-handling-001 has exactly the expected line count (25-28)', () => {
+    const data = loadFixture('objection-handling-001');
     expect(data.length).toBeGreaterThanOrEqual(25);
     expect(data.length).toBeLessThanOrEqual(28);
   });
 
   it('fixtures contain both rep and prospect speakers', () => {
-    for (const name of ['discovery-call', 'demo-call']) {
+    for (const name of ['discovery-call-001', 'objection-handling-001']) {
       const data = loadFixture(name);
       const speakers = new Set(data.map((l) => l.speaker));
       expect(speakers.has('rep')).toBe(true);
@@ -147,7 +148,7 @@ describe('Fixture data — content quality', () => {
   });
 
   it('no fixture line has an unexpected property beyond speaker/text', () => {
-    for (const name of ['discovery-call', 'demo-call']) {
+    for (const name of ['discovery-call-001', 'objection-handling-001']) {
       const data = loadFixture(name);
       for (const line of data) {
         const keys = Object.keys(line);
@@ -159,7 +160,7 @@ describe('Fixture data — content quality', () => {
   });
 
   it('fixture lines do not contain timestamps (v0 spec: timestamps added by PlaybackService)', () => {
-    for (const name of ['discovery-call', 'demo-call']) {
+    for (const name of ['discovery-call-001', 'objection-handling-001']) {
       const data = loadFixture(name);
       for (const line of data) {
         expect(line).not.toHaveProperty('timestamp');
@@ -167,20 +168,20 @@ describe('Fixture data — content quality', () => {
     }
   });
 
-  it('discovery-call includes feature dumping (long rep monologue)', () => {
-    const data = loadFixture('discovery-call');
+  it('discovery-call-001 includes feature dumping (long rep monologue)', () => {
+    const data = loadFixture('discovery-call-001');
     const longRepLines = data.filter((l) => l.speaker === 'rep' && l.text.length > 200);
     expect(longRepLines.length).toBeGreaterThanOrEqual(1);
   });
 
-  it('demo-call includes feature dumping (long rep monologue)', () => {
-    const data = loadFixture('demo-call');
+  it('objection-handling-001 includes feature dumping (long rep monologue)', () => {
+    const data = loadFixture('objection-handling-001');
     const longRepLines = data.filter((l) => l.speaker === 'rep' && l.text.length > 200);
     expect(longRepLines.length).toBeGreaterThanOrEqual(1);
   });
 
-  it('discovery-call includes filler words from rep', () => {
-    const data = loadFixture('discovery-call');
+  it('discovery-call-001 includes filler words from rep', () => {
+    const data = loadFixture('discovery-call-001');
     const fillerPattern = /\b(um|uh|like|you know|basically)\b/i;
     const repWithFiller = data.filter(
       (l) => l.speaker === 'rep' && fillerPattern.test(l.text)
@@ -188,8 +189,8 @@ describe('Fixture data — content quality', () => {
     expect(repWithFiller.length).toBeGreaterThanOrEqual(1);
   });
 
-  it('demo-call includes filler words from rep', () => {
-    const data = loadFixture('demo-call');
+  it('objection-handling-001 includes filler words from rep', () => {
+    const data = loadFixture('objection-handling-001');
     const fillerPattern = /\b(um|uh|like|you know|basically)\b/i;
     const repWithFiller = data.filter(
       (l) => l.speaker === 'rep' && fillerPattern.test(l.text)
@@ -198,7 +199,7 @@ describe('Fixture data — content quality', () => {
   });
 
   it('fixtures are valid JSON arrays (not objects or primitives)', () => {
-    for (const name of ['discovery-call', 'demo-call']) {
+    for (const name of ['discovery-call-001', 'objection-handling-001']) {
       const raw = fs.readFileSync(path.join(fixturesDir, `${name}.json`), 'utf-8');
       const parsed = JSON.parse(raw);
       expect(Array.isArray(parsed)).toBe(true);
@@ -206,7 +207,7 @@ describe('Fixture data — content quality', () => {
   });
 
   it('no fixture line has empty speaker or text', () => {
-    for (const name of ['discovery-call', 'demo-call']) {
+    for (const name of ['discovery-call-001', 'objection-handling-001']) {
       const data = loadFixture(name);
       for (const line of data) {
         expect(line.speaker).toBeTruthy();
@@ -231,12 +232,12 @@ describe('GET /api/fixtures route', () => {
     expect(contentType).toContain('application/json');
   });
 
-  it('returns array containing discovery-call and demo-call', async () => {
+  it('returns array containing discovery-call-001 and objection-handling-001', async () => {
     const response = await GET();
     const body = await response.json();
     expect(Array.isArray(body)).toBe(true);
-    expect(body).toContain('discovery-call');
-    expect(body).toContain('demo-call');
+    expect(body).toContain('discovery-call-001');
+    expect(body).toContain('objection-handling-001');
   });
 
   it('returns fixture names without .json extension', async () => {

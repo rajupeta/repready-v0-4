@@ -6,6 +6,7 @@ import {
   CoachingPrompt,
   Session,
   Scorecard,
+  CallType,
 } from '@/types';
 
 export interface IRulesEngine {
@@ -61,12 +62,13 @@ export class SessionManager {
     this.deps = deps;
   }
 
-  createSession(fixtureId: string): string {
+  createSession(fixtureId: string, callType?: CallType): string {
     const id = crypto.randomUUID();
     const session: Session = {
       id,
       status: 'idle',
       fixtureId,
+      callType: callType ?? 'discovery',
       transcript: [],
     };
     this.sessions.set(id, session);
@@ -96,7 +98,10 @@ export class SessionManager {
           data: { line },
         } as SSEEvent);
 
-        const triggered = this.deps.rulesEngine.evaluate(window);
+        const allTriggered = this.deps.rulesEngine.evaluate(window);
+        const triggered = allTriggered.filter((r) =>
+          r.callTypes.includes(session.callType),
+        );
 
         if (triggered.length > 0) {
           this.deps.coachingService
@@ -122,8 +127,11 @@ export class SessionManager {
     playbackService.start(
       (line: TranscriptLine) => transcriptService.addLine(line),
       () => {
+        const applicableRules = this.deps.rules.filter((r) =>
+          r.callTypes.includes(session.callType),
+        );
         this.deps.scorecardService
-          .generate(session.transcript, this.deps.rules)
+          .generate(session.transcript, applicableRules)
           .then((scorecard) => {
             session.scorecard = scorecard;
             session.status = 'completed';

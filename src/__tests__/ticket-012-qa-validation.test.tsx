@@ -208,7 +208,7 @@ describe('Main page — QA validation', () => {
   beforeEach(() => {
     mockUseSSE.mockReturnValue(defaultSSE());
     mockFetch.mockResolvedValue({
-      json: () => Promise.resolve(['discovery-call', 'objection-handling']),
+      json: () => Promise.resolve(['discovery-call-001', 'objection-handling']),
     });
   });
 
@@ -221,7 +221,7 @@ describe('Main page — QA validation', () => {
     await waitFor(() => {
       const options = screen.getAllByRole('option');
       expect(options).toHaveLength(2);
-      expect(options[0]).toHaveTextContent('discovery-call');
+      expect(options[0]).toHaveTextContent('discovery-call-001');
       expect(options[1]).toHaveTextContent('objection-handling');
     });
   });
@@ -230,14 +230,14 @@ describe('Main page — QA validation', () => {
     render(<Home />);
     await waitFor(() => {
       const select = screen.getByLabelText('Select fixture') as HTMLSelectElement;
-      expect(select.value).toBe('discovery-call');
+      expect(select.value).toBe('discovery-call-001');
     });
   });
 
   // --- AC 2: Start Session button creates and starts a session ---
   it('AC2: clicking Start Session calls POST /api/sessions then POST /api/sessions/:id/start', async () => {
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['discovery-call']) })
+      .mockResolvedValueOnce({ json: () => Promise.resolve(['discovery-call-001']) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'sess-99' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: true }) });
 
@@ -249,7 +249,7 @@ describe('Main page — QA validation', () => {
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith('/api/sessions', expect.objectContaining({
         method: 'POST',
-        body: JSON.stringify({ fixtureId: 'discovery-call' }),
+        body: JSON.stringify({ fixtureId: 'discovery-call-001' }),
       }));
       expect(mockFetch).toHaveBeenCalledWith('/api/sessions/sess-99/start', { method: 'POST' });
     });

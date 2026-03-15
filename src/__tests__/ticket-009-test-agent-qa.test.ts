@@ -35,7 +35,7 @@ function params(id: string) {
 
 describe('Test Agent QA — AC1: POST /api/sessions', () => {
   it('returns 201 with { sessionId } for valid fixtureId', async () => {
-    const res = await createSession(jsonPost('http://localhost/api/sessions', { fixtureId: 'discovery-call' }));
+    const res = await createSession(jsonPost('http://localhost/api/sessions', { fixtureId: 'discovery-call-001' }));
     expect(res.status).toBe(201);
 
     const json = await res.json();
@@ -69,7 +69,7 @@ describe('Test Agent QA — AC1: POST /api/sessions', () => {
   it('returns 400 when fixtureId is missing from body', async () => {
     const res = await createSession(jsonPost('http://localhost/api/sessions', {}));
     expect(res.status).toBe(400);
-    expect((await res.json()).error).toBe('fixtureId is required');
+    expect((await res.json()).error).toBe('fixtureId or callType is required');
   });
 
   it('returns 400 for empty string fixtureId', async () => {
@@ -125,7 +125,7 @@ describe('Test Agent QA — AC2: POST /api/sessions/[id]/start', () => {
   let sessionId: string;
 
   beforeEach(() => {
-    sessionId = sessionManager.createSession('discovery-call');
+    sessionId = sessionManager.createSession('discovery-call-001');
   });
 
   it('returns 200 { status: "started" } for idle session', async () => {
@@ -183,7 +183,7 @@ describe('Test Agent QA — AC2: POST /api/sessions/[id]/start', () => {
 
 describe('Test Agent QA — AC3: GET /api/sessions/[id]/scorecard', () => {
   it('returns scorecard JSON for completed session', async () => {
-    const sessionId = sessionManager.createSession('discovery-call');
+    const sessionId = sessionManager.createSession('discovery-call-001');
     sessionManager.startSession(sessionId);
     await new Promise((r) => setTimeout(r, 50));
     expect(sessionManager.getSession(sessionId)!.status).toBe('completed');
@@ -207,7 +207,7 @@ describe('Test Agent QA — AC3: GET /api/sessions/[id]/scorecard', () => {
   });
 
   it('returns 400 for idle (not completed) session', async () => {
-    const sessionId = sessionManager.createSession('discovery-call');
+    const sessionId = sessionManager.createSession('discovery-call-001');
 
     const res = await getScorecard(new NextRequest('http://localhost'), params(sessionId));
     expect(res.status).toBe(400);
@@ -220,7 +220,7 @@ describe('Test Agent QA — AC3: GET /api/sessions/[id]/scorecard', () => {
   });
 
   it('scorecard entries array and score are structurally valid', async () => {
-    const sessionId = sessionManager.createSession('discovery-call');
+    const sessionId = sessionManager.createSession('discovery-call-001');
     sessionManager.startSession(sessionId);
     await new Promise((r) => setTimeout(r, 50));
 
@@ -232,7 +232,7 @@ describe('Test Agent QA — AC3: GET /api/sessions/[id]/scorecard', () => {
   });
 
   it('response Content-Type is application/json', async () => {
-    const sessionId = sessionManager.createSession('discovery-call');
+    const sessionId = sessionManager.createSession('discovery-call-001');
     const res = await getScorecard(new NextRequest('http://localhost'), params(sessionId));
     expect(res.headers.get('content-type')).toContain('application/json');
   });

@@ -32,14 +32,14 @@ afterEach(() => {
 describe('TICKET-017: page.tsx reads sessionId from API response', () => {
   it('reads sessionId (not id) from POST /api/sessions response', async () => {
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['discovery-call']) })
+      .mockResolvedValueOnce({ json: () => Promise.resolve(['discovery-call-001']) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'sess-abc-123' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ status: 'started' }) });
 
     render(<Home />);
 
     await waitFor(() => {
-      expect(screen.getByRole('option', { name: 'discovery-call' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: 'discovery-call-001' })).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByText('Start Session'));
@@ -58,14 +58,14 @@ describe('TICKET-017: page.tsx reads sessionId from API response', () => {
 
   it('does not crash when API returns sessionId instead of id', async () => {
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['demo-call']) })
+      .mockResolvedValueOnce({ json: () => Promise.resolve(['objection-handling-001']) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'sess-xyz-789' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ status: 'started' }) });
 
     render(<Home />);
 
     await waitFor(() => {
-      expect(screen.getByRole('option', { name: 'demo-call' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: 'objection-handling-001' })).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByText('Start Session'));

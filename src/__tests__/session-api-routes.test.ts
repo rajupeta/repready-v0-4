@@ -22,7 +22,7 @@ function makeParams(id: string) {
 
 describe('POST /api/sessions', () => {
   it('returns 201 with sessionId for valid fixtureId', async () => {
-    const response = await createSession(makeRequest({ fixtureId: 'discovery-call' }));
+    const response = await createSession(makeRequest({ fixtureId: 'discovery-call-001' }));
     const json = await response.json();
 
     expect(response.status).toBe(201);
@@ -36,7 +36,7 @@ describe('POST /api/sessions', () => {
     const json = await response.json();
 
     expect(response.status).toBe(400);
-    expect(json).toEqual({ error: 'fixtureId is required' });
+    expect(json).toEqual({ error: 'fixtureId or callType is required' });
   });
 
   it('returns 400 when fixtureId is empty string', async () => {
@@ -44,7 +44,7 @@ describe('POST /api/sessions', () => {
     const json = await response.json();
 
     expect(response.status).toBe(400);
-    expect(json).toEqual({ error: 'fixtureId is required' });
+    expect(json).toEqual({ error: 'fixtureId or callType is required' });
   });
 
   it('returns 400 when fixtureId is whitespace only', async () => {
@@ -52,7 +52,7 @@ describe('POST /api/sessions', () => {
     const json = await response.json();
 
     expect(response.status).toBe(400);
-    expect(json).toEqual({ error: 'fixtureId is required' });
+    expect(json).toEqual({ error: 'fixtureId or callType is required' });
   });
 
   it('returns 400 when fixtureId is not a string', async () => {
@@ -60,7 +60,7 @@ describe('POST /api/sessions', () => {
     const json = await response.json();
 
     expect(response.status).toBe(400);
-    expect(json).toEqual({ error: 'fixtureId is required' });
+    expect(json).toEqual({ error: 'fixtureId or callType is required' });
   });
 });
 
@@ -68,7 +68,7 @@ describe('POST /api/sessions/[id]/start', () => {
   let sessionId: string;
 
   beforeEach(() => {
-    sessionId = sessionManager.createSession('discovery-call');
+    sessionId = sessionManager.createSession('discovery-call-001');
   });
 
   it('returns 200 for idle session', async () => {
@@ -125,7 +125,7 @@ describe('GET /api/sessions/[id]/scorecard', () => {
   });
 
   it('returns 400 for session that is not completed', async () => {
-    const sessionId = sessionManager.createSession('discovery-call');
+    const sessionId = sessionManager.createSession('discovery-call-001');
 
     const response = await getScorecard(
       new NextRequest('http://localhost:3000'),
@@ -139,7 +139,7 @@ describe('GET /api/sessions/[id]/scorecard', () => {
 
   it('returns scorecard JSON for completed session', async () => {
     // Create and start session — the stub deps complete immediately
-    const sessionId = sessionManager.createSession('discovery-call');
+    const sessionId = sessionManager.createSession('discovery-call-001');
     sessionManager.startSession(sessionId);
 
     // Wait for async scorecard generation to complete

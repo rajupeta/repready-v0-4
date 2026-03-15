@@ -50,7 +50,8 @@ describe('TICKET-002: Domain types, fixture data, and fixtures API', () => {
       const session: Session = {
         id: 'session-1',
         status: 'active',
-        fixtureId: 'discovery-call',
+        fixtureId: 'discovery-call-001',
+        callType: 'discovery',
         transcript: [{ speaker: 'rep', text: 'Hello' }],
       };
       expect(session.status).toBe('active');
@@ -59,7 +60,8 @@ describe('TICKET-002: Domain types, fixture data, and fixtures API', () => {
       const completedSession: Session = {
         id: 'session-2',
         status: 'completed',
-        fixtureId: 'demo-call',
+        fixtureId: 'objection-handling-001',
+        callType: 'objection-handling',
         transcript: [],
         scorecard: {
           entries: [],
@@ -110,20 +112,20 @@ describe('TICKET-002: Domain types, fixture data, and fixtures API', () => {
   describe('Fixture files', () => {
     const fixturesDir = path.join(process.cwd(), 'src', 'fixtures');
 
-    it('discovery-call.json exists and has ~25 lines', () => {
-      const data = JSON.parse(fs.readFileSync(path.join(fixturesDir, 'discovery-call.json'), 'utf-8'));
+    it('discovery-call-001.json exists and has ~25 lines', () => {
+      const data = JSON.parse(fs.readFileSync(path.join(fixturesDir, 'discovery-call-001.json'), 'utf-8'));
       expect(data.length).toBeGreaterThanOrEqual(20);
       expect(data.length).toBeLessThanOrEqual(30);
     });
 
-    it('demo-call.json exists and has ~25 lines', () => {
-      const data = JSON.parse(fs.readFileSync(path.join(fixturesDir, 'demo-call.json'), 'utf-8'));
+    it('objection-handling-001.json exists and has ~25 lines', () => {
+      const data = JSON.parse(fs.readFileSync(path.join(fixturesDir, 'objection-handling-001.json'), 'utf-8'));
       expect(data.length).toBeGreaterThanOrEqual(20);
       expect(data.length).toBeLessThanOrEqual(30);
     });
 
     it('all fixture lines have valid speaker and text fields', () => {
-      const files = ['discovery-call.json', 'demo-call.json'];
+      const files = ['discovery-call-001.json', 'objection-handling-001.json'];
       for (const file of files) {
         const data: TranscriptLine[] = JSON.parse(
           fs.readFileSync(path.join(fixturesDir, file), 'utf-8')
@@ -137,7 +139,7 @@ describe('TICKET-002: Domain types, fixture data, and fixtures API', () => {
     });
 
     it('fixtures include coachable moments (long monologues)', () => {
-      const files = ['discovery-call.json', 'demo-call.json'];
+      const files = ['discovery-call-001.json', 'objection-handling-001.json'];
       for (const file of files) {
         const data: TranscriptLine[] = JSON.parse(
           fs.readFileSync(path.join(fixturesDir, file), 'utf-8')
@@ -148,7 +150,7 @@ describe('TICKET-002: Domain types, fixture data, and fixtures API', () => {
     });
 
     it('fixtures include filler words', () => {
-      const files = ['discovery-call.json', 'demo-call.json'];
+      const files = ['discovery-call-001.json', 'objection-handling-001.json'];
       const fillerPattern = /\b(um|uh|like|you know|basically|so)\b/i;
       for (const file of files) {
         const data: TranscriptLine[] = JSON.parse(
@@ -168,8 +170,8 @@ describe('TICKET-002: Domain types, fixture data, and fixtures API', () => {
         .filter((f) => f.endsWith('.json'))
         .map((f) => f.replace('.json', ''));
 
-      expect(names).toContain('discovery-call');
-      expect(names).toContain('demo-call');
+      expect(names).toContain('discovery-call-001');
+      expect(names).toContain('objection-handling-001');
       expect(names.length).toBeGreaterThanOrEqual(2);
     });
   });

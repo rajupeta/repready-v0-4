@@ -45,7 +45,7 @@ describe('GET /api/sessions/[id]/stream', () => {
     (mockSessionManager.getSession as jest.Mock).mockReturnValue({
       id: 'session-1',
       status: 'active',
-      fixtureId: 'discovery-call',
+      fixtureId: 'discovery-call-001',
       transcript: [],
     });
 
@@ -69,7 +69,7 @@ describe('GET /api/sessions/[id]/stream', () => {
     (mockSessionManager.getSession as jest.Mock).mockReturnValue({
       id: 'session-2',
       status: 'active',
-      fixtureId: 'demo-call',
+      fixtureId: 'objection-handling-001',
       transcript: [],
     });
 
@@ -89,7 +89,7 @@ describe('GET /api/sessions/[id]/stream', () => {
     (mockSessionManager.getSession as jest.Mock).mockReturnValue({
       id: 'session-3',
       status: 'active',
-      fixtureId: 'discovery-call',
+      fixtureId: 'discovery-call-001',
       transcript: [],
     });
 
@@ -122,7 +122,7 @@ describe('GET /api/sessions/[id]/stream', () => {
     (mockSessionManager.getSession as jest.Mock).mockReturnValue({
       id: 'session-4',
       status: 'active',
-      fixtureId: 'discovery-call',
+      fixtureId: 'discovery-call-001',
       transcript: [],
     });
 
@@ -153,7 +153,7 @@ describe('GET /api/sessions/[id]/stream', () => {
     (mockSessionManager.getSession as jest.Mock).mockReturnValue({
       id: 'session-5',
       status: 'active',
-      fixtureId: 'discovery-call',
+      fixtureId: 'discovery-call-001',
       transcript: [],
     });
 
@@ -236,7 +236,7 @@ describe('GET /api/sessions/[id]/stream', () => {
     (mockSessionManager.getSession as jest.Mock).mockReturnValue({
       id: 'session-6',
       status: 'active',
-      fixtureId: 'discovery-call',
+      fixtureId: 'discovery-call-001',
       transcript: [],
     });
 

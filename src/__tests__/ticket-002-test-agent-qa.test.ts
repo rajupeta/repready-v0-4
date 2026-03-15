@@ -28,7 +28,7 @@ function loadFixture(name: string): Record<string, unknown>[] {
   );
 }
 
-const FIXTURE_NAMES = ['discovery-call', 'demo-call'] as const;
+const FIXTURE_NAMES = ['discovery-call-001', 'objection-handling-001'] as const;
 
 // ---------------------------------------------------------------------------
 // 1. Acceptance Criteria: All TypeScript interfaces export cleanly
@@ -108,7 +108,8 @@ describe('AC: All TypeScript interfaces export cleanly from src/types/index.ts',
     const session: Session = {
       id: 's1',
       status: 'idle',
-      fixtureId: 'demo-call',
+      fixtureId: 'objection-handling-001',
+      callType: 'objection-handling',
       transcript: [],
     };
     expect(session.scorecard).toBeUndefined();
@@ -128,6 +129,7 @@ describe('AC: All TypeScript interfaces export cleanly from src/types/index.ts',
         id: `s-${s}`,
         status: s,
         fixtureId: 'f',
+        callType: 'discovery',
         transcript: [],
       };
       expect(session.status).toBe(s);
@@ -311,16 +313,16 @@ describe('AC: GET /api/fixtures returns 200 with fixture names', () => {
     expect(Array.isArray(body)).toBe(true);
   });
 
-  it('includes discovery-call in the response', async () => {
+  it('includes discovery-call-001 in the response', async () => {
     const res = await GET();
     const body = await res.json();
-    expect(body).toContain('discovery-call');
+    expect(body).toContain('discovery-call-001');
   });
 
-  it('includes demo-call in the response', async () => {
+  it('includes objection-handling-001 in the response', async () => {
     const res = await GET();
     const body = await res.json();
-    expect(body).toContain('demo-call');
+    expect(body).toContain('objection-handling-001');
   });
 
   it('does not include .json extension in names', async () => {
