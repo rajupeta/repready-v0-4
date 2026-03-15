@@ -238,7 +238,7 @@ describe('Main page — QA validation', () => {
   it('AC2: clicking Start Session calls POST /api/sessions then POST /api/sessions/:id/start', async () => {
     mockFetch
       .mockResolvedValueOnce({ json: () => Promise.resolve(['discovery-call']) })
-      .mockResolvedValueOnce({ json: () => Promise.resolve({ id: 'sess-99' }) })
+      .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'sess-99' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: true }) });
 
     render(<Home />);
@@ -261,7 +261,7 @@ describe('Main page — QA validation', () => {
   it('AC3: useSSE is called with null initially, then sessionId after start', async () => {
     mockFetch
       .mockResolvedValueOnce({ json: () => Promise.resolve(['fix1']) })
-      .mockResolvedValueOnce({ json: () => Promise.resolve({ id: 'sid' }) })
+      .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'sid' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({}) });
 
     render(<Home />);
@@ -412,7 +412,7 @@ describe('Main page — QA validation', () => {
     mockUseSSE.mockReturnValue({ ...defaultSSE(), isConnected: true });
     mockFetch
       .mockResolvedValueOnce({ json: () => Promise.resolve(['fix1']) })
-      .mockResolvedValueOnce({ json: () => Promise.resolve({ id: 's' }) })
+      .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 's' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({}) });
 
     render(<Home />);

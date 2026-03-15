@@ -59,7 +59,7 @@ export default function Home() {
         body: JSON.stringify({ fixtureId: selectedFixture }),
       });
       const session = await createRes.json();
-      const id = session.id;
+      const id = session.sessionId;
 
       // Start session
       await fetch(`/api/sessions/${id}/start`, { method: 'POST' });
