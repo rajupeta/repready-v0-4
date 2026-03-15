@@ -253,12 +253,13 @@ describe("Project health", () => {
   });
 
   it(".gitignore excludes .env files (but not .env.example)", () => {
-    const gitignore = fs.readFileSync(
+    const content = fs.readFileSync(
       path.join(ROOT, ".gitignore"),
       "utf-8"
     );
     // .env.example should NOT be in .gitignore
     // .env.local or similar should be excluded
+    expect(content).toBeDefined();
     expect(fs.existsSync(path.join(ROOT, ".env.example"))).toBe(true);
   });
 

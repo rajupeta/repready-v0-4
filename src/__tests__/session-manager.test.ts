@@ -86,12 +86,13 @@ function createMockDeps(overrides: Partial<SessionManagerDeps> = {}): SessionMan
   };
 
   const mockTranscriptLines: TranscriptLine[] = [];
-  const mockTranscript: ITranscriptService = {
+  const mockTranscriptService: ITranscriptService = {
     addLine: jest.fn((line: TranscriptLine) => {
       mockTranscriptLines.push(line);
     }),
     getTranscript: jest.fn(() => [...mockTranscriptLines]),
   };
+  void mockTranscriptService;
 
   return {
     eventBus: mockEventBus as unknown as SessionManagerDeps['eventBus'],
