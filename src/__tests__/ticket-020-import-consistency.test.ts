@@ -148,8 +148,8 @@ describe('TICKET-020 QA: Import consistency across codebase', () => {
   });
 
   describe('TypeScript compilation', () => {
-    it('tsc --noEmit succeeds (no type errors)', () => {
-      const { execSync } = require('child_process');
+    it('tsc --noEmit succeeds (no type errors)', async () => {
+      const { execSync } = await import('child_process');
       const result = execSync('npx tsc --noEmit 2>&1', {
         cwd: path.resolve(__dirname, '../..'),
         encoding: 'utf-8',

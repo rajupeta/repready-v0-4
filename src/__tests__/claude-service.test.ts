@@ -1,6 +1,6 @@
 import { ClaudeService } from "@/services/claude-service";
 import Anthropic from "@anthropic-ai/sdk";
-import { TranscriptLine, RuleDefinition, CoachingPrompt, Scorecard } from "@/types";
+import { TranscriptLine, RuleDefinition } from "@/types";
 
 jest.mock("@anthropic-ai/sdk");
 
