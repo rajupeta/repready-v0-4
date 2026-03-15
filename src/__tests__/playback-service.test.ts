@@ -1,5 +1,5 @@
 import { PlaybackService } from "@/services/playback-service";
-import type { TranscriptLine } from "@/types/transcript";
+import type { TranscriptLine } from "@/types";
 
 // Mock fs to avoid reading actual fixture files during tests
 jest.mock("fs", () => ({

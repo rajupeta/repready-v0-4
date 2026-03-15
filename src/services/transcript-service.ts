@@ -1,4 +1,4 @@
-import type { TranscriptLine } from "@/types/transcript";
+import type { TranscriptLine } from "@/types";
 
 const MAX_WINDOW_SIZE = 10;
 

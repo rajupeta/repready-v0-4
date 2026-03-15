@@ -3,8 +3,4 @@ export interface FixtureLine {
   text: string;
 }
 
-export interface TranscriptLine {
-  speaker: string;
-  text: string;
-  timestamp: number;
-}
+export type { TranscriptLine } from './index';

@@ -1,6 +1,6 @@
 import { PlaybackService } from "@/services/playback-service";
 import { TranscriptService } from "@/services/transcript-service";
-import type { TranscriptLine } from "@/types/transcript";
+import type { TranscriptLine } from "@/types";
 import fs from "fs";
 
 // Mock fs for PlaybackService tests
