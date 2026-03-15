@@ -32,7 +32,7 @@ export class PlaybackService {
 
       const fixture = this.lines[index];
       const transcriptLine: TranscriptLine = {
-        speaker: fixture.speaker,
+        speaker: fixture.speaker as TranscriptLine['speaker'],
         text: fixture.text,
         timestamp: Date.now(),
       };
