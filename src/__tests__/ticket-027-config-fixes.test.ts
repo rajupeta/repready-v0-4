@@ -49,6 +49,19 @@ describe("TICKET-027: Claude model default", () => {
     expect(mockCreate.mock.calls[0][0].model).toBe("claude-3-5-haiku-20241022");
   });
 
+  it("uses claude-3-5-haiku-20241022 for scorecard generation too", async () => {
+    mockCreate.mockResolvedValue({
+      content: [{ type: "text", text: JSON.stringify({ entries: [], overallScore: 0, summary: "test" }) }],
+    });
+    const service = new ClaudeService();
+    await service.generateScorecard(
+      [{ speaker: "rep", text: "hello" }],
+      [{ ruleId: "r1", ruleName: "Test", description: "test" }]
+    );
+
+    expect(mockCreate.mock.calls[0][0].model).toBe("claude-3-5-haiku-20241022");
+  });
+
   it("allows override via CLAUDE_MODEL env var", async () => {
     process.env.CLAUDE_MODEL = "claude-sonnet-4-20250514";
     const service = new ClaudeService();
