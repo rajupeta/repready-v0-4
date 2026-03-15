@@ -30,6 +30,7 @@ export interface Session {
   id: string;
   status: 'idle' | 'active' | 'completed';
   fixtureId: string;
+  callType: CallType;
   transcript: TranscriptLine[];
   events: SSEEvent[];
   scorecard?: Scorecard;

@@ -26,7 +26,7 @@ function defaultSSE() {
 beforeEach(() => {
   mockUseSSE.mockReturnValue(defaultSSE());
   mockFetch.mockResolvedValue({
-    json: () => Promise.resolve(['discovery-call']),
+    json: () => Promise.resolve(['discovery-call-001']),
   });
 });
 
@@ -49,12 +49,12 @@ describe('TICKET-012 edge cases', () => {
 
   it('returns to idle state on session creation failure', async () => {
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['discovery-call']) })
+      .mockResolvedValueOnce({ json: () => Promise.resolve(['discovery-call-001']) })
       .mockRejectedValueOnce(new Error('Server error'));
 
     render(<Home />);
     await waitFor(() => {
-      expect(screen.getByRole('option', { name: 'discovery-call' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: 'discovery-call-001' })).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByText('Start Session'));
@@ -70,13 +70,13 @@ describe('TICKET-012 edge cases', () => {
   it('disables fixture selector and start button during active session', async () => {
     mockUseSSE.mockReturnValue({ ...defaultSSE(), isConnected: true });
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['discovery-call']) })
+      .mockResolvedValueOnce({ json: () => Promise.resolve(['discovery-call-001']) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 's1' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: true }) });
 
     render(<Home />);
     await waitFor(() => {
-      expect(screen.getByRole('option', { name: 'discovery-call' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: 'discovery-call-001' })).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByText('Start Session'));
@@ -92,13 +92,13 @@ describe('TICKET-012 edge cases', () => {
     let sseReturn = { ...defaultSSE(), isConnected: false };
     mockUseSSE.mockImplementation(() => sseReturn);
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['discovery-call']) })
+      .mockResolvedValueOnce({ json: () => Promise.resolve(['discovery-call-001']) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 's1' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: true }) });
 
     const { rerender } = render(<Home />);
     await waitFor(() => {
-      expect(screen.getByRole('option', { name: 'discovery-call' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: 'discovery-call-001' })).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByText('Start Session'));

@@ -177,7 +177,7 @@ describe('Main page — test-agent acceptance', () => {
   beforeEach(() => {
     mockUseSSE.mockReturnValue(defaultSSE());
     mockFetch.mockResolvedValue({
-      json: () => Promise.resolve(['discovery-call', 'objection-handling']),
+      json: () => Promise.resolve(['discovery-call-001', 'objection-handling']),
     });
   });
   afterEach(() => jest.restoreAllMocks());
@@ -189,7 +189,7 @@ describe('Main page — test-agent acceptance', () => {
     await waitFor(() => {
       const opts = screen.getAllByRole('option');
       expect(opts).toHaveLength(2);
-      expect(opts[0]).toHaveTextContent('discovery-call');
+      expect(opts[0]).toHaveTextContent('discovery-call-001');
       expect(opts[1]).toHaveTextContent('objection-handling');
     });
   });
@@ -397,7 +397,7 @@ describe('Main page — test-agent acceptance', () => {
     render(<Home />);
     await waitFor(() => {
       const select = screen.getByLabelText('Select fixture') as HTMLSelectElement;
-      expect(select.value).toBe('discovery-call');
+      expect(select.value).toBe('discovery-call-001');
     });
   });
 

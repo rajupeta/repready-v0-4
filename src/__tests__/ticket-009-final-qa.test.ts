@@ -61,7 +61,7 @@ describe('TICKET-009 Final QA — session lifecycle', () => {
   it('create → start → scorecard full lifecycle works', async () => {
     // Step 1: Create
     const createRes = await createSession(
-      jsonPost('http://localhost/api/sessions', { fixtureId: 'discovery-call' }),
+      jsonPost('http://localhost/api/sessions', { fixtureId: 'discovery-call-001' }),
     );
     expect(createRes.status).toBe(201);
     const { sessionId } = await createRes.json();

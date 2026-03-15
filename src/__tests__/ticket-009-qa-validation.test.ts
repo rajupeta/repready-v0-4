@@ -59,7 +59,7 @@ function makeParams(id: string) {
 
 describe('TICKET-009 QA — POST /api/sessions', () => {
   it('AC1: returns 201 with { sessionId } for valid fixtureId', async () => {
-    const res = await createSession(jsonRequest('http://localhost/api/sessions', { fixtureId: 'discovery-call' }));
+    const res = await createSession(jsonRequest('http://localhost/api/sessions', { fixtureId: 'discovery-call-001' }));
     const json = await res.json();
 
     expect(res.status).toBe(201);
@@ -134,7 +134,7 @@ describe('TICKET-009 QA — POST /api/sessions/[id]/start', () => {
   let sessionId: string;
 
   beforeEach(() => {
-    sessionId = sessionManager.createSession('discovery-call');
+    sessionId = sessionManager.createSession('discovery-call-001');
   });
 
   it('AC2: returns 200 { status: "started" } for idle session', async () => {
@@ -197,7 +197,7 @@ describe('TICKET-009 QA — POST /api/sessions/[id]/start', () => {
 
 describe('TICKET-009 QA — GET /api/sessions/[id]/scorecard', () => {
   it('AC3: returns scorecard JSON for completed session', async () => {
-    const sessionId = sessionManager.createSession('discovery-call');
+    const sessionId = sessionManager.createSession('discovery-call-001');
     sessionManager.startSession(sessionId);
     await new Promise((r) => setTimeout(r, 50));
 
@@ -224,7 +224,7 @@ describe('TICKET-009 QA — GET /api/sessions/[id]/scorecard', () => {
   });
 
   it('AC3: returns 400 for idle (not completed) session', async () => {
-    const sessionId = sessionManager.createSession('discovery-call');
+    const sessionId = sessionManager.createSession('discovery-call-001');
 
     const res = await getScorecard(new NextRequest('http://localhost'), makeParams(sessionId));
     const json = await res.json();
@@ -235,7 +235,7 @@ describe('TICKET-009 QA — GET /api/sessions/[id]/scorecard', () => {
 
   it('returns 400 for active (not completed) session', async () => {
     // Create a session and manually set to active to test this state
-    const sessionId = sessionManager.createSession('discovery-call');
+    const sessionId = sessionManager.createSession('discovery-call-001');
     // startSession will transition through active, but with stubs it completes fast
     // We still test: the route checks status !== 'completed'
     sessionManager.getSession(sessionId)!;

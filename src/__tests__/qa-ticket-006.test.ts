@@ -218,14 +218,14 @@ describe("TICKET-006 QA: PlaybackService edge cases", () => {
 
   it("loadFixture reads from correct path using fixtureId", () => {
     readFileSync.mockReturnValue(JSON.stringify([]));
-    const service = new PlaybackService("discovery-call");
+    const service = new PlaybackService("discovery-call-001");
     service.loadFixture();
 
     expect(readFileSync).toHaveBeenCalledTimes(1);
     const calledPath = readFileSync.mock.calls[0][0] as string;
     expect(calledPath).toContain("src");
     expect(calledPath).toContain("fixtures");
-    expect(calledPath).toContain("discovery-call.json");
+    expect(calledPath).toContain("discovery-call-001.json");
   });
 
   it("first line is emitted synchronously (no delay before first line)", () => {
