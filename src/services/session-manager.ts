@@ -55,6 +55,7 @@ export interface SessionManagerDeps {
 
 export class SessionManager {
   private sessions: Map<string, Session> = new Map();
+  private playbackServices: Map<string, IPlaybackService> = new Map();
   private deps: SessionManagerDeps;
 
   constructor(deps: SessionManagerDeps) {
@@ -117,11 +118,13 @@ export class SessionManager {
     );
 
     const playbackService = this.deps.createPlaybackService(session.fixtureId);
+    this.playbackServices.set(sessionId, playbackService);
     playbackService.loadFixture();
 
     playbackService.start(
       (line: TranscriptLine) => transcriptService.addLine(line),
       () => {
+        this.playbackServices.delete(sessionId);
         this.deps.scorecardService
           .generate(session.transcript, this.deps.rules)
           .then((scorecard) => {
@@ -142,6 +145,43 @@ export class SessionManager {
           });
       },
     );
+  }
+
+  async endSession(sessionId: string): Promise<void> {
+    const session = this.sessions.get(sessionId);
+    if (!session) {
+      throw new Error(`Session ${sessionId} not found`);
+    }
+    if (session.status !== 'active') {
+      throw new Error(
+        `Session ${sessionId} is not active (status: ${session.status})`,
+      );
+    }
+
+    const playbackService = this.playbackServices.get(sessionId);
+    if (playbackService) {
+      playbackService.stop();
+      this.playbackServices.delete(sessionId);
+    }
+
+    try {
+      const scorecard = await this.deps.scorecardService.generate(
+        session.transcript,
+        this.deps.rules,
+      );
+      session.scorecard = scorecard;
+      session.status = 'completed';
+      this.deps.eventBus.emit(sessionId, {
+        type: 'session_complete',
+        data: { scorecard },
+      } as SSEEvent);
+    } catch {
+      session.status = 'completed';
+      this.deps.eventBus.emit(sessionId, {
+        type: 'session_complete',
+        data: { error: 'Scorecard generation failed' },
+      } as SSEEvent);
+    }
   }
 
   getSession(sessionId: string): Session | undefined {
