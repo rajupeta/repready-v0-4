@@ -7,6 +7,7 @@ jest.mock("fs", () => ({
   readFileSync: jest.fn(),
 }));
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { readFileSync } = require("fs") as { readFileSync: jest.Mock };
 
 function makeLine(index: number): TranscriptLine {

@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 import React from 'react';
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import TranscriptPanel from '@/components/TranscriptPanel';
 import CoachingPanel from '@/components/CoachingPanel';
@@ -50,11 +50,7 @@ describe('TranscriptPanel — acceptance criteria', () => {
   });
 
   it('auto-scrolls to bottom when new lines are added (useEffect triggers on lines change)', () => {
-    const scrollTopSetter = jest.fn();
     const mockScrollHeight = 500;
-
-    // Mock scrollTop as a setter
-    const originalDefineProperty = Object.defineProperty;
 
     const lines1: TranscriptLine[] = [
       { speaker: 'rep', text: 'Line 1' },
