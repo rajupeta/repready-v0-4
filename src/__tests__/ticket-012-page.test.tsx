@@ -62,7 +62,7 @@ describe('Main page — acceptance criteria', () => {
   it('Start Session button creates and starts a session', async () => {
     mockFetch
       .mockResolvedValueOnce({ json: () => Promise.resolve(['discovery-call']) })
-      .mockResolvedValueOnce({ json: () => Promise.resolve({ id: 'session-1' }) })
+      .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'session-1' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: true }) });
 
     render(<Home />);
