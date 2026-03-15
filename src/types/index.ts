@@ -40,6 +40,12 @@ export interface Scorecard {
   summary: string;
 }
 
+export interface RuleDefinition {
+  ruleId: string;
+  ruleName: string;
+  description: string;
+}
+
 export interface SSEEvent {
   event: 'transcript' | 'coaching_prompt' | 'session_complete' | 'heartbeat';
   data: unknown;
