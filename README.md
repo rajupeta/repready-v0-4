@@ -54,6 +54,25 @@ npm run build
 npm start
 ```
 
+## Docker
+
+Build and run with Docker Compose:
+
+```bash
+cp .env.example .env
+# Edit .env with your values
+docker compose build
+docker compose up
+```
+
+The app will be available at [http://localhost:3000](http://localhost:3000).
+
+To run in detached mode:
+
+```bash
+docker compose up -d
+```
+
 ## API
 
 | Endpoint | Method | Response |

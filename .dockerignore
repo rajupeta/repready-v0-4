@@ -1,0 +1,15 @@
+node_modules
+.next
+.git
+.env
+.env*.local
+*.test.ts
+*.test.tsx
+__tests__
+.github
+.eslintrc*
+coverage
+.DS_Store
+npm-debug.log*
+.vercel
+*.tsbuildinfo
