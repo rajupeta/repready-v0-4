@@ -149,6 +149,7 @@ describe('TICKET-020 QA: Import consistency across codebase', () => {
 
   describe('TypeScript compilation', () => {
     it('tsc --noEmit succeeds (no type errors)', () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { execSync } = require('child_process');
       const result = execSync('npx tsc --noEmit 2>&1', {
         cwd: path.resolve(__dirname, '../..'),

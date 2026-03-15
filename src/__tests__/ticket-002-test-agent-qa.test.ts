@@ -65,6 +65,8 @@ describe('AC: All TypeScript interfaces export cleanly from src/types/index.ts',
       name: 'Test',
       description: 'Desc',
       cooldownMs: 1000,
+      callTypes: ['discovery'],
+      severity: 'medium',
       detect: () => false,
     };
     expect(rule.ruleId).toBe('test');
@@ -77,6 +79,8 @@ describe('AC: All TypeScript interfaces export cleanly from src/types/index.ts',
       name: 'Echo',
       description: 'Always true',
       cooldownMs: 0,
+      callTypes: ['discovery'],
+      severity: 'medium',
       detect: (window: TranscriptLine[]) => window.length > 0,
     };
     expect(rule.detect([])).toBe(false);
