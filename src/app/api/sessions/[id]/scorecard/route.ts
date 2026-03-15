@@ -25,7 +25,7 @@ export async function GET(
 
     const scorecard = sessionManager.getScorecard(id);
     return NextResponse.json(scorecard, { status: 200 });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 },

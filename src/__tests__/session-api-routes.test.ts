@@ -1,3 +1,4 @@
+import { NextRequest } from 'next/server';
 import { sessionManager } from '@/lib/session-manager-instance';
 
 // We test route handlers by importing them directly and calling with mock Request objects.
@@ -7,8 +8,8 @@ import { POST as createSession } from '@/app/api/sessions/route';
 import { POST as startSession } from '@/app/api/sessions/[id]/start/route';
 import { GET as getScorecard } from '@/app/api/sessions/[id]/scorecard/route';
 
-function makeRequest(body: unknown): Request {
-  return new Request('http://localhost:3000/api/sessions', {
+function makeRequest(body: unknown): NextRequest {
+  return new NextRequest('http://localhost:3000/api/sessions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -21,7 +22,7 @@ function makeParams(id: string) {
 
 describe('POST /api/sessions', () => {
   it('returns 201 with sessionId for valid fixtureId', async () => {
-    const response = await createSession(makeRequest({ fixtureId: 'discovery-call' }) as any);
+    const response = await createSession(makeRequest({ fixtureId: 'discovery-call' }));
     const json = await response.json();
 
     expect(response.status).toBe(201);
@@ -31,7 +32,7 @@ describe('POST /api/sessions', () => {
   });
 
   it('returns 400 when fixtureId is missing', async () => {
-    const response = await createSession(makeRequest({}) as any);
+    const response = await createSession(makeRequest({}));
     const json = await response.json();
 
     expect(response.status).toBe(400);
@@ -39,7 +40,7 @@ describe('POST /api/sessions', () => {
   });
 
   it('returns 400 when fixtureId is empty string', async () => {
-    const response = await createSession(makeRequest({ fixtureId: '' }) as any);
+    const response = await createSession(makeRequest({ fixtureId: '' }));
     const json = await response.json();
 
     expect(response.status).toBe(400);
@@ -47,7 +48,7 @@ describe('POST /api/sessions', () => {
   });
 
   it('returns 400 when fixtureId is whitespace only', async () => {
-    const response = await createSession(makeRequest({ fixtureId: '   ' }) as any);
+    const response = await createSession(makeRequest({ fixtureId: '   ' }));
     const json = await response.json();
 
     expect(response.status).toBe(400);
@@ -55,7 +56,7 @@ describe('POST /api/sessions', () => {
   });
 
   it('returns 400 when fixtureId is not a string', async () => {
-    const response = await createSession(makeRequest({ fixtureId: 123 }) as any);
+    const response = await createSession(makeRequest({ fixtureId: 123 }));
     const json = await response.json();
 
     expect(response.status).toBe(400);
@@ -72,7 +73,7 @@ describe('POST /api/sessions/[id]/start', () => {
 
   it('returns 200 for idle session', async () => {
     const response = await startSession(
-      new Request('http://localhost:3000') as any,
+      new NextRequest('http://localhost:3000'),
       makeParams(sessionId),
     );
     const json = await response.json();
@@ -83,7 +84,7 @@ describe('POST /api/sessions/[id]/start', () => {
 
   it('returns 404 for non-existent session', async () => {
     const response = await startSession(
-      new Request('http://localhost:3000') as any,
+      new NextRequest('http://localhost:3000'),
       makeParams('non-existent-id'),
     );
     const json = await response.json();
@@ -95,13 +96,13 @@ describe('POST /api/sessions/[id]/start', () => {
   it('returns 400 for already started session', async () => {
     // Start it once
     await startSession(
-      new Request('http://localhost:3000') as any,
+      new NextRequest('http://localhost:3000'),
       makeParams(sessionId),
     );
 
     // Try to start again
     const response = await startSession(
-      new Request('http://localhost:3000') as any,
+      new NextRequest('http://localhost:3000'),
       makeParams(sessionId),
     );
     const json = await response.json();
@@ -114,7 +115,7 @@ describe('POST /api/sessions/[id]/start', () => {
 describe('GET /api/sessions/[id]/scorecard', () => {
   it('returns 404 for non-existent session', async () => {
     const response = await getScorecard(
-      new Request('http://localhost:3000') as any,
+      new NextRequest('http://localhost:3000'),
       makeParams('non-existent-id'),
     );
     const json = await response.json();
@@ -127,7 +128,7 @@ describe('GET /api/sessions/[id]/scorecard', () => {
     const sessionId = sessionManager.createSession('discovery-call');
 
     const response = await getScorecard(
-      new Request('http://localhost:3000') as any,
+      new NextRequest('http://localhost:3000'),
       makeParams(sessionId),
     );
     const json = await response.json();
@@ -148,7 +149,7 @@ describe('GET /api/sessions/[id]/scorecard', () => {
     expect(session?.status).toBe('completed');
 
     const response = await getScorecard(
-      new Request('http://localhost:3000') as any,
+      new NextRequest('http://localhost:3000'),
       makeParams(sessionId),
     );
     const json = await response.json();
