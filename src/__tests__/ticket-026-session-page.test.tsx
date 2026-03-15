@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import SessionPage from '@/app/session/page';
 import { Scorecard } from '@/types';
@@ -299,6 +299,168 @@ describe('TICKET-026: Session page at /session route', () => {
     const source = fs.readFileSync(pagePath, 'utf-8');
 
     expect(source.trimStart().startsWith("'use client'")).toBe(true);
+  });
+});
+
+// =============================================================
+// Edge cases: Error handling and resilience
+// =============================================================
+describe('TICKET-026: Error handling', () => {
+  it('recovers to idle state when session creation fails', async () => {
+    mockFetch.mockRejectedValueOnce(new Error('Network error'));
+
+    render(<SessionPage />);
+    fireEvent.click(screen.getByText('Start Session'));
+
+    await waitFor(() => {
+      // Should return to idle — Start Session button enabled again
+      expect(screen.getByText('Start Session')).not.toBeDisabled();
+    });
+    // No End Call button should appear
+    expect(screen.queryByText('End Call')).not.toBeInTheDocument();
+  });
+
+  it('transitions to completed even when end-call API fails', async () => {
+    // Verify the code has error resilience: handleEndCall catches fetch
+    // failures and still transitions to 'completed' (lines 65-75 of session/page.tsx)
+    mockUseSSE.mockReturnValue({ ...defaultSSE(), isConnected: true });
+    mockFetch
+      .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'err-end' }) })
+      .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: true }) })
+      .mockRejectedValueOnce(new Error('End call failed'));
+
+    render(<SessionPage />);
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('Start Session'));
+      // Flush all microtasks from handleStartSession (both fetches + setSessionId)
+      await new Promise((r) => setTimeout(r, 0));
+    });
+
+    // Now sessionId is set AND End Call button is visible
+    expect(screen.getByText('End Call')).toBeInTheDocument();
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('End Call'));
+      await new Promise((r) => setTimeout(r, 0));
+    });
+
+    // Despite fetch rejection, UI transitions to completed
+    expect(mockFetch).toHaveBeenCalledWith('/api/sessions/err-end/end', { method: 'POST' });
+    expect(screen.getByText('Session Complete')).toBeInTheDocument();
+  });
+
+  it('Start Session button shows "Starting..." and is disabled during loading', async () => {
+    // Make fetch hang so we can observe loading state
+    mockFetch.mockImplementation(() => new Promise(() => {}));
+
+    render(<SessionPage />);
+    fireEvent.click(screen.getByText('Start Session'));
+
+    await waitFor(() => {
+      const btn = screen.getByText('Starting...');
+      expect(btn).toBeInTheDocument();
+      expect(btn).toBeDisabled();
+    });
+  });
+
+  it('Start Session button is disabled during active session', async () => {
+    mockUseSSE.mockReturnValue({ ...defaultSSE(), isConnected: true });
+    mockFetch
+      .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 's1' }) })
+      .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: true }) });
+
+    render(<SessionPage />);
+    fireEvent.click(screen.getByText('Start Session'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Start Session')).toBeDisabled();
+    });
+  });
+
+  it('maps objection-handling call type to fixtureId demo-call', async () => {
+    mockFetch
+      .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 's3' }) })
+      .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: true }) });
+
+    render(<SessionPage />);
+    fireEvent.change(screen.getByLabelText('Select call type'), { target: { value: 'objection-handling' } });
+    fireEvent.click(screen.getByText('Start Session'));
+
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalledWith('/api/sessions', expect.objectContaining({
+        body: JSON.stringify({ fixtureId: 'demo-call' }),
+      }));
+    });
+  });
+
+  it('maps follow-up call type to fixtureId discovery-call', async () => {
+    mockFetch
+      .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 's4' }) })
+      .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: true }) });
+
+    render(<SessionPage />);
+    fireEvent.change(screen.getByLabelText('Select call type'), { target: { value: 'follow-up' } });
+    fireEvent.click(screen.getByText('Start Session'));
+
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalledWith('/api/sessions', expect.objectContaining({
+        body: JSON.stringify({ fixtureId: 'discovery-call' }),
+      }));
+    });
+  });
+
+  it('Close scorecard resets to idle and re-enables Start Session', () => {
+    const sampleScorecard = {
+      overallScore: 80,
+      summary: 'Great',
+      entries: [{ ruleId: 'r1', ruleName: 'Test', assessment: 'good' as const, comment: 'OK' }],
+    };
+    mockUseSSE.mockReturnValue({ ...defaultSSE(), scorecard: sampleScorecard });
+
+    render(<SessionPage />);
+
+    // Scorecard visible
+    expect(screen.getByText('80')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('Close'));
+
+    // Back to idle — Start Session enabled, dropdown enabled
+    expect(screen.getByText('Start Session')).not.toBeDisabled();
+    expect(screen.getByLabelText('Select call type')).not.toBeDisabled();
+  });
+
+  it('shows Live indicator only during active session', async () => {
+    mockUseSSE.mockReturnValue({ ...defaultSSE(), isConnected: true });
+    mockFetch
+      .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 's1' }) })
+      .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: true }) });
+
+    render(<SessionPage />);
+
+    // No Live indicator when idle
+    expect(screen.queryByText('Live')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('Start Session'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Live')).toBeInTheDocument();
+    });
+  });
+
+  it('scorecard with 0 score renders correctly', () => {
+    const zeroScorecard = {
+      overallScore: 0,
+      summary: 'Needs improvement',
+      entries: [],
+    };
+    mockUseSSE.mockReturnValue({ ...defaultSSE(), scorecard: zeroScorecard });
+
+    render(<SessionPage />);
+
+    expect(screen.getByText('0')).toBeInTheDocument();
+    expect(screen.getByText('Needs improvement')).toBeInTheDocument();
   });
 });
 
