@@ -109,7 +109,7 @@ describe('useSSE hook — test-agent acceptance', () => {
   it('AC: transcript event appends to lines array', () => {
     render(<HookHarness sessionId="s" />);
     act(() => {
-      MockEventSource.latest().simulateEvent('transcript', { speaker: 'rep', text: 'Hey', timestamp: 10 });
+      MockEventSource.latest().simulateEvent('transcript', { line: { speaker: 'rep', text: 'Hey', timestamp: 10 } });
     });
     const lines = JSON.parse(screen.getByTestId('ln').textContent!);
     expect(lines).toHaveLength(1);
@@ -120,7 +120,7 @@ describe('useSSE hook — test-agent acceptance', () => {
     render(<HookHarness sessionId="s" />);
     act(() => {
       MockEventSource.latest().simulateEvent('coaching_prompt', {
-        ruleId: 'qa-r1', ruleName: 'Test Rule', message: 'Do X', timestamp: 5,
+        prompt: { ruleId: 'qa-r1', ruleName: 'Test Rule', message: 'Do X', timestamp: 5 },
       });
     });
     const prompts = JSON.parse(screen.getByTestId('pr').textContent!);
@@ -132,7 +132,7 @@ describe('useSSE hook — test-agent acceptance', () => {
     render(<HookHarness sessionId="s" />);
     const sc = { overallScore: 95, summary: 'Perfect', entries: [] };
     act(() => {
-      MockEventSource.latest().simulateEvent('session_complete', sc);
+      MockEventSource.latest().simulateEvent('session_complete', { scorecard: sc });
     });
     expect(JSON.parse(screen.getByTestId('sc').textContent!)).toEqual(sc);
   });
