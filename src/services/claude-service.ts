@@ -32,7 +32,7 @@ export class ClaudeService {
     this.client = new Anthropic({
       apiKey: process.env.ANTHROPIC_API_KEY,
     });
-    this.model = process.env.CLAUDE_MODEL || "claude-sonnet-4-20250514";
+    this.model = process.env.CLAUDE_MODEL || "claude-3-5-haiku-20241022";
   }
 
   async getCoachingPrompts(

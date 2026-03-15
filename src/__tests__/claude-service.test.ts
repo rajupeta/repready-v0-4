@@ -69,7 +69,7 @@ describe("ClaudeService", () => {
       const service = new ClaudeService();
       await service.getCoachingPrompts([sampleRules[0]], sampleTranscript);
 
-      expect(mockCreate.mock.calls[0][0].model).toBe("claude-sonnet-4-20250514");
+      expect(mockCreate.mock.calls[0][0].model).toBe("claude-3-5-haiku-20241022");
     });
 
     it("uses CLAUDE_MODEL env var when set", async () => {
