@@ -45,18 +45,18 @@ export function useSSE(sessionId: string | null): UseSSEReturn {
     };
 
     es.addEventListener('transcript', (event: MessageEvent) => {
-      const line: TranscriptLine = JSON.parse(event.data);
+      const { line } = JSON.parse(event.data) as { line: TranscriptLine };
       setLines((prev) => [...prev, line]);
     });
 
     es.addEventListener('coaching_prompt', (event: MessageEvent) => {
-      const prompt: CoachingPrompt = JSON.parse(event.data);
+      const { prompt } = JSON.parse(event.data) as { prompt: CoachingPrompt };
       setPrompts((prev) => [...prev, prompt]);
     });
 
     es.addEventListener('session_complete', (event: MessageEvent) => {
-      const data: Scorecard = JSON.parse(event.data);
-      setScorecard(data);
+      const { scorecard } = JSON.parse(event.data) as { scorecard: Scorecard };
+      setScorecard(scorecard);
     });
 
     es.addEventListener('heartbeat', () => {
