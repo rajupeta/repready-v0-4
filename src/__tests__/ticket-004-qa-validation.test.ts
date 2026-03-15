@@ -6,9 +6,7 @@ import { ClaudeService } from "@/services/claude-service";
 import Anthropic from "@anthropic-ai/sdk";
 import {
   TranscriptLine,
-  CoachingPrompt,
   Scorecard,
-  ScorecardEntry,
   RuleDefinition,
 } from "@/types";
 import * as fs from "fs";
