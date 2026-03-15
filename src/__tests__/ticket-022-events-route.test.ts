@@ -134,6 +134,31 @@ describe('SessionManager.getEvents', () => {
   });
 });
 
+describe('GET /api/sessions/[id]/events — route parameter handling', () => {
+  it('returns 404 for session ID with special characters', async () => {
+    const response = await getEvents(
+      new NextRequest('http://localhost:3000'),
+      makeParams('id-with-special-chars!@#$'),
+    );
+
+    expect(response.status).toBe(404);
+    const json = await response.json();
+    expect(json).toEqual({ error: 'Session not found' });
+  });
+
+  it('returns 404 for very long session ID', async () => {
+    const longId = 'a'.repeat(500);
+    const response = await getEvents(
+      new NextRequest('http://localhost:3000'),
+      makeParams(longId),
+    );
+
+    expect(response.status).toBe(404);
+    const json = await response.json();
+    expect(json).toEqual({ error: 'Session not found' });
+  });
+});
+
 describe('GET /api/sessions/[id]/events — HTTP method and error handling', () => {
   it('returns JSON content-type header on 200', async () => {
     const sessionId = sessionManager.createSession('discovery-call');

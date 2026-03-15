@@ -248,6 +248,43 @@ describe('TICKET-022 QA Validation: GET /api/sessions/[id]/events', () => {
     });
   });
 
+  describe('Concurrent Session Validation', () => {
+    it('handles multiple sessions with events simultaneously', async () => {
+      const sm = createTestSessionManager({
+        lines: [
+          { speaker: 'rep', text: 'First line' },
+          { speaker: 'prospect', text: 'Second line' },
+        ],
+      });
+
+      const session1 = sm.createSession('discovery-call');
+      const session2 = sm.createSession('discovery-call');
+      const session3 = sm.createSession('discovery-call');
+
+      sm.startSession(session1);
+      sm.startSession(session2);
+      await new Promise((r) => setTimeout(r, 50));
+
+      // Sessions 1 and 2 have events, session 3 does not
+      const events1 = sm.getEvents(session1);
+      const events2 = sm.getEvents(session2);
+      const events3 = sm.getEvents(session3);
+
+      expect(events1!.length).toBeGreaterThan(0);
+      expect(events2!.length).toBeGreaterThan(0);
+      expect(events3).toEqual([]);
+
+      // Both started sessions should have the same number of events
+      expect(events1!.length).toBe(events2!.length);
+    });
+
+    it('getEvents returns undefined for completely unknown session ID', () => {
+      const sm = createTestSessionManager();
+      const events = sm.getEvents('totally-unknown-id-12345');
+      expect(events).toBeUndefined();
+    });
+  });
+
   describe('Session Type Integration', () => {
     it('Session type includes events field', async () => {
       const sm = createTestSessionManager();
