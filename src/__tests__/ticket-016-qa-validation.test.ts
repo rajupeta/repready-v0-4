@@ -221,14 +221,14 @@ describe('TICKET-016: Wire real dependencies into session-manager-instance', () 
       const { sessionManager } = await import('@/lib/session-manager-instance');
 
       // Step 1: Create session
-      const sessionId = sessionManager.createSession('discovery-call');
+      const sessionId = sessionManager.createSession('discovery-call-001');
       expect(typeof sessionId).toBe('string');
       expect(sessionId.length).toBeGreaterThan(0);
 
       const session = sessionManager.getSession(sessionId);
       expect(session).toBeDefined();
       expect(session!.status).toBe('idle');
-      expect(session!.fixtureId).toBe('discovery-call');
+      expect(session!.fixtureId).toBe('discovery-call-001');
       expect(session!.transcript).toEqual([]);
 
       // Step 2: Start session
@@ -252,7 +252,7 @@ describe('TICKET-016: Wire real dependencies into session-manager-instance', () 
       const { sessionManager } = await import('@/lib/session-manager-instance');
       const { eventBus } = await import('@/lib/event-bus-instance');
 
-      const sessionId = sessionManager.createSession('discovery-call');
+      const sessionId = sessionManager.createSession('discovery-call-001');
       const events: SSEEvent[] = [];
 
       // Subscribe to events
@@ -280,7 +280,7 @@ describe('TICKET-016: Wire real dependencies into session-manager-instance', () 
 
     it('PlaybackService.loadFixture() is called during startSession', async () => {
       const { sessionManager } = await import('@/lib/session-manager-instance');
-      const sessionId = sessionManager.createSession('discovery-call');
+      const sessionId = sessionManager.createSession('discovery-call-001');
 
       sessionManager.startSession(sessionId);
       await new Promise((resolve) => setTimeout(resolve, 50));
@@ -290,7 +290,7 @@ describe('TICKET-016: Wire real dependencies into session-manager-instance', () 
 
     it('PlaybackService.start() is called with callbacks', async () => {
       const { sessionManager } = await import('@/lib/session-manager-instance');
-      const sessionId = sessionManager.createSession('discovery-call');
+      const sessionId = sessionManager.createSession('discovery-call-001');
 
       sessionManager.startSession(sessionId);
       await new Promise((resolve) => setTimeout(resolve, 50));
@@ -303,7 +303,7 @@ describe('TICKET-016: Wire real dependencies into session-manager-instance', () 
 
     it('getScorecard returns scorecard after session completes', async () => {
       const { sessionManager } = await import('@/lib/session-manager-instance');
-      const sessionId = sessionManager.createSession('discovery-call');
+      const sessionId = sessionManager.createSession('discovery-call-001');
 
       // Before start — no scorecard
       expect(sessionManager.getScorecard(sessionId)).toBeUndefined();
@@ -326,7 +326,7 @@ describe('TICKET-016: Wire real dependencies into session-manager-instance', () 
 
     it('rejects starting an already-active session', async () => {
       const { sessionManager } = await import('@/lib/session-manager-instance');
-      const sessionId = sessionManager.createSession('discovery-call');
+      const sessionId = sessionManager.createSession('discovery-call-001');
 
       sessionManager.startSession(sessionId);
 
@@ -340,12 +340,12 @@ describe('TICKET-016: Wire real dependencies into session-manager-instance', () 
     it('multiple sessions can be created independently', async () => {
       const { sessionManager } = await import('@/lib/session-manager-instance');
 
-      const id1 = sessionManager.createSession('discovery-call');
-      const id2 = sessionManager.createSession('demo-call');
+      const id1 = sessionManager.createSession('discovery-call-001');
+      const id2 = sessionManager.createSession('objection-handling-001');
 
       expect(id1).not.toBe(id2);
-      expect(sessionManager.getSession(id1)!.fixtureId).toBe('discovery-call');
-      expect(sessionManager.getSession(id2)!.fixtureId).toBe('demo-call');
+      expect(sessionManager.getSession(id1)!.fixtureId).toBe('discovery-call-001');
+      expect(sessionManager.getSession(id2)!.fixtureId).toBe('objection-handling-001');
     });
 
     it('RulesEngine evaluates coaching rules correctly within the singleton', async () => {
@@ -383,7 +383,7 @@ describe('TICKET-016: Wire real dependencies into session-manager-instance', () 
       const { sessionManager } = await import('@/lib/session-manager-instance');
       const { eventBus } = await import('@/lib/event-bus-instance');
 
-      const sessionId = sessionManager.createSession('discovery-call');
+      const sessionId = sessionManager.createSession('discovery-call-001');
       const events: SSEEvent[] = [];
       eventBus.subscribe(sessionId, (e: SSEEvent) => events.push(e));
 
