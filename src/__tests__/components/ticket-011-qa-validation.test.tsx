@@ -60,7 +60,7 @@ describe('TranscriptPanel — edge cases', () => {
     render(<TranscriptPanel lines={lines} />);
     const container = screen.getByText('Test').closest('.overflow-y-auto');
     expect(container).not.toBeNull();
-    expect(container!.className).toContain('max-h-96');
+    expect(container!.className).toContain('flex-1');
   });
 
   it('handles long text content without breaking', () => {
@@ -106,7 +106,7 @@ describe('CoachingPanel — edge cases', () => {
       { ruleId: 'r1', ruleName: 'Test', message: 'Test msg', timestamp: 1 },
     ];
     render(<CoachingPanel prompts={prompts} />);
-    const card = screen.getByText('Test').closest('.border-amber-200');
+    const card = screen.getByText('Test').closest('.border-amber-500');
     expect(card).not.toBeNull();
     expect(card!.className).toContain('bg-amber-50');
   });
@@ -133,7 +133,7 @@ describe('CoachingPanel — edge cases', () => {
     ];
     render(<CoachingPanel prompts={prompts} />);
     const msgEl = screen.getByText('Check this');
-    expect(msgEl.className).toContain('text-amber-700');
+    expect(msgEl.className).toContain('text-amber-800');
   });
 
   it('does not mutate the original prompts array when reversing', () => {

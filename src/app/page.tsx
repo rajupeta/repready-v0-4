@@ -82,21 +82,21 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="flex h-screen flex-col bg-gray-50">
       {/* Header */}
-      <header className="border-b border-gray-200 bg-white px-6 py-4">
-        <h1 className="text-2xl font-bold text-gray-900">RepReady</h1>
-        <p className="text-sm text-gray-500">AI Sales Coaching</p>
+      <header className="bg-blue-700 px-6 py-4 shadow-md">
+        <h1 className="text-2xl font-bold text-white">RepReady</h1>
+        <p className="text-sm text-blue-200">AI Sales Coaching</p>
       </header>
 
       {/* Controls */}
-      <div className="mx-auto max-w-7xl px-6 py-6">
-        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+      <div className="mx-auto w-full max-w-7xl px-6 py-4">
+        <div className="flex flex-col gap-3 rounded-xl bg-white p-4 shadow-sm sm:flex-row sm:items-center">
           <select
             value={selectedFixture}
             onChange={(e) => setSelectedFixture(e.target.value)}
             disabled={sessionStatus === 'loading' || sessionStatus === 'active'}
-            className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none"
+            className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 transition hover:border-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none disabled:opacity-50"
             aria-label="Select fixture"
           >
             {fixtures.map((f) => (
@@ -113,7 +113,7 @@ export default function Home() {
               sessionStatus === 'loading' ||
               sessionStatus === 'active'
             }
-            className="rounded-lg bg-blue-600 px-6 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 hover:shadow-md active:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
           >
             {sessionStatus === 'loading' ? 'Starting...' : 'Start Session'}
           </button>
@@ -122,29 +122,34 @@ export default function Home() {
             <>
               <button
                 onClick={handleEndCall}
-                className="rounded-lg bg-red-600 px-6 py-2 text-sm font-medium text-white hover:bg-red-700"
+                className="rounded-lg bg-red-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700 hover:shadow-md active:bg-red-800"
               >
                 End Call
               </button>
-              <span className="text-sm text-green-600">Live</span>
+              <span className="inline-flex items-center gap-1.5 text-sm font-medium text-green-600">
+                <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-green-500" />
+                Live
+              </span>
             </>
           )}
           {sessionStatus === 'completed' && (
-            <span className="text-sm text-gray-500">Session Complete</span>
+            <span className="text-sm font-medium text-gray-500">Session Complete</span>
           )}
         </div>
+      </div>
 
-        {/* Two-column grid */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+      {/* Two-column grid — fills remaining viewport */}
+      <div className="mx-auto w-full max-w-7xl flex-1 overflow-hidden px-6 pb-6">
+        <div className="grid h-full grid-cols-1 gap-6 md:grid-cols-2">
           <TranscriptPanel lines={lines} />
           <CoachingPanel prompts={prompts} />
         </div>
       </div>
 
-      {/* Scorecard overlay */}
+      {/* Scorecard — full-width replacing split layout */}
       {showScorecard && scorecard && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-lg">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-gray-50/95 p-6">
+          <div className="mx-auto max-w-2xl">
             <ScorecardView
               scorecard={scorecard}
               onClose={() => setShowScorecard(false)}

@@ -286,7 +286,7 @@ describe('Main page — test-agent acceptance', () => {
     // Overlay structure
     const overlay = document.querySelector('.fixed.inset-0.z-50');
     expect(overlay).not.toBeNull();
-    expect(overlay!.className).toContain('bg-black/50');
+    expect(overlay!.className).toContain('bg-gray-50/95');
 
     // Score content
     expect(screen.getByText('78')).toBeInTheDocument();

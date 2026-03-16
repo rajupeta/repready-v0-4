@@ -26,10 +26,10 @@ describe('TranscriptPanel — acceptance criteria', () => {
     render(<TranscriptPanel lines={lines} />);
 
     const repBadge = screen.getByText('Rep');
-    expect(repBadge).toHaveClass('bg-blue-100', 'text-blue-800');
+    expect(repBadge).toHaveClass('bg-blue-600', 'text-white');
 
     const prospectBadge = screen.getByText('Prospect');
-    expect(prospectBadge).toHaveClass('bg-gray-100', 'text-gray-800');
+    expect(prospectBadge).toHaveClass('bg-gray-500', 'text-white');
   });
 
   it('shows empty state message when no lines provided', () => {
@@ -46,7 +46,7 @@ describe('TranscriptPanel — acceptance criteria', () => {
     render(<TranscriptPanel lines={lines} />);
     const scrollContainer = screen.getByText('Scroll test').closest('div.overflow-y-auto');
     expect(scrollContainer).not.toBeNull();
-    expect(scrollContainer).toHaveClass('max-h-96', 'overflow-y-auto');
+    expect(scrollContainer).toHaveClass('flex-1', 'overflow-y-auto');
   });
 
   it('auto-scrolls to bottom when new lines are added (useEffect triggers on lines change)', () => {
@@ -138,7 +138,7 @@ describe('TranscriptPanel — additional edge cases', () => {
     render(<TranscriptPanel lines={[{ speaker: 'rep', text: 'Layout check' }]} />);
     const lineContainer = screen.getByText('Rep').closest('div.flex');
     expect(lineContainer).not.toBeNull();
-    expect(lineContainer).toHaveClass('items-start', 'gap-2');
+    expect(lineContainer).toHaveClass('items-start', 'gap-3');
   });
 
   it('speaker badge has shrink-0 to prevent compression', () => {
@@ -185,15 +185,15 @@ describe('CoachingPanel — acceptance criteria', () => {
     ];
     render(<CoachingPanel prompts={prompts} />);
 
-    const card = screen.getByText('Test Rule').closest('div.border-amber-200');
+    const card = screen.getByText('Test Rule').closest('div.border-amber-500');
     expect(card).not.toBeNull();
     expect(card).toHaveClass('bg-amber-50');
 
     const header = screen.getByText('Test Rule');
-    expect(header).toHaveClass('text-amber-800');
+    expect(header).toHaveClass('text-amber-900');
 
     const message = screen.getByText('Test message');
-    expect(message).toHaveClass('text-amber-700');
+    expect(message).toHaveClass('text-amber-800');
   });
 
   it('uses "use client" directive (renders in jsdom)', () => {
@@ -270,7 +270,7 @@ describe('CoachingPanel — additional edge cases', () => {
 
     const header = screen.getByText('Structure Check');
     expect(header.tagName).toBe('H3');
-    expect(header).toHaveClass('text-sm', 'font-semibold');
+    expect(header).toHaveClass('text-sm', 'font-bold');
 
     const message = screen.getByText('Check structure');
     expect(message.tagName).toBe('P');
@@ -293,7 +293,7 @@ describe('ScorecardView — acceptance criteria', () => {
   it('displays prominent overall score as large number', () => {
     render(<ScorecardView scorecard={fullScorecard} />);
     const score = screen.getByText('72');
-    expect(score).toHaveClass('text-6xl', 'font-bold');
+    expect(score).toHaveClass('text-7xl', 'font-extrabold');
   });
 
   it('color-codes score green when >= 70', () => {
@@ -339,8 +339,8 @@ describe('ScorecardView — acceptance criteria', () => {
     render(<ScorecardView scorecard={fullScorecard} />);
     const summary = screen.getByText('Solid call performance. Strong discovery phase but needs improvement on closing.');
     expect(summary).toBeInTheDocument();
-    // Summary is in a gray background container
-    const summaryContainer = summary.closest('div.bg-gray-50');
+    // Summary is in a blue background container
+    const summaryContainer = summary.closest('div.bg-blue-50');
     expect(summaryContainer).not.toBeNull();
   });
 
@@ -436,7 +436,7 @@ describe('ScorecardView — additional edge cases', () => {
     render(<ScorecardView scorecard={{ overallScore: 50, summary: 'Test', entries: [] }} onClose={onClose} />);
 
     const closeBtn = screen.getByText('Close');
-    expect(closeBtn).toHaveClass('rounded', 'text-sm', 'text-gray-500');
+    expect(closeBtn).toHaveClass('rounded-lg', 'text-sm', 'text-gray-500');
   });
 
   it('onClose button click does not fire multiple times for single click', () => {

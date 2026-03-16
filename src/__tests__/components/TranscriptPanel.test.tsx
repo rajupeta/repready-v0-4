@@ -32,8 +32,8 @@ describe('TranscriptPanel', () => {
     ];
     render(<TranscriptPanel lines={lines} />);
     const badge = screen.getByText('Rep');
-    expect(badge.className).toContain('bg-blue-100');
-    expect(badge.className).toContain('text-blue-800');
+    expect(badge.className).toContain('bg-blue-600');
+    expect(badge.className).toContain('text-white');
   });
 
   it('applies gray styling to Prospect badge', () => {
@@ -42,8 +42,8 @@ describe('TranscriptPanel', () => {
     ];
     render(<TranscriptPanel lines={lines} />);
     const badge = screen.getByText('Prospect');
-    expect(badge.className).toContain('bg-gray-100');
-    expect(badge.className).toContain('text-gray-800');
+    expect(badge.className).toContain('bg-gray-500');
+    expect(badge.className).toContain('text-white');
   });
 
   it('auto-scrolls container when lines change', () => {

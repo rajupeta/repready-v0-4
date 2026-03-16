@@ -172,6 +172,6 @@ describe('TICKET-012 edge cases', () => {
     const overlay = document.querySelector('.fixed.inset-0.z-50');
     expect(overlay).not.toBeNull();
     // Check backdrop has semi-transparent bg
-    expect(overlay?.className).toContain('bg-black/50');
+    expect(overlay?.className).toContain('bg-gray-50/95');
   });
 });

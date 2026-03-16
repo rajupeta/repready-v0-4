@@ -8,9 +8,9 @@ interface ScorecardViewProps {
 }
 
 const assessmentStyles = {
-  good: 'bg-green-100 text-green-800',
-  'needs-work': 'bg-yellow-100 text-yellow-800',
-  missed: 'bg-red-100 text-red-800',
+  good: 'bg-green-100 text-green-800 ring-1 ring-green-200',
+  'needs-work': 'bg-yellow-100 text-yellow-800 ring-1 ring-yellow-200',
+  missed: 'bg-red-100 text-red-800 ring-1 ring-red-200',
 } as const;
 
 function scoreColor(score: number): string {
@@ -21,51 +21,51 @@ function scoreColor(score: number): string {
 
 export default function ScorecardView({ scorecard, onClose }: ScorecardViewProps) {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-6">
+    <div className="rounded-xl bg-white p-6 shadow-lg">
       <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900">Scorecard</h2>
+        <h2 className="text-xl font-bold text-gray-900">Scorecard</h2>
         {onClose && (
           <button
             onClick={onClose}
-            className="rounded px-3 py-1 text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+            className="rounded-lg px-4 py-1.5 text-sm font-medium text-gray-500 transition hover:bg-gray-100 hover:text-gray-900"
           >
             Close
           </button>
         )}
       </div>
 
-      <div className="mb-6 text-center">
-        <div className={`text-6xl font-bold ${scoreColor(scorecard.overallScore)}`}>
+      <div className="mb-8 text-center">
+        <div className={`text-7xl font-extrabold ${scoreColor(scorecard.overallScore)}`}>
           {scorecard.overallScore}
         </div>
-        <p className="mt-1 text-sm text-gray-500">Overall Score</p>
+        <p className="mt-2 text-sm font-medium text-gray-500">Overall Score</p>
       </div>
 
       <div className="mb-6 space-y-3">
         {scorecard.entries.map((entry) => (
           <div
             key={entry.ruleId}
-            className="flex items-start gap-3 rounded-lg border border-gray-100 p-3"
+            className="flex items-start gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4 shadow-sm"
           >
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-gray-900">
+                <span className="text-sm font-semibold text-gray-900">
                   {entry.ruleName}
                 </span>
                 <span
-                  className={`inline-flex items-center rounded px-2 py-0.5 text-xs font-medium ${assessmentStyles[entry.assessment]}`}
+                  className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-bold ${assessmentStyles[entry.assessment]}`}
                 >
                   {entry.assessment}
                 </span>
               </div>
-              <p className="mt-1 text-sm text-gray-600">{entry.comment}</p>
+              <p className="mt-1.5 text-sm leading-relaxed text-gray-600">{entry.comment}</p>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="rounded-lg bg-gray-50 p-4">
-        <p className="text-sm text-gray-700">{scorecard.summary}</p>
+      <div className="rounded-lg bg-blue-50 p-4">
+        <p className="text-sm leading-relaxed text-gray-700">{scorecard.summary}</p>
       </div>
     </div>
   );

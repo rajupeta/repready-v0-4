@@ -62,6 +62,6 @@ describe('CoachingPanel', () => {
     render(<CoachingPanel prompts={prompts} />);
 
     const header = screen.getByText('Test Rule');
-    expect(header.className).toContain('text-amber-800');
+    expect(header.className).toContain('text-amber-900');
   });
 });

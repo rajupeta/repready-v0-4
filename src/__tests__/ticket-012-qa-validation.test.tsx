@@ -327,7 +327,7 @@ describe('Main page — QA validation', () => {
     // Overlay structure
     const overlay = document.querySelector('.fixed.inset-0.z-50');
     expect(overlay).not.toBeNull();
-    expect(overlay!.className).toContain('bg-black/50');
+    expect(overlay!.className).toContain('bg-gray-50/95');
 
     // Score and summary
     expect(screen.getByText('72')).toBeInTheDocument();
