@@ -341,11 +341,11 @@ describe('TICKET-016: Wire real dependencies into session-manager-instance', () 
       const { sessionManager } = await import('@/lib/session-manager-instance');
 
       const id1 = sessionManager.createSession('discovery-call-001');
-      const id2 = sessionManager.createSession('objection-handling-001');
+      const id2 = sessionManager.createSession('demo-call');
 
       expect(id1).not.toBe(id2);
       expect(sessionManager.getSession(id1)!.fixtureId).toBe('discovery-call-001');
-      expect(sessionManager.getSession(id2)!.fixtureId).toBe('objection-handling-001');
+      expect(sessionManager.getSession(id2)!.fixtureId).toBe('demo-call');
     });
 
     it('RulesEngine evaluates coaching rules correctly within the singleton', async () => {
