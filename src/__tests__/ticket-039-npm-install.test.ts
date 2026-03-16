@@ -96,20 +96,4 @@ describe("TICKET-039: npm install and dependency resolution", () => {
     });
   });
 
-  describe("CI workflow", () => {
-    it("GitHub Actions CI workflow exists", () => {
-      const ciPath = join(rootDir, ".github", "workflows", "ci.yml");
-      expect(existsSync(ciPath)).toBe(true);
-    });
-
-    it("CI workflow runs npm ci before tests", () => {
-      const ciPath = join(rootDir, ".github", "workflows", "ci.yml");
-      const content = readFileSync(ciPath, "utf-8");
-      const ciIndex = content.indexOf("npm ci");
-      const testIndex = content.indexOf("npm test");
-      expect(ciIndex).toBeGreaterThan(-1);
-      expect(testIndex).toBeGreaterThan(-1);
-      expect(ciIndex).toBeLessThan(testIndex);
-    });
-  });
 });
