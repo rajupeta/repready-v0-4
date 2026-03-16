@@ -233,7 +233,8 @@ describe("QA TICKET-005 — edge cases", () => {
   describe("RulesEngine edge cases", () => {
     it("handles empty rules array", () => {
       const engine = new RulesEngine([]);
-      const result = engine.evaluate(makeLines([{ speaker: "rep", text: "hi" }]));
+      const evalLines = makeLines([{ speaker: "rep", text: "hi" }]);
+      const result = engine.evaluate(evalLines[evalLines.length - 1], evalLines);
       expect(result).toHaveLength(0);
     });
 
@@ -259,11 +260,11 @@ describe("QA TICKET-005 — edge cases", () => {
         { speaker: "prospect", text: "Hmm" },
       ]);
 
-      const first = engine.evaluate(window);
+      const first = engine.evaluate(window[window.length - 1], window);
       const firstIds = first.map((r) => r.ruleId);
 
       // Second call — same rules should be in cooldown
-      const second = engine.evaluate(window);
+      const second = engine.evaluate(window[window.length - 1], window);
       // All previously triggered rules should now be suppressed
       for (const id of firstIds) {
         expect(second.map((r) => r.ruleId)).not.toContain(id);
@@ -271,7 +272,7 @@ describe("QA TICKET-005 — edge cases", () => {
 
       // Reset and re-evaluate — should trigger again
       engine.resetCooldowns();
-      const third = engine.evaluate(window);
+      const third = engine.evaluate(window[window.length - 1], window);
       const thirdIds = third.map((r) => r.ruleId);
       for (const id of firstIds) {
         expect(thirdIds).toContain(id);

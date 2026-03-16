@@ -11,7 +11,7 @@ import {
 } from '@/types';
 
 export interface IRulesEngine {
-  evaluate(window: TranscriptLine[], sessionId?: string): CoachingRule[];
+  evaluate(newLine: TranscriptLine, window: TranscriptLine[], sessionId?: string): CoachingRule[];
   resetCooldowns(sessionId?: string): void;
 }
 
@@ -113,7 +113,7 @@ export class SessionManager {
           data: { line },
         });
 
-        const triggered = this.deps.rulesEngine.evaluate(window, sessionId);
+        const triggered = this.deps.rulesEngine.evaluate(line, window, sessionId);
 
         if (triggered.length > 0) {
           this.deps.coachingService

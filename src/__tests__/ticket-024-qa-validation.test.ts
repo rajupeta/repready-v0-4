@@ -35,7 +35,7 @@ describe("TICKET-024 QA: acceptance criteria validation", () => {
         { speaker: "rep", text: "Best in class." },
         { speaker: "prospect", text: "OK." },
       ]);
-      const triggered = engine.evaluate(window);
+      const triggered = engine.evaluate(window[window.length - 1], window);
       // Should trigger at least talk-ratio
       const ruleIds = triggered.map((r) => r.ruleId);
       expect(ruleIds).toContain("talk-ratio");
@@ -288,7 +288,7 @@ describe("TICKET-024 QA: acceptance criteria validation", () => {
         { speaker: "rep", text: "Literally the top product." },
         { speaker: "prospect", text: "OK." },
       ]);
-      const triggered = engine.evaluate(w);
+      const triggered = engine.evaluate(w[w.length - 1], w);
       const ids = triggered.map((r) => r.ruleId);
       // Should trigger: talk-ratio, long-monologue, no-questions, feature-dump
       expect(ids).toContain("talk-ratio");
@@ -310,8 +310,8 @@ describe("TICKET-024 QA: acceptance criteria validation", () => {
         { speaker: "rep", text: "World class." },
         { speaker: "prospect", text: "OK." },
       ]);
-      const first = engine.evaluate(w);
-      const second = engine.evaluate(w);
+      const first = engine.evaluate(w[w.length - 1], w);
+      const second = engine.evaluate(w[w.length - 1], w);
       // Same window — rules already triggered and within cooldown
       const firstIds = first.map((r) => r.ruleId);
       const secondIds = second.map((r) => r.ruleId);

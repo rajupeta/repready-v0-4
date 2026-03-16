@@ -8,7 +8,7 @@ export class RulesEngine {
     this.rules = rules;
   }
 
-  evaluate(window: TranscriptLine[], sessionId?: string): CoachingRule[] {
+  evaluate(newLine: TranscriptLine, window: TranscriptLine[], sessionId?: string): CoachingRule[] {
     const now = Date.now();
     const triggered: CoachingRule[] = [];
     const key = sessionId ?? '__default__';

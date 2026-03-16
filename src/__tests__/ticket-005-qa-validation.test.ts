@@ -368,7 +368,7 @@ describe("TICKET-005 QA Validation — Acceptance Criteria", () => {
         detect: () => false,
       };
       const engine = new RulesEngine([always, never]);
-      const result = engine.evaluate([]);
+      const result = engine.evaluate({ speaker: 'rep' as const, text: '' }, []);
       expect(result).toHaveLength(1);
       expect(result[0].ruleId).toBe("always");
     });
@@ -386,8 +386,8 @@ describe("TICKET-005 QA Validation — Acceptance Criteria", () => {
       const engine = new RulesEngine([rule]);
       const window = makeLines([{ speaker: "rep", text: "test" }]);
 
-      expect(engine.evaluate(window)).toHaveLength(1);
-      expect(engine.evaluate(window)).toHaveLength(0);
+      expect(engine.evaluate(window[window.length - 1], window)).toHaveLength(1);
+      expect(engine.evaluate(window[window.length - 1], window)).toHaveLength(0);
     });
 
     it("updates lastTriggered for triggered rules", () => {
@@ -402,9 +402,9 @@ describe("TICKET-005 QA Validation — Acceptance Criteria", () => {
       };
       const engine = new RulesEngine([rule]);
 
-      engine.evaluate([]);
+      engine.evaluate({ speaker: 'rep' as const, text: '' }, []);
       // Second call should be blocked by cooldown
-      const second = engine.evaluate([]);
+      const second = engine.evaluate({ speaker: 'rep' as const, text: '' }, []);
       expect(second).toHaveLength(0);
     });
   });
@@ -432,11 +432,11 @@ describe("TICKET-005 QA Validation — Acceptance Criteria", () => {
       };
       const engine = new RulesEngine([ruleA, ruleB]);
 
-      const first = engine.evaluate([]);
+      const first = engine.evaluate({ speaker: 'rep' as const, text: '' }, []);
       expect(first.map((r) => r.ruleId).sort()).toEqual(["a", "b"]);
 
       // Both in cooldown
-      const second = engine.evaluate([]);
+      const second = engine.evaluate({ speaker: 'rep' as const, text: '' }, []);
       expect(second).toHaveLength(0);
     });
 
@@ -465,11 +465,11 @@ describe("TICKET-005 QA Validation — Acceptance Criteria", () => {
       };
       const engine = new RulesEngine([ruleA, ruleB]);
 
-      const first = engine.evaluate([]);
+      const first = engine.evaluate({ speaker: 'rep' as const, text: '' }, []);
       expect(first.map((r) => r.ruleId).sort()).toEqual(["a", "b"]);
 
       // ruleA won't detect, ruleB in cooldown
-      const second = engine.evaluate([]);
+      const second = engine.evaluate({ speaker: 'rep' as const, text: '' }, []);
       expect(second).toHaveLength(0);
     });
   });
@@ -488,11 +488,11 @@ describe("TICKET-005 QA Validation — Acceptance Criteria", () => {
       };
       const engine = new RulesEngine([rule]);
 
-      engine.evaluate([]);
-      expect(engine.evaluate([])).toHaveLength(0);
+      engine.evaluate({ speaker: 'rep' as const, text: '' }, []);
+      expect(engine.evaluate({ speaker: 'rep' as const, text: '' }, [])).toHaveLength(0);
 
       engine.resetCooldowns();
-      expect(engine.evaluate([])).toHaveLength(1);
+      expect(engine.evaluate({ speaker: 'rep' as const, text: '' }, [])).toHaveLength(1);
     });
 
     it("resets cooldowns for multiple rules at once", () => {
@@ -503,11 +503,11 @@ describe("TICKET-005 QA Validation — Acceptance Criteria", () => {
       ];
       const engine = new RulesEngine(rules);
 
-      engine.evaluate([]);
-      expect(engine.evaluate([])).toHaveLength(0);
+      engine.evaluate({ speaker: 'rep' as const, text: '' }, []);
+      expect(engine.evaluate({ speaker: 'rep' as const, text: '' }, [])).toHaveLength(0);
 
       engine.resetCooldowns();
-      const result = engine.evaluate([]);
+      const result = engine.evaluate({ speaker: 'rep' as const, text: '' }, []);
       expect(result).toHaveLength(3);
     });
 
@@ -536,7 +536,7 @@ describe("TICKET-005 QA Validation — Acceptance Criteria", () => {
         { speaker: "prospect", text: "Hmm" },
       ]);
 
-      const triggered = engine.evaluate(window);
+      const triggered = engine.evaluate(window[window.length - 1], window);
       const ids = triggered.map((r) => r.ruleId);
       expect(ids).toContain("talk-ratio");
       expect(ids).toContain("long-monologue");
@@ -559,10 +559,10 @@ describe("TICKET-005 QA Validation — Acceptance Criteria", () => {
         { speaker: "prospect", text: "Hmm" },
       ]);
 
-      const first = engine.evaluate(window);
+      const first = engine.evaluate(window[window.length - 1], window);
       expect(first.length).toBeGreaterThan(0);
 
-      const second = engine.evaluate(window);
+      const second = engine.evaluate(window[window.length - 1], window);
       // All previously triggered rules should be in cooldown
       for (const rule of first) {
         expect(second.map((r) => r.ruleId)).not.toContain(rule.ruleId);
@@ -585,11 +585,11 @@ describe("TICKET-005 QA Validation — Acceptance Criteria", () => {
         { speaker: "prospect", text: "Hmm" },
       ]);
 
-      const first = engine.evaluate(window);
+      const first = engine.evaluate(window[window.length - 1], window);
       const firstIds = first.map((r) => r.ruleId);
 
       engine.resetCooldowns();
-      const afterReset = engine.evaluate(window);
+      const afterReset = engine.evaluate(window[window.length - 1], window);
       const afterIds = afterReset.map((r) => r.ruleId);
 
       for (const id of firstIds) {
