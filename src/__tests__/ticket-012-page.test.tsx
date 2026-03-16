@@ -108,7 +108,7 @@ describe('Main page — acceptance criteria', () => {
     expect(screen.getByText('Reflect back')).toBeInTheDocument();
   });
 
-  it('shows ScorecardView as overlay when scorecard arrives', () => {
+  it('shows ScorecardView inline when scorecard arrives', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
       scorecard: {
@@ -120,9 +120,11 @@ describe('Main page — acceptance criteria', () => {
     render(<Home />);
     expect(screen.getByText('80')).toBeInTheDocument();
     expect(screen.getByText('Great call')).toBeInTheDocument();
+    // No modal overlay
+    expect(document.querySelector('.fixed.inset-0.z-50')).toBeNull();
   });
 
-  it('scorecard overlay has Close button that hides it', () => {
+  it('scorecard replaces split view when session completes', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
       scorecard: {
@@ -133,9 +135,8 @@ describe('Main page — acceptance criteria', () => {
     });
     render(<Home />);
     expect(screen.getByText('80')).toBeInTheDocument();
-
-    fireEvent.click(screen.getByText('Close'));
-    expect(screen.queryByText('80')).not.toBeInTheDocument();
+    // Split grid should not be visible
+    expect(document.querySelector('.grid.grid-cols-1.md\\:grid-cols-2')).toBeNull();
   });
 
   it('uses responsive layout with grid classes', () => {
