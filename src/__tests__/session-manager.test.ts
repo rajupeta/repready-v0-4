@@ -334,6 +334,7 @@ describe('SessionManager', () => {
       });
 
       expect(deps.rulesEngine.evaluate).toHaveBeenCalledWith(
+        expect.objectContaining({ speaker: 'rep', text: 'Hello' }),
         expect.arrayContaining([
           expect.objectContaining({ speaker: 'rep', text: 'Hello' }),
         ]),

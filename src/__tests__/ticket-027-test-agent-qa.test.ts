@@ -2,7 +2,7 @@
  * TICKET-027 Test Agent QA — Additional validation for Claude model and playback delay
  *
  * This test file validates edge cases and code-level assertions for TICKET-027:
- * - Claude default model is claude-3-5-haiku-20241022 (not claude-sonnet-4-20250514)
+ * - Claude default model is claude-haiku-4-5-20251001 (not claude-sonnet-4-20250514)
  * - Playback delay formula is 2000 + Math.random() * 2000 (2-4s range)
  * - Source code inspection tests verify the constants directly
  */
@@ -28,12 +28,12 @@ jest.mock("fs", () => ({
 const MockedAnthropic = Anthropic as jest.MockedClass<typeof Anthropic>;
 
 describe("TICKET-027 Test Agent QA: Source code verification", () => {
-  it("claude-service.ts hardcodes claude-3-5-haiku-20241022 as default", () => {
+  it("claude-service.ts hardcodes claude-haiku-4-5-20251001 as default", () => {
     const source = jest.requireActual("fs").readFileSync(
       join(process.cwd(), "src/services/claude-service.ts"),
       "utf-8"
     ) as string;
-    expect(source).toContain('"claude-3-5-haiku-20241022"');
+    expect(source).toContain('"claude-haiku-4-5-20251001"');
     expect(source).not.toContain('"claude-sonnet-4-20250514"');
   });
 
@@ -85,8 +85,8 @@ describe("TICKET-027 Test Agent QA: Claude model runtime behavior", () => {
       [{ speaker: "rep", text: "world" }]
     );
 
-    expect(mockCreate.mock.calls[0][0].model).toBe("claude-3-5-haiku-20241022");
-    expect(mockCreate.mock.calls[1][0].model).toBe("claude-3-5-haiku-20241022");
+    expect(mockCreate.mock.calls[0][0].model).toBe("claude-haiku-4-5-20251001");
+    expect(mockCreate.mock.calls[1][0].model).toBe("claude-haiku-4-5-20251001");
   });
 
   it("empty CLAUDE_MODEL env var falls back to default", async () => {
@@ -98,7 +98,7 @@ describe("TICKET-027 Test Agent QA: Claude model runtime behavior", () => {
     );
 
     // Empty string is falsy, should use default
-    expect(mockCreate.mock.calls[0][0].model).toBe("claude-3-5-haiku-20241022");
+    expect(mockCreate.mock.calls[0][0].model).toBe("claude-haiku-4-5-20251001");
   });
 
   it("ClaudeService silently returns empty on API error (does not crash)", async () => {

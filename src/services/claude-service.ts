@@ -45,7 +45,7 @@ export class ClaudeService {
     this.client = new Anthropic({
       apiKey: process.env.ANTHROPIC_API_KEY,
     });
-    this.model = process.env.CLAUDE_MODEL || "claude-3-5-haiku-20241022";
+    this.model = process.env.CLAUDE_MODEL || "claude-haiku-4-5-20251001";
   }
 
   async getCoachingPrompts(

@@ -412,7 +412,7 @@ describe("AC: RulesEngine.evaluate()", () => {
       detect: () => false,
     };
     const engine = new RulesEngine([always, never]);
-    const result = engine.evaluate([]);
+    const result = engine.evaluate({ speaker: 'rep' as const, text: '' }, []);
     expect(result).toHaveLength(1);
     expect(result[0].ruleId).toBe("always");
   });
@@ -430,9 +430,9 @@ describe("AC: RulesEngine.evaluate()", () => {
     const engine = new RulesEngine([rule]);
     const w = makeLines([{ speaker: "rep", text: "test" }]);
 
-    expect(engine.evaluate(w)).toHaveLength(1);
+    expect(engine.evaluate(w[w.length - 1], w)).toHaveLength(1);
     // Second call — still in cooldown
-    expect(engine.evaluate(w)).toHaveLength(0);
+    expect(engine.evaluate(w[w.length - 1], w)).toHaveLength(0);
   });
 
   it("allows rule to fire again after cooldown expires", () => {
@@ -447,13 +447,13 @@ describe("AC: RulesEngine.evaluate()", () => {
     };
     const engine = new RulesEngine([rule]);
 
-    expect(engine.evaluate([])).toHaveLength(1);
-    expect(engine.evaluate([])).toHaveLength(0);
+    expect(engine.evaluate({ speaker: 'rep' as const, text: '' }, [])).toHaveLength(1);
+    expect(engine.evaluate({ speaker: 'rep' as const, text: '' }, [])).toHaveLength(0);
 
     // Wait for cooldown to expire
     return new Promise<void>((resolve) => {
       setTimeout(() => {
-        expect(engine.evaluate([])).toHaveLength(1);
+        expect(engine.evaluate({ speaker: 'rep' as const, text: '' }, [])).toHaveLength(1);
         resolve();
       }, 150);
     });
@@ -485,11 +485,11 @@ describe("AC: cooldown tracking per-ruleId", () => {
     };
     const engine = new RulesEngine([ruleA, ruleB]);
 
-    const first = engine.evaluate([]);
+    const first = engine.evaluate({ speaker: 'rep' as const, text: '' }, []);
     expect(first.map((r) => r.ruleId).sort()).toEqual(["a", "b"]);
 
     // Both should be in cooldown
-    expect(engine.evaluate([])).toHaveLength(0);
+    expect(engine.evaluate({ speaker: 'rep' as const, text: '' }, [])).toHaveLength(0);
   });
 
   it("one rule being in cooldown does not block another", () => {
@@ -517,11 +517,11 @@ describe("AC: cooldown tracking per-ruleId", () => {
     };
     const engine = new RulesEngine([ruleA, ruleB]);
 
-    const first = engine.evaluate([]);
+    const first = engine.evaluate({ speaker: 'rep' as const, text: '' }, []);
     expect(first.map((r) => r.ruleId).sort()).toEqual(["a", "b"]);
 
     // ruleA won't detect, ruleB in cooldown — neither should appear
-    expect(engine.evaluate([])).toHaveLength(0);
+    expect(engine.evaluate({ speaker: 'rep' as const, text: '' }, [])).toHaveLength(0);
   });
 });
 
@@ -541,11 +541,11 @@ describe("AC: resetCooldowns()", () => {
     };
     const engine = new RulesEngine([rule]);
 
-    engine.evaluate([]);
-    expect(engine.evaluate([])).toHaveLength(0);
+    engine.evaluate({ speaker: 'rep' as const, text: '' }, []);
+    expect(engine.evaluate({ speaker: 'rep' as const, text: '' }, [])).toHaveLength(0);
 
     engine.resetCooldowns();
-    expect(engine.evaluate([])).toHaveLength(1);
+    expect(engine.evaluate({ speaker: 'rep' as const, text: '' }, [])).toHaveLength(1);
   });
 
   it("resets all rules simultaneously", () => {
@@ -560,11 +560,11 @@ describe("AC: resetCooldowns()", () => {
     }));
     const engine = new RulesEngine(rules);
 
-    engine.evaluate([]);
-    expect(engine.evaluate([])).toHaveLength(0);
+    engine.evaluate({ speaker: 'rep' as const, text: '' }, []);
+    expect(engine.evaluate({ speaker: 'rep' as const, text: '' }, [])).toHaveLength(0);
 
     engine.resetCooldowns();
-    expect(engine.evaluate([])).toHaveLength(3);
+    expect(engine.evaluate({ speaker: 'rep' as const, text: '' }, [])).toHaveLength(3);
   });
 
   it("does not throw on a fresh engine with no rules", () => {
@@ -594,7 +594,7 @@ describe("Integration: RulesEngine + real coaching rules", () => {
       { speaker: "prospect", text: "I see" },
     ]);
 
-    const triggered = engine.evaluate(w);
+    const triggered = engine.evaluate(w[w.length - 1], w);
     const ids = triggered.map((r) => r.ruleId);
     expect(ids).toContain("talk-ratio");
     expect(ids).toContain("long-monologue");
@@ -610,10 +610,10 @@ describe("Integration: RulesEngine + real coaching rules", () => {
       { speaker: "prospect", text: "Hmm" },
     ]);
 
-    const first = engine.evaluate(w);
+    const first = engine.evaluate(w[w.length - 1], w);
     expect(first.length).toBeGreaterThan(0);
 
-    const second = engine.evaluate(w);
+    const second = engine.evaluate(w[w.length - 1], w);
     for (const rule of first) {
       expect(second.map((r) => r.ruleId)).not.toContain(rule.ruleId);
     }
@@ -628,11 +628,11 @@ describe("Integration: RulesEngine + real coaching rules", () => {
       { speaker: "prospect", text: "Hmm" },
     ]);
 
-    const first = engine.evaluate(w);
+    const first = engine.evaluate(w[w.length - 1], w);
     const firstIds = first.map((r) => r.ruleId);
 
     engine.resetCooldowns();
-    const afterReset = engine.evaluate(w);
+    const afterReset = engine.evaluate(w[w.length - 1], w);
     const afterIds = afterReset.map((r) => r.ruleId);
 
     for (const id of firstIds) {
@@ -656,7 +656,7 @@ describe("Integration: RulesEngine + real coaching rules", () => {
       { speaker: "prospect", text: "Perfect." },
     ]);
 
-    const triggered = engine.evaluate(w);
+    const triggered = engine.evaluate(w[w.length - 1], w);
     expect(triggered).toHaveLength(0);
   });
 });

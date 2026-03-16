@@ -68,7 +68,7 @@ describe('session-manager-instance', () => {
 
     // Verify instances can be created (constructors are callable)
     const rulesEngine = new RulesEngine(coachingRules);
-    expect(rulesEngine.evaluate([])).toEqual([]);
+    expect(rulesEngine.evaluate({ speaker: 'rep' as const, text: '' }, [])).toEqual([]);
 
     rulesEngine.resetCooldowns(); // should not throw
   });

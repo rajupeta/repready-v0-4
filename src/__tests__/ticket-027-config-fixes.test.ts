@@ -39,17 +39,17 @@ describe("TICKET-027: Claude model default", () => {
     delete process.env.CLAUDE_MODEL;
   });
 
-  it("defaults to claude-3-5-haiku-20241022 per spec", async () => {
+  it("defaults to claude-haiku-4-5-20251001 per spec", async () => {
     const service = new ClaudeService();
     await service.getCoachingPrompts(
       [{ ruleId: "r1", ruleName: "Test", description: "test" }],
       [{ speaker: "rep", text: "hello" }]
     );
 
-    expect(mockCreate.mock.calls[0][0].model).toBe("claude-3-5-haiku-20241022");
+    expect(mockCreate.mock.calls[0][0].model).toBe("claude-haiku-4-5-20251001");
   });
 
-  it("uses claude-3-5-haiku-20241022 for scorecard generation too", async () => {
+  it("uses claude-haiku-4-5-20251001 for scorecard generation too", async () => {
     mockCreate.mockResolvedValue({
       content: [{ type: "text", text: JSON.stringify({ entries: [], overallScore: 0, summary: "test" }) }],
     });
@@ -59,7 +59,7 @@ describe("TICKET-027: Claude model default", () => {
       [{ ruleId: "r1", ruleName: "Test", description: "test" }]
     );
 
-    expect(mockCreate.mock.calls[0][0].model).toBe("claude-3-5-haiku-20241022");
+    expect(mockCreate.mock.calls[0][0].model).toBe("claude-haiku-4-5-20251001");
   });
 
   it("allows override via CLAUDE_MODEL env var", async () => {

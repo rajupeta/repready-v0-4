@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSSE } from '@/hooks/useSSE';
 import TranscriptPanel from '@/components/TranscriptPanel';
 import CoachingPanel from '@/components/CoachingPanel';
@@ -21,14 +21,9 @@ export default function Home() {
   const [showScorecard, setShowScorecard] = useState(false);
   const [scorecardData, setScorecardData] = useState<import('@/types').Scorecard | null>(null);
   const [scorecardLoading, setScorecardLoading] = useState(false);
+  const pendingStartIdRef = useRef<string | null>(null);
 
   const { lines, prompts, scorecard, sessionComplete, isConnected } = useSSE(sessionId);
-
-  // Only show coaching prompts whose triggering transcript line is already visible
-  const visiblePrompts = useMemo(
-    () => prompts.filter((p) => p.triggerLineIndex > 0 && p.triggerLineIndex <= lines.length),
-    [prompts, lines.length]
-  );
 
   // Fetch call types on mount
   useEffect(() => {
@@ -44,6 +39,18 @@ export default function Home() {
         // silently handle fetch errors on mount
       });
   }, []);
+
+  // Start session only after SSE connection is established
+  // This prevents coaching prompts from firing before the client receives transcript lines
+  useEffect(() => {
+    if (isConnected && pendingStartIdRef.current) {
+      const id = pendingStartIdRef.current;
+      pendingStartIdRef.current = null;
+      fetch(`/api/sessions/${id}/start`, { method: 'POST' }).catch(() => {
+        setSessionStatus('idle');
+      });
+    }
+  }, [isConnected]);
 
   // Track connection status
   useEffect(() => {
@@ -61,6 +68,8 @@ export default function Home() {
 
   async function handleStartSession() {
     if (!selectedCallType) return;
+    // Clear previous session data
+    handleNewSession();
     setSessionStatus('loading');
 
     try {
@@ -73,19 +82,21 @@ export default function Home() {
       const session = await createRes.json();
       const id = session.sessionId;
 
-      // Start session
-      await fetch(`/api/sessions/${id}/start`, { method: 'POST' });
-
-      // Connect SSE
+      // Connect SSE FIRST — must subscribe before starting playback
+      // so no transcript or coaching events are missed
+      pendingStartIdRef.current = id;
       setSessionId(id);
+      // The useEffect above will call /start once the SSE connection is established
     } catch {
       setSessionStatus('idle');
     }
   }
 
   async function handleEndCall() {
-    if (!sessionId) return;
+    if (!sessionId || sessionStatus !== 'active') return;
+    if (!window.confirm('Are you sure you want to end this call?')) return;
 
+    setSessionStatus('completed');
     try {
       await fetch(`/api/sessions/${sessionId}/end`, { method: 'POST' });
     } catch {
@@ -110,6 +121,17 @@ export default function Home() {
         const data = await res.json();
         setScorecardData(data);
         setShowScorecard(true);
+      } else {
+        // Scorecard not ready yet — try ending session first to trigger generation
+        await fetch(`/api/sessions/${sessionId}/end`, { method: 'POST' }).catch(() => {});
+        // Wait a moment for scorecard to generate, then retry
+        await new Promise(r => setTimeout(r, 3000));
+        const retryRes = await fetch(`/api/sessions/${sessionId}/scorecard`);
+        if (retryRes.ok) {
+          const data = await retryRes.json();
+          setScorecardData(data);
+          setShowScorecard(true);
+        }
       }
     } catch {
       // silently handle fetch errors
@@ -186,6 +208,15 @@ export default function Home() {
               End Call
             </button>
           )}
+
+          {sessionStatus === 'completed' && (
+            <button
+              onClick={handleNewSession}
+              className="rounded-lg bg-green-600 px-6 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700"
+            >
+              New Session
+            </button>
+          )}
         </div>
       </div>
 
@@ -195,7 +226,7 @@ export default function Home() {
           <div className="grid h-full grid-cols-1 gap-6 md:grid-cols-2">
             <TranscriptPanel lines={lines} />
             <CoachingPanel
-              prompts={visiblePrompts}
+              prompts={prompts}
               sessionCompleted={sessionStatus === 'completed'}
               scorecardLoading={scorecardLoading}
               onGenerateScorecard={handleGenerateScorecard}

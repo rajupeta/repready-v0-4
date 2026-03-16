@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import Home from '@/app/session/page';
 
@@ -17,12 +17,13 @@ const mockFetch = jest.fn();
 global.fetch = mockFetch;
 
 beforeEach(() => {
-  mockUseSSE.mockReturnValue({
+  // Simulate SSE connecting once a sessionId is provided
+  mockUseSSE.mockImplementation((sid: string | null) => ({
     lines: [],
     prompts: [],
     scorecard: null,
-    isConnected: false,
-  });
+    isConnected: !!sid,
+  }));
 });
 
 afterEach(() => {
@@ -42,7 +43,9 @@ describe('TICKET-017: page.tsx reads sessionId from API response', () => {
       expect(screen.getByRole('option', { name: 'Discovery Call' })).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByText('Start Session'));
+    await act(async () => {
+      fireEvent.click(screen.getByText('Start Session'));
+    });
 
     await waitFor(() => {
       // Verify start was called with the correct session ID from sessionId field
@@ -68,7 +71,9 @@ describe('TICKET-017: page.tsx reads sessionId from API response', () => {
       expect(screen.getByRole('option', { name: 'Objection Handling' })).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByText('Start Session'));
+    await act(async () => {
+      fireEvent.click(screen.getByText('Start Session'));
+    });
 
     // Should not fall back to idle (which would indicate a crash/error)
     await waitFor(() => {
@@ -97,7 +102,9 @@ describe('TICKET-017: page.tsx reads sessionId from API response', () => {
       expect(screen.getByRole('option', { name: 'Discovery Call' })).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByText('Start Session'));
+    await act(async () => {
+      fireEvent.click(screen.getByText('Start Session'));
+    });
 
     await waitFor(() => {
       // Verify the session create call

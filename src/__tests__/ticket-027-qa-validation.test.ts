@@ -2,7 +2,7 @@
  * TICKET-027 QA Validation: Claude model and playback delay spec compliance
  *
  * Acceptance Criteria:
- * - Claude SDK wrapper configured to use claude-3-5-haiku-20241022
+ * - Claude SDK wrapper configured to use claude-haiku-4-5-20251001
  * - Playback delay range updated to 2-4s
  * - Confirmed via config/code inspection and tests
  */
@@ -27,7 +27,7 @@ jest.mock("fs", () => ({
 const MockedAnthropic = Anthropic as jest.MockedClass<typeof Anthropic>;
 
 describe("TICKET-027 QA: Acceptance Criteria Validation", () => {
-  describe("AC1: Claude SDK wrapper uses claude-3-5-haiku-20241022", () => {
+  describe("AC1: Claude SDK wrapper uses claude-haiku-4-5-20251001", () => {
     let mockCreate: jest.Mock;
 
     beforeEach(() => {
@@ -50,7 +50,7 @@ describe("TICKET-027 QA: Acceptance Criteria Validation", () => {
       delete process.env.CLAUDE_MODEL;
     });
 
-    it("coaching prompts call uses claude-3-5-haiku-20241022 model", async () => {
+    it("coaching prompts call uses claude-haiku-4-5-20251001 model", async () => {
       const service = new ClaudeService();
       await service.getCoachingPrompts(
         [{ ruleId: "qa-rule", ruleName: "QA Test Rule", description: "testing" }],
@@ -58,10 +58,10 @@ describe("TICKET-027 QA: Acceptance Criteria Validation", () => {
       );
 
       const callArgs = mockCreate.mock.calls[0][0];
-      expect(callArgs.model).toBe("claude-3-5-haiku-20241022");
+      expect(callArgs.model).toBe("claude-haiku-4-5-20251001");
     });
 
-    it("scorecard generation uses claude-3-5-haiku-20241022 model", async () => {
+    it("scorecard generation uses claude-haiku-4-5-20251001 model", async () => {
       mockCreate.mockResolvedValue({
         content: [{
           type: "text",
@@ -80,7 +80,7 @@ describe("TICKET-027 QA: Acceptance Criteria Validation", () => {
       );
 
       const callArgs = mockCreate.mock.calls[0][0];
-      expect(callArgs.model).toBe("claude-3-5-haiku-20241022");
+      expect(callArgs.model).toBe("claude-haiku-4-5-20251001");
     });
 
     it("model is NOT claude-3-opus, claude-3-sonnet, or any other variant by default", async () => {
@@ -94,7 +94,7 @@ describe("TICKET-027 QA: Acceptance Criteria Validation", () => {
       expect(model).not.toContain("opus");
       expect(model).not.toContain("sonnet");
       expect(model).not.toBe("claude-3-haiku-20240307");
-      expect(model).toBe("claude-3-5-haiku-20241022");
+      expect(model).toBe("claude-haiku-4-5-20251001");
     });
 
     it("CLAUDE_MODEL env var override still works", async () => {

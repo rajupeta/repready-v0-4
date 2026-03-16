@@ -35,6 +35,8 @@ beforeEach(() => {
 
 afterEach(() => {
   jest.restoreAllMocks();
+  mockFetch.mockReset();
+  mockUseSSE.mockReset();
 });
 
 describe('TICKET-028: End Call button', () => {

@@ -212,7 +212,11 @@ describe('Main page — QA validation', () => {
     });
   });
 
-  afterEach(() => jest.restoreAllMocks());
+  afterEach(() => {
+    jest.restoreAllMocks();
+    mockFetch.mockReset();
+    mockUseSSE.mockReset();
+  });
 
   // --- AC 1: Page loads with fixture dropdown populated from /api/fixtures ---
   it('AC1: fetches /api/fixtures on mount and renders options in dropdown', async () => {
@@ -234,8 +238,13 @@ describe('Main page — QA validation', () => {
     });
   });
 
-  // --- AC 2: Start Session button creates and starts a session ---
+  // --- AC 2: Start Session button creates session, connects SSE, then starts ---
   it('AC2: clicking Start Session calls POST /api/sessions then POST /api/sessions/:id/start', async () => {
+    // SSE connects once sessionId is set, then /start is called
+    mockUseSSE.mockImplementation((sid: string | null) => ({
+      ...defaultSSE(),
+      isConnected: !!sid,
+    }));
     mockFetch
       .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'sess-99' }) })
@@ -244,21 +253,29 @@ describe('Main page — QA validation', () => {
     render(<Home />);
     await waitFor(() => expect(screen.getByRole('option')).toBeInTheDocument());
 
-    fireEvent.click(screen.getByText('Start Session'));
+    await act(async () => {
+      fireEvent.click(screen.getByText('Start Session'));
+    });
 
+    // SSE connects first (useSSE called with session id)
+    expect(mockUseSSE).toHaveBeenCalledWith('sess-99');
+
+    // Then /start is called after SSE connection
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith('/api/sessions', expect.objectContaining({
         method: 'POST',
         body: JSON.stringify({ callType: 'discovery' }),
       }));
-      expect(mockFetch).toHaveBeenCalledWith('/api/sessions/sess-99/start', { method: 'POST' });
+      expect(mockFetch).toHaveBeenCalledWith('/api/sessions/sess-99/start', expect.objectContaining({ method: 'POST' }));
     });
-
-    expect(mockUseSSE).toHaveBeenCalledWith('sess-99');
   });
 
   // --- AC 3: SSE hook connects and receives real-time events ---
   it('AC3: useSSE is called with null initially, then sessionId after start', async () => {
+    mockUseSSE.mockImplementation((sid: string | null) => ({
+      ...defaultSSE(),
+      isConnected: !!sid,
+    }));
     mockFetch
       .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'sid' }) })
@@ -268,7 +285,9 @@ describe('Main page — QA validation', () => {
     expect(mockUseSSE).toHaveBeenCalledWith(null);
 
     await waitFor(() => expect(screen.getByRole('option')).toBeInTheDocument());
-    fireEvent.click(screen.getByText('Start Session'));
+    await act(async () => {
+      fireEvent.click(screen.getByText('Start Session'));
+    });
     await waitFor(() => expect(mockUseSSE).toHaveBeenCalledWith('sid'));
   });
 

@@ -180,7 +180,11 @@ describe('Main page — test-agent acceptance', () => {
       json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}, {callType: 'objection-handling', displayName: 'Objection Handling'}]),
     });
   });
-  afterEach(() => jest.restoreAllMocks());
+  afterEach(() => {
+    jest.restoreAllMocks();
+    mockFetch.mockReset();
+    mockUseSSE.mockReset();
+  });
 
   // AC 1: fixture dropdown populated
   it('AC1: fetches /api/fixtures on mount and populates dropdown options', async () => {
@@ -194,8 +198,12 @@ describe('Main page — test-agent acceptance', () => {
     });
   });
 
-  // AC 2: Start Session creates and starts session
+  // AC 2: Start Session creates session, connects SSE, then starts
   it('AC2: Start Session POSTs to /api/sessions then /api/sessions/:id/start', async () => {
+    mockUseSSE.mockImplementation((sid: string | null) => ({
+      ...defaultSSE(),
+      isConnected: !!sid,
+    }));
     mockFetch
       .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'qa-sess' }) })
@@ -203,20 +211,26 @@ describe('Main page — test-agent acceptance', () => {
 
     render(<Home />);
     await waitFor(() => expect(screen.getByRole('option')).toBeInTheDocument());
-    fireEvent.click(screen.getByText('Start Session'));
+    await act(async () => {
+      fireEvent.click(screen.getByText('Start Session'));
+    });
 
+    expect(mockUseSSE).toHaveBeenCalledWith('qa-sess');
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith('/api/sessions', expect.objectContaining({
         method: 'POST',
         body: JSON.stringify({ callType: 'discovery' }),
       }));
-      expect(mockFetch).toHaveBeenCalledWith('/api/sessions/qa-sess/start', { method: 'POST' });
+      expect(mockFetch).toHaveBeenCalledWith('/api/sessions/qa-sess/start', expect.objectContaining({ method: 'POST' }));
     });
-    expect(mockUseSSE).toHaveBeenCalledWith('qa-sess');
   });
 
   // AC 3: SSE hook connects
   it('AC3: useSSE called with null initially, then sessionId after session start', async () => {
+    mockUseSSE.mockImplementation((sid: string | null) => ({
+      ...defaultSSE(),
+      isConnected: !!sid,
+    }));
     mockFetch
       .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'id1' }) })
@@ -225,7 +239,9 @@ describe('Main page — test-agent acceptance', () => {
     render(<Home />);
     expect(mockUseSSE).toHaveBeenCalledWith(null);
     await waitFor(() => expect(screen.getByRole('option')).toBeInTheDocument());
-    fireEvent.click(screen.getByText('Start Session'));
+    await act(async () => {
+      fireEvent.click(screen.getByText('Start Session'));
+    });
     await waitFor(() => expect(mockUseSSE).toHaveBeenCalledWith('id1'));
   });
 
