@@ -26,7 +26,7 @@ describe("RulesEngine", () => {
     const neverTriggers = makeRule({ ruleId: "never", detect: () => false });
     const engine = new RulesEngine([alwaysTriggers, neverTriggers]);
 
-    const result = engine.evaluate([]);
+    const result = engine.evaluate({ speaker: 'rep' as const, text: '' }, []);
     expect(result).toHaveLength(1);
     expect(result[0].ruleId).toBe("always");
   });
@@ -37,10 +37,10 @@ describe("RulesEngine", () => {
 
     const window = makeLines([{ speaker: "rep", text: "test" }]);
 
-    const first = engine.evaluate(window);
+    const first = engine.evaluate(window[window.length - 1], window);
     expect(first).toHaveLength(1);
 
-    const second = engine.evaluate(window);
+    const second = engine.evaluate(window[window.length - 1], window);
     expect(second).toHaveLength(0);
   });
 
@@ -49,14 +49,14 @@ describe("RulesEngine", () => {
     const engine = new RulesEngine([rule]);
     const window = makeLines([{ speaker: "rep", text: "test" }]);
 
-    const first = engine.evaluate(window);
+    const first = engine.evaluate(window[window.length - 1], window);
     expect(first).toHaveLength(1);
 
     // Simulate time passing by manipulating the internal state
     // We'll use a short cooldown and real time
     return new Promise<void>((resolve) => {
       setTimeout(() => {
-        const second = engine.evaluate(window);
+        const second = engine.evaluate(window[window.length - 1], window);
         expect(second).toHaveLength(1);
         resolve();
       }, 150);
@@ -70,11 +70,11 @@ describe("RulesEngine", () => {
 
     const window = makeLines([{ speaker: "rep", text: "test" }]);
 
-    const first = engine.evaluate(window);
+    const first = engine.evaluate(window[window.length - 1], window);
     expect(first).toHaveLength(2);
 
     // Both are now in cooldown
-    const second = engine.evaluate(window);
+    const second = engine.evaluate(window[window.length - 1], window);
     expect(second).toHaveLength(0);
   });
 
@@ -83,18 +83,18 @@ describe("RulesEngine", () => {
     const engine = new RulesEngine([rule]);
     const window = makeLines([{ speaker: "rep", text: "test" }]);
 
-    engine.evaluate(window);
-    expect(engine.evaluate(window)).toHaveLength(0);
+    engine.evaluate(window[window.length - 1], window);
+    expect(engine.evaluate(window[window.length - 1], window)).toHaveLength(0);
 
     engine.resetCooldowns();
-    expect(engine.evaluate(window)).toHaveLength(1);
+    expect(engine.evaluate(window[window.length - 1], window)).toHaveLength(1);
   });
 
   it("returns empty array when no rules trigger", () => {
     const rule = makeRule({ ruleId: "no-trigger", detect: () => false });
     const engine = new RulesEngine([rule]);
 
-    const result = engine.evaluate([]);
+    const result = engine.evaluate({ speaker: 'rep' as const, text: '' }, []);
     expect(result).toHaveLength(0);
   });
 
@@ -107,7 +107,7 @@ describe("RulesEngine", () => {
       { speaker: "prospect", text: "hi" },
     ]);
 
-    engine.evaluate(window);
+    engine.evaluate(window[window.length - 1], window);
     expect(detectSpy).toHaveBeenCalledWith(window);
   });
 
@@ -129,7 +129,7 @@ describe("RulesEngine", () => {
       { speaker: "prospect", text: "I see" },
     ]);
 
-    const triggered = engine.evaluate(window);
+    const triggered = engine.evaluate(window[window.length - 1], window);
     const ruleIds = triggered.map((r) => r.ruleId);
     expect(ruleIds).toContain("talk-ratio");
   });

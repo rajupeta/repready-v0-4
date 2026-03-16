@@ -103,7 +103,7 @@ describe('TICKET-016: Wire real dependencies into session-manager-instance', () 
       expect(coachingRules).toHaveLength(8);
 
       // Verify evaluate works (not a no-op stub)
-      const result = engine.evaluate([]);
+      const result = engine.evaluate({ speaker: 'rep' as const, text: '' }, []);
       expect(result).toEqual([]);
 
       // Verify rules actually fire when conditions are met
@@ -112,7 +112,7 @@ describe('TICKET-016: Wire real dependencies into session-manager-instance', () 
         text: 'test line',
         timestamp: Date.now(),
       }));
-      const triggered = engine.evaluate(highTalkRatioWindow);
+      const triggered = engine.evaluate(highTalkRatioWindow[highTalkRatioWindow.length - 1], highTalkRatioWindow);
       expect(triggered.length).toBeGreaterThan(0);
       const ruleIds = triggered.map(r => r.ruleId);
       expect(ruleIds).toContain('talk-ratio');
@@ -361,7 +361,7 @@ describe('TICKET-016: Wire real dependencies into session-manager-instance', () 
         { speaker: 'rep', text: 'Third point', timestamp: 3 },
         { speaker: 'rep', text: 'Fourth point', timestamp: 4 },
       ];
-      const triggered = engine.evaluate(monologueWindow);
+      const triggered = engine.evaluate(monologueWindow[monologueWindow.length - 1], monologueWindow);
       const ruleIds = triggered.map(r => r.ruleId);
       expect(ruleIds).toContain('long-monologue');
       expect(ruleIds).toContain('talk-ratio');
