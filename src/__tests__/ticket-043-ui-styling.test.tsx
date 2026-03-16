@@ -28,7 +28,8 @@ beforeEach(() => {
     isConnected: false,
   });
   mockFetch.mockResolvedValue({
-    json: () => Promise.resolve(['discovery-call-001']),
+    ok: true,
+    json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]),
   });
 });
 
@@ -95,7 +96,7 @@ describe('TICKET-043: Coaching prompts amber/warning style', () => {
 
   it('coaching prompt has amber background and left border', () => {
     render(<CoachingPanel prompts={prompts} />);
-    const card = screen.getByText('Ask Questions').closest('div');
+    const card = screen.getByText('Ask Questions').closest('.bg-amber-50');
     expect(card).toHaveClass('bg-amber-50', 'border-l-4', 'border-amber-500');
   });
 

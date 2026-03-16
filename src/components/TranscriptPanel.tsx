@@ -18,7 +18,7 @@ export default function TranscriptPanel({ lines }: TranscriptPanelProps) {
 
   if (lines.length === 0) {
     return (
-      <div className="flex h-full flex-col rounded-xl border border-gray-200 bg-white p-5 shadow-md">
+      <div className="flex h-full min-h-0 flex-col rounded-xl border border-gray-200 bg-white p-5 shadow-md">
         <h2 className="mb-4 text-lg font-semibold text-gray-900">Transcript</h2>
         <p className="text-sm text-gray-400">Waiting for call to start...</p>
       </div>
@@ -26,11 +26,11 @@ export default function TranscriptPanel({ lines }: TranscriptPanelProps) {
   }
 
   return (
-    <div className="flex h-full flex-col rounded-xl border border-gray-200 bg-white p-5 shadow-md">
+    <div className="flex h-full min-h-0 flex-col rounded-xl border border-gray-200 bg-white p-5 shadow-md">
       <h2 className="mb-4 text-lg font-semibold text-gray-900">Transcript</h2>
       <div
         ref={containerRef}
-        className="flex-1 space-y-3 overflow-y-auto pr-1"
+        className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1"
       >
         {lines.map((line, index) => (
           <div key={index} className="flex items-start gap-3">

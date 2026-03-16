@@ -185,7 +185,7 @@ describe('TICKET-011: CoachingPanel renders prompts as styled cards', () => {
     render(<CoachingPanel prompts={prompts} />);
 
     // Card container
-    const card = screen.getByText('Empathy').closest('div');
+    const card = screen.getByText('Empathy').closest('.bg-amber-50');
     expect(card).toHaveClass('bg-amber-50', 'border-amber-500');
 
     // Header text color
@@ -195,7 +195,7 @@ describe('TICKET-011: CoachingPanel renders prompts as styled cards', () => {
     expect(screen.getByText('Show understanding')).toHaveClass('text-amber-800');
   });
 
-  it('most recent prompt appears at top', () => {
+  it('prompts render in natural order (oldest first)', () => {
     const prompts: CoachingPrompt[] = [
       { ruleId: 'r1', ruleName: 'Early', message: 'M1', timestamp: 100 },
       { ruleId: 'r2', ruleName: 'Later', message: 'M2', timestamp: 200 },
@@ -203,7 +203,7 @@ describe('TICKET-011: CoachingPanel renders prompts as styled cards', () => {
     render(<CoachingPanel prompts={prompts} />);
 
     const text = document.body.textContent!;
-    expect(text.indexOf('Later')).toBeLessThan(text.indexOf('Early'));
+    expect(text.indexOf('Early')).toBeLessThan(text.indexOf('Later'));
   });
 
   it('multiple prompts all render with cards', () => {

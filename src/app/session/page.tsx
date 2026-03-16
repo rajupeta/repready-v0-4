@@ -21,6 +21,8 @@ export default function Home() {
   const [showScorecard, setShowScorecard] = useState(false);
   const [scorecardData, setScorecardData] = useState<import('@/types').Scorecard | null>(null);
   const [scorecardLoading, setScorecardLoading] = useState(false);
+  const [confirmingEndCall, setConfirmingEndCall] = useState(false);
+  const [fixtureError, setFixtureError] = useState<string | null>(null);
   const pendingStartIdRef = useRef<string | null>(null);
 
   const { lines, prompts, scorecard, sessionComplete, isConnected } = useSSE(sessionId);
@@ -28,15 +30,19 @@ export default function Home() {
   // Fetch call types on mount
   useEffect(() => {
     fetch('/api/fixtures')
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to load call types');
+        return res.json();
+      })
       .then((data: CallTypeOption[]) => {
         setCallTypes(data);
+        setFixtureError(null);
         if (data.length > 0) {
           setSelectedCallType(data[0].callType);
         }
       })
       .catch(() => {
-        // silently handle fetch errors on mount
+        setFixtureError('Failed to load call types. Please refresh the page.');
       });
   }, []);
 
@@ -92,10 +98,17 @@ export default function Home() {
     }
   }
 
-  async function handleEndCall() {
-    if (!sessionId || sessionStatus !== 'active') return;
-    if (!window.confirm('Are you sure you want to end this call?')) return;
+  function handleEndCallRequest() {
+    setConfirmingEndCall(true);
+  }
 
+  function handleEndCallCancel() {
+    setConfirmingEndCall(false);
+  }
+
+  async function handleEndCallConfirm() {
+    if (!sessionId || sessionStatus !== 'active') return;
+    setConfirmingEndCall(false);
     setSessionStatus('completed');
     try {
       await fetch(`/api/sessions/${sessionId}/end`, { method: 'POST' });
@@ -144,6 +157,7 @@ export default function Home() {
     setShowScorecard(false);
     setScorecardData(null);
     setScorecardLoading(false);
+    setConfirmingEndCall(false);
     setSessionId(null);
     setSessionStatus('idle');
   }
@@ -177,10 +191,11 @@ export default function Home() {
           <select
             value={selectedCallType}
             onChange={(e) => setSelectedCallType(e.target.value)}
-            disabled={sessionStatus === 'loading' || sessionStatus === 'active'}
+            disabled={sessionStatus === 'loading' || sessionStatus === 'active' || sessionStatus === 'completed'}
             className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             aria-label="Select call type"
           >
+            {callTypes.length === 0 && <option value="">—</option>}
             {callTypes.map((ct) => (
               <option key={ct.callType} value={ct.callType}>
                 {ct.displayName}
@@ -188,25 +203,51 @@ export default function Home() {
             ))}
           </select>
 
-          <button
-            onClick={handleStartSession}
-            disabled={
-              !selectedCallType ||
-              sessionStatus === 'loading' ||
-              sessionStatus === 'active'
-            }
-            className="rounded-lg bg-blue-600 px-6 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {sessionStatus === 'loading' ? 'Starting...' : 'Start Session'}
-          </button>
-
-          {sessionStatus === 'active' && (
+          {sessionStatus !== 'completed' && (
             <button
-              onClick={handleEndCall}
+              onClick={handleStartSession}
+              disabled={
+                !selectedCallType ||
+                sessionStatus === 'loading' ||
+                sessionStatus === 'active'
+              }
+              className="rounded-lg bg-blue-600 px-6 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {sessionStatus === 'loading' ? 'Starting...' : 'Start Session'}
+            </button>
+          )}
+
+          {sessionStatus === 'active' && !confirmingEndCall && (
+            <button
+              onClick={handleEndCallRequest}
               className="rounded-lg bg-red-600 px-6 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700"
             >
               End Call
             </button>
+          )}
+
+          {sessionStatus === 'active' && confirmingEndCall && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">End this call?</span>
+              <button
+                onClick={handleEndCallConfirm}
+                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700"
+              >
+                Confirm
+              </button>
+              <button
+                onClick={handleEndCallCancel}
+                className="rounded-lg bg-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+
+          {sessionStatus === 'active' && (
+            <span className="text-sm text-gray-500">
+              Line {lines.length}
+            </span>
           )}
 
           {sessionStatus === 'completed' && (
@@ -216,6 +257,10 @@ export default function Home() {
             >
               New Session
             </button>
+          )}
+
+          {fixtureError && (
+            <span className="text-sm text-red-600">{fixtureError}</span>
           )}
         </div>
       </div>

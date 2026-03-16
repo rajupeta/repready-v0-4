@@ -29,6 +29,7 @@ function defaultSSE() {
 beforeEach(() => {
   mockUseSSE.mockReturnValue(defaultSSE());
   mockFetch.mockResolvedValue({
+    ok: true,
     json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}, {callType: 'objection-handling', displayName: 'Objection Handling'}]),
   });
 });
@@ -68,7 +69,7 @@ describe('Main page — acceptance criteria', () => {
     });
 
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'session-1' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: true }) });
 
@@ -125,7 +126,7 @@ describe('Main page — acceptance criteria', () => {
     expect(screen.getByText('Reflect back')).toBeInTheDocument();
   });
 
-  it('shows Generate Scorecard button when scorecard arrives (TICKET-049 slide-out)', () => {
+  it('shows View Scorecard button when scorecard arrives (TICKET-049 slide-out)', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
       sessionComplete: true,
@@ -136,8 +137,8 @@ describe('Main page — acceptance criteria', () => {
       },
     });
     render(<Home />);
-    // Generate Scorecard button appears
-    expect(screen.getByText('Generate Scorecard')).toBeInTheDocument();
+    // View Scorecard button appears
+    expect(screen.getByText('View Scorecard')).toBeInTheDocument();
     // No full-screen modal overlay
     expect(document.querySelector('.fixed.inset-0.z-50')).toBeNull();
   });
@@ -171,7 +172,7 @@ describe('Main page — acceptance criteria', () => {
   it('disables Start Session button when loading', async () => {
     // Make fetch never resolve for session creation to keep loading state
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockImplementationOnce(() => new Promise(() => {}));
 
     render(<Home />);

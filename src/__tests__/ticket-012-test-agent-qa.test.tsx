@@ -177,6 +177,7 @@ describe('Main page — test-agent acceptance', () => {
   beforeEach(() => {
     mockUseSSE.mockReturnValue(defaultSSE());
     mockFetch.mockResolvedValue({
+      ok: true,
       json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}, {callType: 'objection-handling', displayName: 'Objection Handling'}]),
     });
   });
@@ -205,18 +206,17 @@ describe('Main page — test-agent acceptance', () => {
       isConnected: !!sid,
     }));
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'qa-sess' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: true }) });
 
     render(<Home />);
-    await waitFor(() => expect(screen.getByRole('option')).toBeInTheDocument());
-    await act(async () => {
-      fireEvent.click(screen.getByText('Start Session'));
-    });
+    await waitFor(() => expect(screen.getByRole('option', { name: 'Discovery Call' })).toBeInTheDocument());
+    fireEvent.click(screen.getByText('Start Session'));
+    await act(async () => { await new Promise(r => setTimeout(r, 50)); });
 
-    expect(mockUseSSE).toHaveBeenCalledWith('qa-sess');
     await waitFor(() => {
+      expect(mockUseSSE).toHaveBeenCalledWith('qa-sess');
       expect(mockFetch).toHaveBeenCalledWith('/api/sessions', expect.objectContaining({
         method: 'POST',
         body: JSON.stringify({ callType: 'discovery' }),
@@ -232,16 +232,15 @@ describe('Main page — test-agent acceptance', () => {
       isConnected: !!sid,
     }));
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'id1' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({}) });
 
     render(<Home />);
     expect(mockUseSSE).toHaveBeenCalledWith(null);
-    await waitFor(() => expect(screen.getByRole('option')).toBeInTheDocument());
-    await act(async () => {
-      fireEvent.click(screen.getByText('Start Session'));
-    });
+    await waitFor(() => expect(screen.getByRole('option', { name: 'Discovery Call' })).toBeInTheDocument());
+    fireEvent.click(screen.getByText('Start Session'));
+    await act(async () => { await new Promise(r => setTimeout(r, 50)); });
     await waitFor(() => expect(mockUseSSE).toHaveBeenCalledWith('id1'));
   });
 
@@ -288,7 +287,7 @@ describe('Main page — test-agent acceptance', () => {
   });
 
   // AC 6: Scorecard available via slide-out panel (TICKET-049 supersedes TICKET-031)
-  it('AC6: scorecard data available and Generate Scorecard button shown', () => {
+  it('AC6: scorecard data available and View Scorecard button shown', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
       sessionComplete: true,
@@ -306,11 +305,11 @@ describe('Main page — test-agent acceptance', () => {
     // No full-screen modal overlay
     expect(document.querySelector('.fixed.inset-0.z-50')).toBeNull();
 
-    // Generate Scorecard button appears
-    expect(screen.getByText('Generate Scorecard')).toBeInTheDocument();
+    // View Scorecard button appears
+    expect(screen.getByText('View Scorecard')).toBeInTheDocument();
 
     // Click to open slide-out and verify content
-    fireEvent.click(screen.getByText('Generate Scorecard'));
+    fireEvent.click(screen.getByText('View Scorecard'));
     expect(screen.getByText('78')).toBeInTheDocument();
     expect(screen.getByText('Good session')).toBeInTheDocument();
     expect(screen.getByText('Discovery')).toBeInTheDocument();
@@ -357,16 +356,16 @@ describe('Main page — test-agent acceptance', () => {
     mockFetch.mockRejectedValueOnce(new Error('Network'));
     render(<Home />);
     expect(screen.getByText('RepReady')).toBeInTheDocument();
-    await waitFor(() => expect(screen.queryAllByRole('option')).toHaveLength(0));
+    await waitFor(() => expect(screen.getByText('Failed to load call types. Please refresh the page.')).toBeInTheDocument());
   });
 
   it('session creation failure resets to idle — button re-enabled', async () => {
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockRejectedValueOnce(new Error('500'));
 
     render(<Home />);
-    await waitFor(() => expect(screen.getByRole('option')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole('option', { name: 'Discovery Call' })).toBeInTheDocument());
     fireEvent.click(screen.getByText('Start Session'));
     await waitFor(() => {
       expect(screen.getByText('Start Session')).not.toBeDisabled();
@@ -375,28 +374,32 @@ describe('Main page — test-agent acceptance', () => {
 
   it('button text changes to "Starting..." during loading', async () => {
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockImplementationOnce(() => new Promise(() => {}));
 
     render(<Home />);
-    await waitFor(() => expect(screen.getByRole('option')).toBeInTheDocument());
-    fireEvent.click(screen.getByText('Start Session'));
+    await waitFor(() => expect(screen.getByRole('option', { name: 'Discovery Call' })).toBeInTheDocument());
+    await act(async () => {
+      fireEvent.click(screen.getByText('Start Session'));
+      await new Promise(r => setTimeout(r, 50));
+    });
     expect(screen.getByText('Starting...')).toBeInTheDocument();
   });
 
   it('dropdown is disabled during active session', async () => {
     mockUseSSE.mockReturnValue({ ...defaultSSE(), isConnected: true });
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 's' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({}) });
 
     render(<Home />);
-    await waitFor(() => expect(screen.getByRole('option')).toBeInTheDocument());
-    fireEvent.click(screen.getByText('Start Session'));
-    await waitFor(() => {
-      expect(screen.getByLabelText('Select call type')).toBeDisabled();
+    await waitFor(() => expect(screen.getByRole('option', { name: 'Discovery Call' })).toBeInTheDocument());
+    await act(async () => {
+      fireEvent.click(screen.getByText('Start Session'));
+      await new Promise(r => setTimeout(r, 50));
     });
+    expect(screen.getByLabelText('Select call type')).toBeDisabled();
   });
 
   it('renders "Session Complete" when scorecard arrives', () => {
@@ -410,7 +413,7 @@ describe('Main page — test-agent acceptance', () => {
   });
 
   it('Start Session disabled when fixture list is empty', async () => {
-    mockFetch.mockResolvedValueOnce({ json: () => Promise.resolve([]) });
+    mockFetch.mockResolvedValueOnce({ ok: true, json: () => Promise.resolve([]) });
     render(<Home />);
     await waitFor(() => expect(mockFetch).toHaveBeenCalled());
     expect(screen.getByText('Start Session')).toBeDisabled();

@@ -39,6 +39,7 @@ const mockScorecard = {
 beforeEach(() => {
   mockUseSSE.mockReturnValue(defaultSSE());
   mockFetch.mockResolvedValue({
+    ok: true,
     json: () => Promise.resolve([{ callType: 'discovery', displayName: 'Discovery Call' }]),
   });
 });
@@ -69,7 +70,7 @@ describe('TICKET-051: Scorecard UX — keep transcript+coaching visible, scoreca
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
-  it('AC2: Generate Scorecard button appears in coaching panel after session ends', () => {
+  it('AC2: View Scorecard button appears in coaching panel after session ends', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
       sessionComplete: true,
@@ -79,10 +80,10 @@ describe('TICKET-051: Scorecard UX — keep transcript+coaching visible, scoreca
 
     const button = screen.getByTestId('generate-scorecard-button');
     expect(button).toBeInTheDocument();
-    expect(button).toHaveTextContent('Generate Scorecard');
+    expect(button).toHaveTextContent('View Scorecard');
   });
 
-  it('AC2: Generate Scorecard button does NOT appear during active session', () => {
+  it('AC2: View Scorecard button does NOT appear during active session', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
       isConnected: true,
@@ -93,7 +94,7 @@ describe('TICKET-051: Scorecard UX — keep transcript+coaching visible, scoreca
     expect(screen.queryByTestId('generate-scorecard-button')).not.toBeInTheDocument();
   });
 
-  it('AC3: clicking Generate Scorecard opens slide-out panel from right', () => {
+  it('AC3: clicking View Scorecard opens slide-out panel from right', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
       sessionComplete: true,
@@ -201,11 +202,11 @@ describe('TICKET-051: Scorecard UX — keep transcript+coaching visible, scoreca
 
     // Session is marked as completed
     expect(screen.getByText('Session Complete')).toBeInTheDocument();
-    // Generate Scorecard button is shown
+    // View Scorecard button is shown
     expect(screen.getByTestId('generate-scorecard-button')).toBeInTheDocument();
   });
 
-  it('Generate Scorecard button shows loading state', () => {
+  it('View Scorecard button shows loading state', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
       sessionComplete: true,

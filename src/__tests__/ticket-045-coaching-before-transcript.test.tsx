@@ -32,6 +32,7 @@ beforeEach(() => {
   useSSECalls.length = 0;
   mockUseSSE.mockReturnValue(defaultSSE());
   mockFetch.mockResolvedValue({
+    ok: true,
     json: () =>
       Promise.resolve([
         { callType: 'discovery', displayName: 'Discovery Call' },
@@ -59,6 +60,7 @@ describe('TICKET-045: Coaching prompts should not fire before transcript starts'
       }
       if (url === '/api/fixtures') {
         return Promise.resolve({
+          ok: true,
           json: () =>
             Promise.resolve([
               { callType: 'discovery', displayName: 'Discovery Call' },
@@ -115,6 +117,7 @@ describe('TICKET-045: Coaching prompts should not fire before transcript starts'
 
     mockFetch
       .mockResolvedValueOnce({
+        ok: true,
         json: () =>
           Promise.resolve([
             { callType: 'discovery', displayName: 'Discovery Call' },

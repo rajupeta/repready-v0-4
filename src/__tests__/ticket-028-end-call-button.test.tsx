@@ -29,6 +29,7 @@ function defaultSSE() {
 beforeEach(() => {
   mockUseSSE.mockReturnValue(defaultSSE());
   mockFetch.mockResolvedValue({
+    ok: true,
     json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]),
   });
 });
@@ -56,7 +57,7 @@ describe('TICKET-028: End Call button', () => {
     });
 
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'session-1' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: true }) });
 
@@ -82,7 +83,7 @@ describe('TICKET-028: End Call button', () => {
     });
 
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'session-42' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: true }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ status: 'ended' }) });
@@ -103,6 +104,11 @@ describe('TICKET-028: End Call button', () => {
 
     await act(async () => {
       fireEvent.click(screen.getByText('End Call'));
+    });
+
+    // Inline confirmation UI appears — click Confirm to actually end the call
+    await act(async () => {
+      fireEvent.click(screen.getByText('Confirm'));
     });
 
     await waitFor(() => {
@@ -131,7 +137,7 @@ describe('TICKET-028: End Call button', () => {
 
   it('End Call button is NOT visible during loading state', async () => {
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockImplementationOnce(() => new Promise(() => {})); // Never resolves
 
     render(<Home />);

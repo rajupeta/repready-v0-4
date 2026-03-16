@@ -17,8 +17,8 @@ describe('TICKET-049: Scorecard as slide-out panel', () => {
     },
   ];
 
-  describe('Generate Scorecard button in CoachingPanel', () => {
-    it('does not show Generate Scorecard button during active session', () => {
+  describe('View Scorecard button in CoachingPanel', () => {
+    it('does not show View Scorecard button during active session', () => {
       render(
         <CoachingPanel
           prompts={prompts}
@@ -26,10 +26,10 @@ describe('TICKET-049: Scorecard as slide-out panel', () => {
           onGenerateScorecard={jest.fn()}
         />
       );
-      expect(screen.queryByText('Generate Scorecard')).not.toBeInTheDocument();
+      expect(screen.queryByText('View Scorecard')).not.toBeInTheDocument();
     });
 
-    it('shows Generate Scorecard button when session is completed', () => {
+    it('shows View Scorecard button when session is completed', () => {
       render(
         <CoachingPanel
           prompts={prompts}
@@ -37,7 +37,7 @@ describe('TICKET-049: Scorecard as slide-out panel', () => {
           onGenerateScorecard={jest.fn()}
         />
       );
-      expect(screen.getByText('Generate Scorecard')).toBeInTheDocument();
+      expect(screen.getByText('View Scorecard')).toBeInTheDocument();
     });
 
     it('calls onGenerateScorecard when button is clicked', () => {
@@ -49,21 +49,21 @@ describe('TICKET-049: Scorecard as slide-out panel', () => {
           onGenerateScorecard={onGenerateScorecard}
         />
       );
-      fireEvent.click(screen.getByText('Generate Scorecard'));
+      fireEvent.click(screen.getByText('View Scorecard'));
       expect(onGenerateScorecard).toHaveBeenCalledTimes(1);
     });
 
-    it('does not show Generate Scorecard button when onGenerateScorecard is not provided', () => {
+    it('does not show View Scorecard button when onGenerateScorecard is not provided', () => {
       render(
         <CoachingPanel
           prompts={prompts}
           sessionCompleted={true}
         />
       );
-      expect(screen.queryByText('Generate Scorecard')).not.toBeInTheDocument();
+      expect(screen.queryByText('View Scorecard')).not.toBeInTheDocument();
     });
 
-    it('shows Generate Scorecard button even with empty prompts when session completed', () => {
+    it('shows View Scorecard button even with empty prompts when session completed', () => {
       render(
         <CoachingPanel
           prompts={[]}
@@ -71,7 +71,7 @@ describe('TICKET-049: Scorecard as slide-out panel', () => {
           onGenerateScorecard={jest.fn()}
         />
       );
-      expect(screen.getByText('Generate Scorecard')).toBeInTheDocument();
+      expect(screen.getByText('View Scorecard')).toBeInTheDocument();
     });
 
     it('coaching prompts remain visible when session is completed', () => {
@@ -91,7 +91,7 @@ describe('TICKET-049: Scorecard as slide-out panel', () => {
     it('still works without new props (backward compatible)', () => {
       render(<CoachingPanel prompts={prompts} />);
       expect(screen.getByText('Ask Open Questions')).toBeInTheDocument();
-      expect(screen.queryByText('Generate Scorecard')).not.toBeInTheDocument();
+      expect(screen.queryByText('View Scorecard')).not.toBeInTheDocument();
     });
 
     it('shows empty state without new props', () => {

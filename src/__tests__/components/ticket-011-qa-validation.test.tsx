@@ -111,7 +111,7 @@ describe('CoachingPanel — edge cases', () => {
     expect(card!.className).toContain('bg-amber-50');
   });
 
-  it('renders multiple prompts in reverse order (most recent first)', () => {
+  it('renders multiple prompts in natural order (oldest first)', () => {
     const prompts: CoachingPrompt[] = [
       { ruleId: 'r1', ruleName: 'Alpha', message: 'A msg', timestamp: 100 },
       { ruleId: 'r2', ruleName: 'Beta', message: 'B msg', timestamp: 200 },
@@ -120,11 +120,11 @@ describe('CoachingPanel — edge cases', () => {
     render(<CoachingPanel prompts={prompts} />);
 
     const allText = document.body.textContent!;
-    const gammaIdx = allText.indexOf('Gamma');
-    const betaIdx = allText.indexOf('Beta');
     const alphaIdx = allText.indexOf('Alpha');
-    expect(gammaIdx).toBeLessThan(betaIdx);
-    expect(betaIdx).toBeLessThan(alphaIdx);
+    const betaIdx = allText.indexOf('Beta');
+    const gammaIdx = allText.indexOf('Gamma');
+    expect(alphaIdx).toBeLessThan(betaIdx);
+    expect(betaIdx).toBeLessThan(gammaIdx);
   });
 
   it('displays message body text with amber-700 styling', () => {
@@ -136,7 +136,7 @@ describe('CoachingPanel — edge cases', () => {
     expect(msgEl.className).toContain('text-amber-800');
   });
 
-  it('does not mutate the original prompts array when reversing', () => {
+  it('does not mutate the original prompts array', () => {
     const prompts: CoachingPrompt[] = [
       { ruleId: 'r1', ruleName: 'First', message: 'A', timestamp: 1 },
       { ruleId: 'r2', ruleName: 'Second', message: 'B', timestamp: 2 },

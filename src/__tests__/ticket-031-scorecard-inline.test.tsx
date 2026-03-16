@@ -39,6 +39,7 @@ const mockScorecard = {
 beforeEach(() => {
   mockUseSSE.mockReturnValue(defaultSSE());
   mockFetch.mockResolvedValue({
+    ok: true,
     json: () => Promise.resolve(['discovery-call-001']),
   });
 });
@@ -62,7 +63,7 @@ describe('TICKET-031: Scorecard renders inline not as modal overlay (updated for
     expect(document.querySelector('.bg-black\\/50')).toBeNull();
   });
 
-  it('AC2: when session completes, scorecard data is available and Generate Scorecard button appears', () => {
+  it('AC2: when session completes, scorecard data is available and View Scorecard button appears', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
       scorecard: mockScorecard,
@@ -72,8 +73,8 @@ describe('TICKET-031: Scorecard renders inline not as modal overlay (updated for
 
     // Session Complete status shown
     expect(screen.getByText('Session Complete')).toBeInTheDocument();
-    // Generate Scorecard button is visible
-    expect(screen.getByText('Generate Scorecard')).toBeInTheDocument();
+    // View Scorecard button is visible
+    expect(screen.getByText('View Scorecard')).toBeInTheDocument();
   });
 
   it('AC3: transcript and coaching remain visible when session completes (TICKET-049)', () => {
@@ -118,7 +119,7 @@ describe('TICKET-031: Scorecard renders inline not as modal overlay (updated for
     expect(document.querySelector('.grid.grid-cols-1.md\\:grid-cols-2')).not.toBeNull();
   });
 
-  it('scorecard opens in slide-out panel when Generate Scorecard is clicked', () => {
+  it('scorecard opens in slide-out panel when View Scorecard is clicked', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
       scorecard: mockScorecard,
@@ -126,8 +127,8 @@ describe('TICKET-031: Scorecard renders inline not as modal overlay (updated for
     });
     render(<Home />);
 
-    // Click Generate Scorecard
-    fireEvent.click(screen.getByText('Generate Scorecard'));
+    // Click View Scorecard
+    fireEvent.click(screen.getByText('View Scorecard'));
 
     // Scorecard content now visible in slide-out
     expect(screen.getByText('82')).toBeInTheDocument();

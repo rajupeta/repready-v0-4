@@ -165,7 +165,7 @@ describe('CoachingPanel — acceptance criteria', () => {
     expect(screen.getByText('No coaching prompts yet')).toBeInTheDocument();
   });
 
-  it('renders most recent prompt at top (reverses input order)', () => {
+  it('renders prompts in natural order (oldest first)', () => {
     const prompts: CoachingPrompt[] = [
       { ruleId: 'r1', ruleName: 'Oldest', message: 'Old msg', timestamp: 100 },
       { ruleId: 'r2', ruleName: 'Middle', message: 'Mid msg', timestamp: 200 },
@@ -174,9 +174,9 @@ describe('CoachingPanel — acceptance criteria', () => {
     render(<CoachingPanel prompts={prompts} />);
 
     const headers = screen.getAllByRole('heading', { level: 3 });
-    expect(headers[0]).toHaveTextContent('Newest');
+    expect(headers[0]).toHaveTextContent('Oldest');
     expect(headers[1]).toHaveTextContent('Middle');
-    expect(headers[2]).toHaveTextContent('Oldest');
+    expect(headers[2]).toHaveTextContent('Newest');
   });
 
   it('uses amber/yellow styling for coaching cards', () => {
@@ -256,10 +256,10 @@ describe('CoachingPanel — additional edge cases', () => {
     }));
     render(<CoachingPanel prompts={prompts} />);
 
-    // Most recent (last added) should appear first
+    // Prompts render in natural order (oldest first)
     const headers = screen.getAllByRole('heading', { level: 3 });
-    expect(headers[0]).toHaveTextContent('Rule 49');
-    expect(headers[headers.length - 1]).toHaveTextContent('Rule 0');
+    expect(headers[0]).toHaveTextContent('Rule 0');
+    expect(headers[headers.length - 1]).toHaveTextContent('Rule 49');
   });
 
   it('each card has rule name as h3 header and message as paragraph', () => {

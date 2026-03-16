@@ -27,6 +27,7 @@ function defaultSSE() {
 beforeEach(() => {
   mockUseSSE.mockReturnValue(defaultSSE());
   mockFetch.mockResolvedValue({
+    ok: true,
     json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]),
   });
 });
@@ -44,15 +45,15 @@ describe('TICKET-012 edge cases', () => {
     // Should still render without crashing
     expect(screen.getByText('RepReady')).toBeInTheDocument();
     expect(screen.getByText('Start Session')).toBeInTheDocument();
-    // No options in the dropdown
+    // Shows error message and placeholder option
     await waitFor(() => {
-      expect(screen.queryAllByRole('option')).toHaveLength(0);
+      expect(screen.getByText('Failed to load call types. Please refresh the page.')).toBeInTheDocument();
     });
   });
 
   it('returns to idle state on session creation failure', async () => {
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockRejectedValueOnce(new Error('Server error'));
 
     render(<Home />);
@@ -73,7 +74,7 @@ describe('TICKET-012 edge cases', () => {
   it('disables fixture selector and start button during active session', async () => {
     mockUseSSE.mockReturnValue({ ...defaultSSE(), isConnected: true });
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 's1' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: true }) });
 
@@ -94,7 +95,7 @@ describe('TICKET-012 edge cases', () => {
     // SSE reports connected — sessionStatus transitions from loading to active
     mockUseSSE.mockReturnValue({ ...defaultSSE(), isConnected: true });
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 's1' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: true }) });
 
@@ -173,10 +174,10 @@ describe('TICKET-012 edge cases', () => {
     render(<Home />);
     // No fixed overlay auto-shown
     expect(document.querySelector('.fixed.inset-0.z-50')).toBeNull();
-    // Generate Scorecard button appears
-    expect(screen.getByText('Generate Scorecard')).toBeInTheDocument();
+    // View Scorecard button appears
+    expect(screen.getByText('View Scorecard')).toBeInTheDocument();
     // Click to open slide-out and verify content
-    fireEvent.click(screen.getByText('Generate Scorecard'));
+    fireEvent.click(screen.getByText('View Scorecard'));
     expect(screen.getByText('90')).toBeInTheDocument();
     expect(screen.getByText('Excellent')).toBeInTheDocument();
   });

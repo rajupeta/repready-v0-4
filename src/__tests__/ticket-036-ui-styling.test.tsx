@@ -112,19 +112,19 @@ describe('TICKET-036: Coaching prompts have amber/warning styling', () => {
 
   it('coaching card has amber-50 background', () => {
     render(<CoachingPanel prompts={prompts} />);
-    const card = screen.getByText('Ask Questions').closest('div');
+    const card = screen.getByText('Ask Questions').closest('.bg-amber-50');
     expect(card).toHaveClass('bg-amber-50');
   });
 
   it('coaching card has amber left border accent', () => {
     render(<CoachingPanel prompts={prompts} />);
-    const card = screen.getByText('Ask Questions').closest('div');
+    const card = screen.getByText('Ask Questions').closest('.bg-amber-50');
     expect(card).toHaveClass('border-l-4', 'border-amber-500');
   });
 
   it('coaching card has shadow-sm for subtle depth', () => {
     render(<CoachingPanel prompts={prompts} />);
-    const card = screen.getByText('Ask Questions').closest('div');
+    const card = screen.getByText('Ask Questions').closest('.bg-amber-50');
     expect(card).toHaveClass('shadow-sm');
   });
 

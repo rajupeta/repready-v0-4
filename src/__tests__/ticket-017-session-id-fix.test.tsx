@@ -22,6 +22,7 @@ beforeEach(() => {
     lines: [],
     prompts: [],
     scorecard: null,
+    sessionComplete: false,
     isConnected: !!sid,
   }));
 });
@@ -33,7 +34,7 @@ afterEach(() => {
 describe('TICKET-017: page.tsx reads sessionId from API response', () => {
   it('reads sessionId (not id) from POST /api/sessions response', async () => {
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'sess-abc-123' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ status: 'started' }) });
 
@@ -61,7 +62,7 @@ describe('TICKET-017: page.tsx reads sessionId from API response', () => {
 
   it('does not crash when API returns sessionId instead of id', async () => {
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'objection-handling', displayName: 'Objection Handling'}]) })
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve([{callType: 'objection-handling', displayName: 'Objection Handling'}]) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'sess-xyz-789' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ status: 'started' }) });
 
@@ -92,7 +93,7 @@ describe('TICKET-017: page.tsx reads sessionId from API response', () => {
 
   it('session ID is correctly used in subsequent API calls', async () => {
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'sess-correct-id' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ status: 'started' }) });
 

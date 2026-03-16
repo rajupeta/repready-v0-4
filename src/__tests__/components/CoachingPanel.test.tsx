@@ -6,6 +6,7 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import CoachingPanel from '@/components/CoachingPanel';
 import { CoachingPrompt } from '@/types';
+import { CoachingPromptWithTrigger } from '@/hooks/useSSE';
 
 describe('CoachingPanel', () => {
   it('shows empty state when no prompts', () => {
@@ -28,7 +29,7 @@ describe('CoachingPanel', () => {
     expect(screen.getByText('Try asking an open-ended question.')).toBeInTheDocument();
   });
 
-  it('renders most recent prompt first', () => {
+  it('renders prompts in oldest-first (natural) order', () => {
     const prompts: CoachingPrompt[] = [
       {
         ruleId: 'rule-1',
@@ -46,8 +47,8 @@ describe('CoachingPanel', () => {
     render(<CoachingPanel prompts={prompts} />);
 
     const cards = screen.getAllByText(/Rule$/);
-    expect(cards[0]).toHaveTextContent('Second Rule');
-    expect(cards[1]).toHaveTextContent('First Rule');
+    expect(cards[0]).toHaveTextContent('First Rule');
+    expect(cards[1]).toHaveTextContent('Second Rule');
   });
 
   it('applies amber styling to prompt cards', () => {
@@ -63,5 +64,34 @@ describe('CoachingPanel', () => {
 
     const header = screen.getByText('Test Rule');
     expect(header.className).toContain('text-amber-900');
+  });
+
+  it('displays trigger line index when prompt has triggerLineIndex', () => {
+    const prompts: CoachingPromptWithTrigger[] = [
+      {
+        ruleId: 'rule-1',
+        ruleName: 'Trigger Rule',
+        message: 'Triggered coaching message',
+        timestamp: Date.now(),
+        triggerLineIndex: 5,
+      },
+    ];
+    render(<CoachingPanel prompts={prompts} />);
+
+    expect(screen.getByText('Line 5')).toBeInTheDocument();
+  });
+
+  it('does not display line label for prompts without triggerLineIndex', () => {
+    const prompts: CoachingPrompt[] = [
+      {
+        ruleId: 'rule-1',
+        ruleName: 'Plain Rule',
+        message: 'No trigger line',
+        timestamp: Date.now(),
+      },
+    ];
+    render(<CoachingPanel prompts={prompts} />);
+
+    expect(screen.queryByText(/^Line \d+$/)).not.toBeInTheDocument();
   });
 });
