@@ -13,8 +13,6 @@ export default function Home() {
   const [selectedFixture, setSelectedFixture] = useState<string>('');
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [sessionStatus, setSessionStatus] = useState<SessionStatus>('idle');
-  const [showScorecard, setShowScorecard] = useState(false);
-
   const { lines, prompts, scorecard, isConnected } = useSSE(sessionId);
 
   // Fetch fixtures on mount
@@ -39,11 +37,10 @@ export default function Home() {
     }
   }, [isConnected, sessionStatus]);
 
-  // Show scorecard when session completes
+  // Update status when session completes
   useEffect(() => {
     if (scorecard) {
       setSessionStatus('completed');
-      setShowScorecard(true);
     }
   }, [scorecard]);
 
@@ -134,24 +131,16 @@ export default function Home() {
           )}
         </div>
 
-        {/* Two-column grid */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <TranscriptPanel lines={lines} />
-          <CoachingPanel prompts={prompts} />
-        </div>
-      </div>
-
-      {/* Scorecard overlay */}
-      {showScorecard && scorecard && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-lg">
-            <ScorecardView
-              scorecard={scorecard}
-              onClose={() => setShowScorecard(false)}
-            />
+        {/* Scorecard inline or Two-column grid */}
+        {scorecard ? (
+          <ScorecardView scorecard={scorecard} />
+        ) : (
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <TranscriptPanel lines={lines} />
+            <CoachingPanel prompts={prompts} />
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </main>
   );
 }
