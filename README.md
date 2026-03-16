@@ -6,7 +6,7 @@ Real-time AI coaching web app for SDRs (Sales Development Representatives). Simu
 
 - **Framework:** Next.js 15 with App Router
 - **Language:** TypeScript 5.7
-- **AI:** Anthropic Claude API (`claude-3-5-haiku-20241022`)
+- **AI:** Anthropic Claude API (`claude-haiku-4-5-20251001`)
 - **Streaming:** Server-Sent Events (SSE)
 - **Styling:** Tailwind CSS
 - **Testing:** Jest + React Testing Library
