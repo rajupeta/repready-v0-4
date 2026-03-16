@@ -5,10 +5,11 @@ import { CoachingPrompt } from '@/types';
 interface CoachingPanelProps {
   prompts: CoachingPrompt[];
   sessionCompleted?: boolean;
+  scorecardLoading?: boolean;
   onGenerateScorecard?: () => void;
 }
 
-export default function CoachingPanel({ prompts, sessionCompleted, onGenerateScorecard }: CoachingPanelProps) {
+export default function CoachingPanel({ prompts, sessionCompleted, scorecardLoading, onGenerateScorecard }: CoachingPanelProps) {
   if (prompts.length === 0) {
     return (
       <div className="flex h-full flex-col rounded-xl border border-gray-200 bg-white p-5 shadow-md">
@@ -18,9 +19,11 @@ export default function CoachingPanel({ prompts, sessionCompleted, onGenerateSco
           <div className="mt-auto pt-4 border-t border-gray-200">
             <button
               onClick={onGenerateScorecard}
-              className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700"
+              disabled={scorecardLoading}
+              className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+              data-testid="generate-scorecard-button"
             >
-              Generate Scorecard
+              {scorecardLoading ? 'Generating...' : 'Generate Scorecard'}
             </button>
           </div>
         )}
@@ -50,9 +53,11 @@ export default function CoachingPanel({ prompts, sessionCompleted, onGenerateSco
         <div className="mt-4 pt-4 border-t border-gray-200">
           <button
             onClick={onGenerateScorecard}
-            className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700"
+            disabled={scorecardLoading}
+            className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            data-testid="generate-scorecard-button"
           >
-            Generate Scorecard
+            {scorecardLoading ? 'Generating...' : 'Generate Scorecard'}
           </button>
         </div>
       )}

@@ -31,7 +31,7 @@ const mockFetch = jest.fn();
 global.fetch = mockFetch;
 
 function defaultSSE() {
-  return { lines: [], prompts: [], scorecard: null, isConnected: false };
+  return { lines: [], prompts: [], scorecard: null, sessionComplete: false, isConnected: false };
 }
 
 // ----- Mock EventSource for hook-level tests -----
@@ -313,6 +313,7 @@ describe('Main page — QA validation', () => {
   it('AC6: scorecard data available and Generate Scorecard button shown', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
+      sessionComplete: true,
       scorecard: {
         overallScore: 72,
         summary: 'Solid performance',
@@ -343,6 +344,7 @@ describe('Main page — QA validation', () => {
   it('AC6: transcript and coaching stay visible when session completes (TICKET-049)', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
+      sessionComplete: true,
       scorecard: { overallScore: 50, summary: 'OK', entries: [] },
     });
     render(<Home />);
@@ -425,6 +427,7 @@ describe('Main page — QA validation', () => {
   it('"Session Complete" text renders when scorecard arrives', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
+      sessionComplete: true,
       scorecard: { overallScore: 60, summary: 'OK', entries: [] },
     });
     render(<Home />);

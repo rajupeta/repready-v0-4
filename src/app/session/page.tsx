@@ -19,8 +19,10 @@ export default function Home() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [sessionStatus, setSessionStatus] = useState<SessionStatus>('idle');
   const [showScorecard, setShowScorecard] = useState(false);
+  const [scorecardData, setScorecardData] = useState<import('@/types').Scorecard | null>(null);
+  const [scorecardLoading, setScorecardLoading] = useState(false);
 
-  const { lines, prompts, scorecard, isConnected } = useSSE(sessionId);
+  const { lines, prompts, scorecard, sessionComplete, isConnected } = useSSE(sessionId);
 
   // Fetch call types on mount
   useEffect(() => {
@@ -44,12 +46,12 @@ export default function Home() {
     }
   }, [isConnected, sessionStatus]);
 
-  // Update status when session completes
+  // Update status when session completes (independent of scorecard)
   useEffect(() => {
-    if (scorecard) {
+    if (sessionComplete) {
       setSessionStatus('completed');
     }
-  }, [scorecard]);
+  }, [sessionComplete]);
 
   async function handleStartSession() {
     if (!selectedCallType) return;
@@ -85,8 +87,35 @@ export default function Home() {
     }
   }
 
+  async function handleGenerateScorecard() {
+    // Use cached scorecard from SSE if available
+    if (scorecard) {
+      setScorecardData(scorecard);
+      setShowScorecard(true);
+      return;
+    }
+
+    // Otherwise fetch from API
+    if (!sessionId) return;
+    setScorecardLoading(true);
+    try {
+      const res = await fetch(`/api/sessions/${sessionId}/scorecard`);
+      if (res.ok) {
+        const data = await res.json();
+        setScorecardData(data);
+        setShowScorecard(true);
+      }
+    } catch {
+      // silently handle fetch errors
+    } finally {
+      setScorecardLoading(false);
+    }
+  }
+
   function handleNewSession() {
     setShowScorecard(false);
+    setScorecardData(null);
+    setScorecardLoading(false);
     setSessionId(null);
     setSessionStatus('idle');
   }
@@ -162,16 +191,17 @@ export default function Home() {
             <CoachingPanel
               prompts={prompts}
               sessionCompleted={sessionStatus === 'completed'}
-              onGenerateScorecard={() => setShowScorecard(true)}
+              scorecardLoading={scorecardLoading}
+              onGenerateScorecard={handleGenerateScorecard}
             />
           </div>
         </div>
       </div>
 
       {/* Scorecard slide-out panel */}
-      {scorecard && (
+      {scorecardData && (
         <ScorecardSlideOut
-          scorecard={scorecard}
+          scorecard={scorecardData}
           isOpen={showScorecard}
           onClose={() => setShowScorecard(false)}
           onNewSession={handleNewSession}

@@ -21,6 +21,7 @@ function defaultSSE() {
     lines: [],
     prompts: [],
     scorecard: null,
+    sessionComplete: false,
     isConnected: false,
   };
 }
@@ -113,6 +114,7 @@ describe('TICKET-028: End Call button', () => {
   it('End Call button is NOT visible when session is completed', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
+      sessionComplete: true,
       scorecard: {
         overallScore: 80,
         summary: 'Done',
@@ -150,6 +152,7 @@ describe('TICKET-028: End Call button', () => {
     // Simulate scorecard arrival (which sets completed state)
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
+      sessionComplete: true,
       scorecard: {
         overallScore: 90,
         summary: 'Great session',

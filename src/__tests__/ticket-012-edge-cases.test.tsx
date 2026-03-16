@@ -19,6 +19,7 @@ function defaultSSE() {
     lines: [],
     prompts: [],
     scorecard: null,
+    sessionComplete: false,
     isConnected: false,
   };
 }
@@ -119,6 +120,7 @@ describe('TICKET-012 edge cases', () => {
   it('shows "Session Complete" text when scorecard arrives', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
+      sessionComplete: true,
       scorecard: {
         overallScore: 65,
         summary: 'Decent effort',
@@ -156,9 +158,10 @@ describe('TICKET-012 edge cases', () => {
     expect(screen.getByText('Discovery')).toBeInTheDocument();
   });
 
-  it('scorecard renders inline without modal overlay (TICKET-031)', () => {
+  it('scorecard renders in slide-out without modal overlay (TICKET-031/TICKET-051)', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
+      sessionComplete: true,
       scorecard: {
         overallScore: 90,
         summary: 'Excellent',
@@ -168,9 +171,12 @@ describe('TICKET-012 edge cases', () => {
       },
     });
     render(<Home />);
-    // No fixed overlay
+    // No fixed overlay auto-shown
     expect(document.querySelector('.fixed.inset-0.z-50')).toBeNull();
-    // Scorecard content is visible inline
+    // Generate Scorecard button appears
+    expect(screen.getByText('Generate Scorecard')).toBeInTheDocument();
+    // Click to open slide-out and verify content
+    fireEvent.click(screen.getByText('Generate Scorecard'));
     expect(screen.getByText('90')).toBeInTheDocument();
     expect(screen.getByText('Excellent')).toBeInTheDocument();
   });

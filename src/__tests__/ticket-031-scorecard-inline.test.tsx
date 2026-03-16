@@ -21,6 +21,7 @@ function defaultSSE() {
     lines: [],
     prompts: [],
     scorecard: null,
+    sessionComplete: false,
     isConnected: false,
   };
 }
@@ -51,6 +52,7 @@ describe('TICKET-031: Scorecard renders inline not as modal overlay (updated for
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
       scorecard: mockScorecard,
+      sessionComplete: true,
     });
     render(<Home />);
 
@@ -64,6 +66,7 @@ describe('TICKET-031: Scorecard renders inline not as modal overlay (updated for
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
       scorecard: mockScorecard,
+      sessionComplete: true,
     });
     render(<Home />);
 
@@ -77,6 +80,7 @@ describe('TICKET-031: Scorecard renders inline not as modal overlay (updated for
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
       scorecard: mockScorecard,
+      sessionComplete: true,
       lines: [{ speaker: 'rep', text: 'Hello prospect' }],
       prompts: [{ ruleId: 'r1', ruleName: 'Test Rule', message: 'Test msg', timestamp: 1 }],
     });
@@ -118,6 +122,7 @@ describe('TICKET-031: Scorecard renders inline not as modal overlay (updated for
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
       scorecard: mockScorecard,
+      sessionComplete: true,
     });
     render(<Home />);
 
