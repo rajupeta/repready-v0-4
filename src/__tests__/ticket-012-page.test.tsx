@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import Home from '@/app/page';
 
@@ -28,7 +28,7 @@ function defaultSSE() {
 beforeEach(() => {
   mockUseSSE.mockReturnValue(defaultSSE());
   mockFetch.mockResolvedValue({
-    json: () => Promise.resolve(['discovery-call-001', 'objection-handling']),
+    json: () => Promise.resolve({ sessionId: 'session-1' }),
   });
 });
 
@@ -43,15 +43,13 @@ describe('Main page — acceptance criteria', () => {
     expect(screen.getByText('AI Sales Coaching')).toBeInTheDocument();
   });
 
-  it('fetches fixtures on mount and populates dropdown', async () => {
+  it('shows call type dropdown with options', () => {
     render(<Home />);
-    await waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith('/api/fixtures');
-    });
-    await waitFor(() => {
-      expect(screen.getByRole('option', { name: 'discovery-call-001' })).toBeInTheDocument();
-      expect(screen.getByRole('option', { name: 'objection-handling' })).toBeInTheDocument();
-    });
+    expect(screen.getByLabelText('Select call type')).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Discovery Call' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Demo' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Objection Handling' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'Follow-up' })).toBeInTheDocument();
   });
 
   it('renders Start Session button', () => {
@@ -61,23 +59,20 @@ describe('Main page — acceptance criteria', () => {
 
   it('Start Session button creates and starts a session', async () => {
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['discovery-call-001']) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'session-1' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: true }) });
 
     render(<Home />);
 
-    await waitFor(() => {
-      expect(screen.getByRole('option', { name: 'discovery-call-001' })).toBeInTheDocument();
+    await act(async () => {
+      fireEvent.click(screen.getByText('Start Session'));
     });
 
-    fireEvent.click(screen.getByText('Start Session'));
-
     await waitFor(() => {
-      // POST /api/sessions
+      // POST /api/sessions with callType
       expect(mockFetch).toHaveBeenCalledWith('/api/sessions', expect.objectContaining({
         method: 'POST',
-        body: JSON.stringify({ fixtureId: 'discovery-call-001' }),
+        body: JSON.stringify({ callType: 'discovery' }),
       }));
       // POST /api/sessions/session-1/start
       expect(mockFetch).toHaveBeenCalledWith('/api/sessions/session-1/start', expect.objectContaining({
@@ -152,15 +147,14 @@ describe('Main page — acceptance criteria', () => {
   it('disables Start Session button when loading', async () => {
     // Make fetch never resolve for session creation to keep loading state
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['discovery-call-001']) })
       .mockImplementationOnce(() => new Promise(() => {}));
 
     render(<Home />);
-    await waitFor(() => {
-      expect(screen.getByRole('option', { name: 'discovery-call-001' })).toBeInTheDocument();
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('Start Session'));
     });
 
-    fireEvent.click(screen.getByText('Start Session'));
     expect(screen.getByText('Starting...')).toBeInTheDocument();
   });
 });

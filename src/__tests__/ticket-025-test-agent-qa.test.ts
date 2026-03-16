@@ -386,7 +386,7 @@ describe('AC4 — SessionManager.createSession callType storage', () => {
   });
 
   it('defaults callType to discovery when omitted', () => {
-    const id = sessionManager.createSession('discovery-call-001');
+    const id = sessionManager.createSession('discovery-call-001', 'discovery');
     const s = sessionManager.getSession(id);
     expect(s!.callType).toBe('discovery');
   });

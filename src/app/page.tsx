@@ -8,29 +8,20 @@ import ScorecardView from '@/components/ScorecardView';
 
 type SessionStatus = 'idle' | 'loading' | 'active' | 'completed';
 
+const CALL_TYPES = [
+  { value: 'discovery', label: 'Discovery Call' },
+  { value: 'demo', label: 'Demo' },
+  { value: 'objection-handling', label: 'Objection Handling' },
+  { value: 'follow-up', label: 'Follow-up' },
+] as const;
+
 export default function Home() {
-  const [fixtures, setFixtures] = useState<string[]>([]);
-  const [selectedFixture, setSelectedFixture] = useState<string>('');
+  const [selectedCallType, setSelectedCallType] = useState<string>('discovery');
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [sessionStatus, setSessionStatus] = useState<SessionStatus>('idle');
   const [showScorecard, setShowScorecard] = useState(false);
 
   const { lines, prompts, scorecard, isConnected } = useSSE(sessionId);
-
-  // Fetch fixtures on mount
-  useEffect(() => {
-    fetch('/api/fixtures')
-      .then((res) => res.json())
-      .then((data: string[]) => {
-        setFixtures(data);
-        if (data.length > 0) {
-          setSelectedFixture(data[0]);
-        }
-      })
-      .catch(() => {
-        // silently handle fetch errors on mount
-      });
-  }, []);
 
   // Track connection status
   useEffect(() => {
@@ -48,7 +39,7 @@ export default function Home() {
   }, [scorecard]);
 
   async function handleStartSession() {
-    if (!selectedFixture) return;
+    if (!selectedCallType) return;
     setSessionStatus('loading');
 
     try {
@@ -56,7 +47,7 @@ export default function Home() {
       const createRes = await fetch('/api/sessions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fixtureId: selectedFixture }),
+        body: JSON.stringify({ callType: selectedCallType }),
       });
       const session = await createRes.json();
       const id = session.sessionId;
@@ -83,15 +74,15 @@ export default function Home() {
       <div className="mx-auto max-w-7xl px-6 py-6">
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
           <select
-            value={selectedFixture}
-            onChange={(e) => setSelectedFixture(e.target.value)}
+            value={selectedCallType}
+            onChange={(e) => setSelectedCallType(e.target.value)}
             disabled={sessionStatus === 'loading' || sessionStatus === 'active'}
             className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none"
-            aria-label="Select fixture"
+            aria-label="Select call type"
           >
-            {fixtures.map((f) => (
-              <option key={f} value={f}>
-                {f}
+            {CALL_TYPES.map((ct) => (
+              <option key={ct.value} value={ct.value}>
+                {ct.label}
               </option>
             ))}
           </select>
@@ -99,7 +90,7 @@ export default function Home() {
           <button
             onClick={handleStartSession}
             disabled={
-              !selectedFixture ||
+              !selectedCallType ||
               sessionStatus === 'loading' ||
               sessionStatus === 'active'
             }

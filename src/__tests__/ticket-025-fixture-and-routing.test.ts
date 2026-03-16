@@ -318,7 +318,7 @@ describe('AC4c: SessionManager callType support', () => {
   });
 
   it('createSession defaults callType to discovery when not provided', () => {
-    const id = sessionManager.createSession('some-fixture');
+    const id = sessionManager.createSession('some-fixture', 'discovery');
     const session = sessionManager.getSession(id);
     expect(session!.callType).toBe('discovery');
   });

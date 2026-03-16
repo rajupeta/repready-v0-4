@@ -20,7 +20,7 @@ describe('TICKET-021 — POST /api/sessions/[id]/end', () => {
   let sessionId: string;
 
   beforeEach(() => {
-    sessionId = sessionManager.createSession('discovery-call');
+    sessionId = sessionManager.createSession('discovery-call', 'discovery');
   });
 
   it('returns 200 { status: "ended" } for an active session', async () => {
@@ -39,7 +39,7 @@ describe('TICKET-021 — POST /api/sessions/[id]/end', () => {
   });
 
   it('transitions session to completed status after ending', async () => {
-    const freshId = sessionManager.createSession('test-fixture');
+    const freshId = sessionManager.createSession('test-fixture', 'discovery');
     const freshSession = sessionManager.getSession(freshId)!;
     (freshSession as { status: string }).status = 'active';
 
@@ -108,14 +108,14 @@ describe('TICKET-021 — SessionManager.endSession unit tests', () => {
   });
 
   it('endSession throws for idle session', async () => {
-    const id = sessionManager.createSession('test');
+    const id = sessionManager.createSession('test', 'discovery');
     await expect(sessionManager.endSession(id)).rejects.toThrow(
       'is not active',
     );
   });
 
   it('endSession sets status to completed', async () => {
-    const id = sessionManager.createSession('test');
+    const id = sessionManager.createSession('test', 'discovery');
     const session = sessionManager.getSession(id)!;
     (session as { status: string }).status = 'active';
 
@@ -125,7 +125,7 @@ describe('TICKET-021 — SessionManager.endSession unit tests', () => {
   });
 
   it('endSession generates a scorecard', async () => {
-    const id = sessionManager.createSession('test');
+    const id = sessionManager.createSession('test', 'discovery');
     const session = sessionManager.getSession(id)!;
     (session as { status: string }).status = 'active';
 

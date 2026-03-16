@@ -134,7 +134,7 @@ describe('TICKET-009 QA — POST /api/sessions/[id]/start', () => {
   let sessionId: string;
 
   beforeEach(() => {
-    sessionId = sessionManager.createSession('discovery-call-001');
+    sessionId = sessionManager.createSession('discovery-call-001', 'discovery');
   });
 
   it('AC2: returns 200 { status: "started" } for idle session', async () => {
@@ -197,7 +197,7 @@ describe('TICKET-009 QA — POST /api/sessions/[id]/start', () => {
 
 describe('TICKET-009 QA — GET /api/sessions/[id]/scorecard', () => {
   it('AC3: returns scorecard JSON for completed session', async () => {
-    const sessionId = sessionManager.createSession('discovery-call-001');
+    const sessionId = sessionManager.createSession('discovery-call-001', 'discovery');
     sessionManager.startSession(sessionId);
     await new Promise((r) => setTimeout(r, 50));
 
@@ -224,7 +224,7 @@ describe('TICKET-009 QA — GET /api/sessions/[id]/scorecard', () => {
   });
 
   it('AC3: returns 400 for idle (not completed) session', async () => {
-    const sessionId = sessionManager.createSession('discovery-call-001');
+    const sessionId = sessionManager.createSession('discovery-call-001', 'discovery');
 
     const res = await getScorecard(new NextRequest('http://localhost'), makeParams(sessionId));
     const json = await res.json();
@@ -235,7 +235,7 @@ describe('TICKET-009 QA — GET /api/sessions/[id]/scorecard', () => {
 
   it('returns 400 for active (not completed) session', async () => {
     // Create a session and manually set to active to test this state
-    const sessionId = sessionManager.createSession('discovery-call-001');
+    const sessionId = sessionManager.createSession('discovery-call-001', 'discovery');
     // startSession will transition through active, but with stubs it completes fast
     // We still test: the route checks status !== 'completed'
     sessionManager.getSession(sessionId)!;
@@ -265,7 +265,7 @@ describe('TICKET-009 QA — Error handling across all routes', () => {
   });
 
   it('POST /api/sessions/[id]/start returns correct Content-Type', async () => {
-    const sessionId = sessionManager.createSession('test');
+    const sessionId = sessionManager.createSession('test', 'discovery');
     const res = await startSession(new NextRequest('http://localhost'), makeParams(sessionId));
     expect(res.headers.get('content-type')).toContain('application/json');
   });

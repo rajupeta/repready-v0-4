@@ -20,7 +20,7 @@ function makeParams(id: string) {
 
 describe('TICKET-021 QA — Route response shape', () => {
   it('success response contains only { status: "ended" } with no extra fields', async () => {
-    const id = sessionManager.createSession('test');
+    const id = sessionManager.createSession('test', 'discovery');
     const session = sessionManager.getSession(id)!;
     (session as { status: string }).status = 'active';
 
@@ -46,7 +46,7 @@ describe('TICKET-021 QA — Route response shape', () => {
   });
 
   it('400 response contains only { error: "Session is not active" }', async () => {
-    const id = sessionManager.createSession('test');
+    const id = sessionManager.createSession('test', 'discovery');
     // Session starts as 'idle', not 'active'
     const res = await endSession(
       new NextRequest('http://localhost'),
@@ -59,7 +59,7 @@ describe('TICKET-021 QA — Route response shape', () => {
   });
 
   it('all responses have application/json content-type', async () => {
-    const id = sessionManager.createSession('test');
+    const id = sessionManager.createSession('test', 'discovery');
     const session = sessionManager.getSession(id)!;
     (session as { status: string }).status = 'active';
 
@@ -83,7 +83,7 @@ describe('TICKET-021 QA — Route response shape', () => {
 
 describe('TICKET-021 QA — Edge cases', () => {
   it('ending same session twice returns 400 on second call', async () => {
-    const id = sessionManager.createSession('test');
+    const id = sessionManager.createSession('test', 'discovery');
     const session = sessionManager.getSession(id)!;
     (session as { status: string }).status = 'active';
 
@@ -130,7 +130,7 @@ describe('TICKET-021 QA — Edge cases', () => {
 
 describe('TICKET-021 QA — Session state after ending', () => {
   it('session status transitions from active to completed', async () => {
-    const id = sessionManager.createSession('test');
+    const id = sessionManager.createSession('test', 'discovery');
     const session = sessionManager.getSession(id)!;
     (session as { status: string }).status = 'active';
 
@@ -145,7 +145,7 @@ describe('TICKET-021 QA — Session state after ending', () => {
   });
 
   it('session scorecard is populated after ending', async () => {
-    const id = sessionManager.createSession('test');
+    const id = sessionManager.createSession('test', 'discovery');
     const session = sessionManager.getSession(id)!;
     (session as { status: string }).status = 'active';
 
@@ -161,7 +161,7 @@ describe('TICKET-021 QA — Session state after ending', () => {
   });
 
   it('session remains retrievable via getSession after ending', async () => {
-    const id = sessionManager.createSession('test');
+    const id = sessionManager.createSession('test', 'discovery');
     const session = sessionManager.getSession(id)!;
     (session as { status: string }).status = 'active';
 
@@ -178,8 +178,8 @@ describe('TICKET-021 QA — Session state after ending', () => {
 
 describe('TICKET-021 QA — Multiple sessions isolation', () => {
   it('ending one session does not affect another active session', async () => {
-    const id1 = sessionManager.createSession('test');
-    const id2 = sessionManager.createSession('test');
+    const id1 = sessionManager.createSession('test', 'discovery');
+    const id2 = sessionManager.createSession('test', 'discovery');
     const session1 = sessionManager.getSession(id1)!;
     const session2 = sessionManager.getSession(id2)!;
     (session1 as { status: string }).status = 'active';

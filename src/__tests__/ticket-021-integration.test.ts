@@ -18,7 +18,7 @@ function makeParams(id: string) {
 
 describe('TICKET-021 Integration — end session route', () => {
   it('returns 200 and generates scorecard for active session', async () => {
-    const id = sessionManager.createSession('test');
+    const id = sessionManager.createSession('test', 'discovery');
     const session = sessionManager.getSession(id)!;
     (session as { status: string }).status = 'active';
 
@@ -40,7 +40,7 @@ describe('TICKET-021 Integration — end session route', () => {
   });
 
   it('handles concurrent end requests — second returns 400', async () => {
-    const id = sessionManager.createSession('test');
+    const id = sessionManager.createSession('test', 'discovery');
     const session = sessionManager.getSession(id)!;
     (session as { status: string }).status = 'active';
 
@@ -72,7 +72,7 @@ describe('TICKET-021 Integration — end session route', () => {
       throw new Error('Unexpected internal error');
     };
 
-    const id = sessionManager.createSession('test');
+    const id = sessionManager.createSession('test', 'discovery');
     const session = sessionManager.getSession(id)!;
     (session as { status: string }).status = 'active';
 
@@ -101,7 +101,7 @@ describe('TICKET-021 Integration — end session route', () => {
   });
 
   it('POST handler accepts NextRequest without body', async () => {
-    const id = sessionManager.createSession('test');
+    const id = sessionManager.createSession('test', 'discovery');
     const session = sessionManager.getSession(id)!;
     (session as { status: string }).status = 'active';
 
@@ -114,7 +114,7 @@ describe('TICKET-021 Integration — end session route', () => {
   });
 
   it('session scorecard has expected structure after ending', async () => {
-    const id = sessionManager.createSession('test');
+    const id = sessionManager.createSession('test', 'discovery');
     const session = sessionManager.getSession(id)!;
     (session as { status: string }).status = 'active';
 
@@ -134,7 +134,7 @@ describe('TICKET-021 Integration — end session route', () => {
   });
 
   it('ending an idle session returns 400 with correct error message', async () => {
-    const id = sessionManager.createSession('test');
+    const id = sessionManager.createSession('test', 'discovery');
     // Session starts as idle — do not change status
     const res = await endSession(
       new NextRequest('http://localhost'),

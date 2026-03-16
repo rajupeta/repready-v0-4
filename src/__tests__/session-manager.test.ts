@@ -113,8 +113,8 @@ describe('SessionManager', () => {
       const deps = createMockDeps();
       const manager = new SessionManager(deps);
 
-      const id1 = manager.createSession('discovery-call-001');
-      const id2 = manager.createSession('objection-handling-001');
+      const id1 = manager.createSession('discovery-call-001', 'discovery');
+      const id2 = manager.createSession('objection-handling-001', 'objection-handling');
 
       expect(id1).toBeDefined();
       expect(id2).toBeDefined();
@@ -125,7 +125,7 @@ describe('SessionManager', () => {
       const deps = createMockDeps();
       const manager = new SessionManager(deps);
 
-      const id = manager.createSession('discovery-call-001');
+      const id = manager.createSession('discovery-call-001', 'discovery');
       const session = manager.getSession(id);
 
       expect(session).toBeDefined();
@@ -151,7 +151,7 @@ describe('SessionManager', () => {
       const deps = createMockDeps();
       const manager = new SessionManager(deps);
 
-      const id = manager.createSession('discovery-call-001');
+      const id = manager.createSession('discovery-call-001', 'discovery');
       manager.startSession(id);
 
       expect(() => manager.startSession(id)).toThrow('is not idle');
@@ -161,7 +161,7 @@ describe('SessionManager', () => {
       const deps = createMockDeps();
       const manager = new SessionManager(deps);
 
-      const id = manager.createSession('discovery-call-001');
+      const id = manager.createSession('discovery-call-001', 'discovery');
       manager.startSession(id);
 
       expect(manager.getSession(id)!.status).toBe('active');
@@ -171,7 +171,7 @@ describe('SessionManager', () => {
       const deps = createMockDeps();
       const manager = new SessionManager(deps);
 
-      const id = manager.createSession('discovery-call-001');
+      const id = manager.createSession('discovery-call-001', 'discovery');
       manager.startSession(id);
 
       expect(deps.rulesEngine.resetCooldowns).toHaveBeenCalled();
@@ -181,7 +181,7 @@ describe('SessionManager', () => {
       const deps = createMockDeps();
       const manager = new SessionManager(deps);
 
-      const id = manager.createSession('discovery-call-001');
+      const id = manager.createSession('discovery-call-001', 'discovery');
       manager.startSession(id);
 
       expect(deps.createPlaybackService).toHaveBeenCalledWith('discovery-call-001');
@@ -191,7 +191,7 @@ describe('SessionManager', () => {
       const deps = createMockDeps();
       const manager = new SessionManager(deps);
 
-      const id = manager.createSession('discovery-call-001');
+      const id = manager.createSession('discovery-call-001', 'discovery');
       manager.startSession(id);
 
       expect(deps.createTranscriptService).toHaveBeenCalledWith(
@@ -210,7 +210,7 @@ describe('SessionManager', () => {
       });
       const manager = new SessionManager(deps);
 
-      const id = manager.createSession('discovery-call-001');
+      const id = manager.createSession('discovery-call-001', 'discovery');
       manager.startSession(id);
 
       expect(mockPlayback.loadFixture).toHaveBeenCalled();
@@ -248,7 +248,7 @@ describe('SessionManager', () => {
       });
       const manager = new SessionManager(deps);
 
-      const id = manager.createSession('discovery-call-001');
+      const id = manager.createSession('discovery-call-001', 'discovery');
       manager.startSession(id);
 
       const line: TranscriptLine = {
@@ -281,7 +281,7 @@ describe('SessionManager', () => {
       });
       const manager = new SessionManager(deps);
 
-      const id = manager.createSession('discovery-call-001');
+      const id = manager.createSession('discovery-call-001', 'discovery');
       manager.startSession(id);
 
       const line1: TranscriptLine = {
@@ -319,7 +319,7 @@ describe('SessionManager', () => {
       });
       const manager = new SessionManager(deps);
 
-      const id = manager.createSession('discovery-call-001');
+      const id = manager.createSession('discovery-call-001', 'discovery');
       manager.startSession(id);
 
       mockPlayback._onLine!({
@@ -373,7 +373,7 @@ describe('SessionManager', () => {
       });
       const manager = new SessionManager(deps);
 
-      const id = manager.createSession('discovery-call-001');
+      const id = manager.createSession('discovery-call-001', 'discovery');
       manager.startSession(id);
 
       mockPlayback._onLine!({
@@ -423,7 +423,7 @@ describe('SessionManager', () => {
       });
       const manager = new SessionManager(deps);
 
-      const id = manager.createSession('discovery-call-001');
+      const id = manager.createSession('discovery-call-001', 'discovery');
       manager.startSession(id);
 
       // Should not throw
@@ -471,7 +471,7 @@ describe('SessionManager', () => {
       });
       const manager = new SessionManager(deps);
 
-      const id = manager.createSession('discovery-call-001');
+      const id = manager.createSession('discovery-call-001', 'discovery');
       manager.startSession(id);
 
       // Feed some lines
@@ -534,7 +534,7 @@ describe('SessionManager', () => {
       });
       const manager = new SessionManager(deps);
 
-      const id = manager.createSession('discovery-call-001');
+      const id = manager.createSession('discovery-call-001', 'discovery');
       manager.startSession(id);
       mockPlayback._onComplete!();
 
@@ -600,7 +600,7 @@ describe('SessionManager', () => {
       const manager = new SessionManager(deps);
 
       // Step 1: Create session
-      const id = manager.createSession('discovery-call-001');
+      const id = manager.createSession('discovery-call-001', 'discovery');
       expect(manager.getSession(id)!.status).toBe('idle');
 
       // Step 2: Start session
@@ -676,7 +676,7 @@ describe('SessionManager', () => {
       const deps = createMockDeps();
       const manager = new SessionManager(deps);
 
-      const id = manager.createSession('discovery-call-001');
+      const id = manager.createSession('discovery-call-001', 'discovery');
       expect(manager.getScorecard(id)).toBeUndefined();
     });
   });

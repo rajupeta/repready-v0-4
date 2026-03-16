@@ -232,7 +232,7 @@ describe('TICKET-009 Final QA — SessionManager direct', () => {
   });
 
   it('createSession returns a valid UUID string', () => {
-    const id = sm.createSession('test-fixture');
+    const id = sm.createSession('test-fixture', 'discovery');
     expect(id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
   });
 
@@ -245,7 +245,7 @@ describe('TICKET-009 Final QA — SessionManager direct', () => {
   });
 
   it('getScorecard returns undefined for idle session', () => {
-    const id = sm.createSession('test');
+    const id = sm.createSession('test', 'discovery');
     expect(sm.getScorecard(id)).toBeUndefined();
   });
 
@@ -254,13 +254,13 @@ describe('TICKET-009 Final QA — SessionManager direct', () => {
   });
 
   it('startSession throws for already-started session', () => {
-    const id = sm.createSession('test');
+    const id = sm.createSession('test', 'discovery');
     sm.startSession(id);
     expect(() => sm.startSession(id)).toThrow('not idle');
   });
 
   it('completed session has scorecard with expected shape', async () => {
-    const id = sm.createSession('test');
+    const id = sm.createSession('test', 'discovery');
     sm.startSession(id);
     await new Promise((r) => setTimeout(r, 50));
 

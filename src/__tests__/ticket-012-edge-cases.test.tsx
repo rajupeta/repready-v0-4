@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import Home from '@/app/page';
 
@@ -26,7 +26,7 @@ function defaultSSE() {
 beforeEach(() => {
   mockUseSSE.mockReturnValue(defaultSSE());
   mockFetch.mockResolvedValue({
-    json: () => Promise.resolve(['discovery-call-001']),
+    json: () => Promise.resolve({ sessionId: 'session-1' }),
   });
 });
 
@@ -35,29 +35,21 @@ afterEach(() => {
 });
 
 describe('TICKET-012 edge cases', () => {
-  it('handles fixture fetch failure gracefully — no crash, empty dropdown', async () => {
-    mockFetch.mockRejectedValueOnce(new Error('Network error'));
+  it('renders without crashing and shows call type dropdown', () => {
     render(<Home />);
-    // Should still render without crashing
     expect(screen.getByText('RepReady')).toBeInTheDocument();
     expect(screen.getByText('Start Session')).toBeInTheDocument();
-    // No options in the dropdown
-    await waitFor(() => {
-      expect(screen.queryAllByRole('option')).toHaveLength(0);
-    });
+    expect(screen.getAllByRole('option')).toHaveLength(4);
   });
 
   it('returns to idle state on session creation failure', async () => {
-    mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['discovery-call-001']) })
-      .mockRejectedValueOnce(new Error('Server error'));
+    mockFetch.mockRejectedValueOnce(new Error('Server error'));
 
     render(<Home />);
-    await waitFor(() => {
-      expect(screen.getByRole('option', { name: 'discovery-call-001' })).toBeInTheDocument();
-    });
 
-    fireEvent.click(screen.getByText('Start Session'));
+    await act(async () => {
+      fireEvent.click(screen.getByText('Start Session'));
+    });
 
     // After failure, button should revert to "Start Session" (not stuck on "Starting...")
     await waitFor(() => {
@@ -67,22 +59,20 @@ describe('TICKET-012 edge cases', () => {
     expect(screen.getByText('Start Session')).not.toBeDisabled();
   });
 
-  it('disables fixture selector and start button during active session', async () => {
+  it('disables call type selector and start button during active session', async () => {
     mockUseSSE.mockReturnValue({ ...defaultSSE(), isConnected: true });
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['discovery-call-001']) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 's1' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: true }) });
 
     render(<Home />);
-    await waitFor(() => {
-      expect(screen.getByRole('option', { name: 'discovery-call-001' })).toBeInTheDocument();
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('Start Session'));
     });
 
-    fireEvent.click(screen.getByText('Start Session'));
-
     await waitFor(() => {
-      const select = screen.getByLabelText('Select fixture');
+      const select = screen.getByLabelText('Select call type');
       expect(select).toBeDisabled();
     });
   });
@@ -92,16 +82,15 @@ describe('TICKET-012 edge cases', () => {
     let sseReturn = { ...defaultSSE(), isConnected: false };
     mockUseSSE.mockImplementation(() => sseReturn);
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['discovery-call-001']) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 's1' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: true }) });
 
     const { rerender } = render(<Home />);
-    await waitFor(() => {
-      expect(screen.getByRole('option', { name: 'discovery-call-001' })).toBeInTheDocument();
+
+    await act(async () => {
+      fireEvent.click(screen.getByText('Start Session'));
     });
 
-    fireEvent.click(screen.getByText('Start Session'));
     await waitFor(() => {
       expect(screen.getByText('Starting...')).toBeInTheDocument();
     });
@@ -129,16 +118,10 @@ describe('TICKET-012 edge cases', () => {
     expect(screen.getByText('Session Complete')).toBeInTheDocument();
   });
 
-  it('Start Session button is disabled when no fixture is selected', async () => {
-    mockFetch.mockResolvedValueOnce({
-      json: () => Promise.resolve([]),
-    });
+  it('Start Session button is always enabled with call type dropdown (default selected)', () => {
     render(<Home />);
-    await waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith('/api/fixtures');
-    });
-    // With empty fixtures, selectedFixture is '' which is falsy
-    expect(screen.getByText('Start Session')).toBeDisabled();
+    // With call type dropdown, there's always a default selection
+    expect(screen.getByText('Start Session')).not.toBeDisabled();
   });
 
   it('accumulates multiple coaching prompts', () => {

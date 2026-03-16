@@ -31,20 +31,23 @@ beforeEach(() => {
     scorecard: null,
     isConnected: false,
   });
+  mockFetch.mockResolvedValue({
+    json: () => Promise.resolve({ sessionId: 'session-1' }),
+  });
 });
 
 describe('TICKET-017 QA: Acceptance Criteria Validation', () => {
   describe('AC1: page.tsx correctly reads sessionId from the API response', () => {
     it('extracts sessionId field from POST /api/sessions response', async () => {
       mockFetch
-        .mockResolvedValueOnce({ json: () => Promise.resolve(['fixture-1']) })
         .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'sess-001' }) })
         .mockResolvedValueOnce({ json: () => Promise.resolve({ status: 'started' }) });
 
       render(<Home />);
-      await waitFor(() => expect(screen.getByRole('option')).toBeInTheDocument());
 
-      fireEvent.click(screen.getByText('Start Session'));
+      await act(async () => {
+        fireEvent.click(screen.getByText('Start Session'));
+      });
 
       await waitFor(() => {
         expect(mockFetch).toHaveBeenCalledWith(
@@ -61,14 +64,14 @@ describe('TICKET-017 QA: Acceptance Criteria Validation', () => {
     it('does NOT read an "id" field — only uses "sessionId"', async () => {
       // Even if the API returned both, page.tsx should use sessionId
       mockFetch
-        .mockResolvedValueOnce({ json: () => Promise.resolve(['fixture-1']) })
         .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'sess-correct', id: 'sess-wrong' }) })
         .mockResolvedValueOnce({ json: () => Promise.resolve({ status: 'started' }) });
 
       render(<Home />);
-      await waitFor(() => expect(screen.getByRole('option')).toBeInTheDocument());
 
-      fireEvent.click(screen.getByText('Start Session'));
+      await act(async () => {
+        fireEvent.click(screen.getByText('Start Session'));
+      });
 
       await waitFor(() => {
         // Should use sessionId, not id
@@ -87,18 +90,18 @@ describe('TICKET-017 QA: Acceptance Criteria Validation', () => {
   describe('AC2: Session creation no longer crashes', () => {
     it('does not crash when API returns { sessionId }', async () => {
       mockFetch
-        .mockResolvedValueOnce({ json: () => Promise.resolve(['call-1']) })
         .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'sess-valid' }) })
         .mockResolvedValueOnce({ json: () => Promise.resolve({ status: 'started' }) });
 
       // Should not throw
       const { container } = render(<Home />);
-      await waitFor(() => expect(screen.getByRole('option')).toBeInTheDocument());
 
-      fireEvent.click(screen.getByText('Start Session'));
+      await act(async () => {
+        fireEvent.click(screen.getByText('Start Session'));
+      });
 
       await waitFor(() => {
-        expect(mockFetch).toHaveBeenCalledTimes(3);
+        expect(mockFetch).toHaveBeenCalledTimes(2);
       });
 
       // Component should still be mounted and functional
@@ -107,17 +110,17 @@ describe('TICKET-017 QA: Acceptance Criteria Validation', () => {
 
     it('does not call /api/sessions/undefined/start', async () => {
       mockFetch
-        .mockResolvedValueOnce({ json: () => Promise.resolve(['call-1']) })
         .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'sess-defined' }) })
         .mockResolvedValueOnce({ json: () => Promise.resolve({ status: 'started' }) });
 
       render(<Home />);
-      await waitFor(() => expect(screen.getByRole('option')).toBeInTheDocument());
 
-      fireEvent.click(screen.getByText('Start Session'));
+      await act(async () => {
+        fireEvent.click(screen.getByText('Start Session'));
+      });
 
       await waitFor(() => {
-        expect(mockFetch).toHaveBeenCalledTimes(3);
+        expect(mockFetch).toHaveBeenCalledTimes(2);
       });
 
       // Verify no call was made to undefined endpoint
@@ -127,14 +130,13 @@ describe('TICKET-017 QA: Acceptance Criteria Validation', () => {
     });
 
     it('handles session creation error gracefully (reverts to idle)', async () => {
-      mockFetch
-        .mockResolvedValueOnce({ json: () => Promise.resolve(['call-1']) })
-        .mockRejectedValueOnce(new Error('Network error'));
+      mockFetch.mockRejectedValueOnce(new Error('Network error'));
 
       render(<Home />);
-      await waitFor(() => expect(screen.getByRole('option')).toBeInTheDocument());
 
-      fireEvent.click(screen.getByText('Start Session'));
+      await act(async () => {
+        fireEvent.click(screen.getByText('Start Session'));
+      });
 
       // Should revert to idle state (button re-enabled)
       await waitFor(() => {
@@ -146,14 +148,14 @@ describe('TICKET-017 QA: Acceptance Criteria Validation', () => {
   describe('AC3: Session ID is correctly passed to subsequent SSE and control calls', () => {
     it('passes sessionId to useSSE hook for SSE connection', async () => {
       mockFetch
-        .mockResolvedValueOnce({ json: () => Promise.resolve(['call-1']) })
         .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'sess-sse-test' }) })
         .mockResolvedValueOnce({ json: () => Promise.resolve({ status: 'started' }) });
 
       render(<Home />);
-      await waitFor(() => expect(screen.getByRole('option')).toBeInTheDocument());
 
-      fireEvent.click(screen.getByText('Start Session'));
+      await act(async () => {
+        fireEvent.click(screen.getByText('Start Session'));
+      });
 
       await waitFor(() => {
         expect(mockUseSSE).toHaveBeenCalledWith('sess-sse-test');
@@ -162,14 +164,14 @@ describe('TICKET-017 QA: Acceptance Criteria Validation', () => {
 
     it('passes sessionId to start session API call', async () => {
       mockFetch
-        .mockResolvedValueOnce({ json: () => Promise.resolve(['call-1']) })
         .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'sess-start-test' }) })
         .mockResolvedValueOnce({ json: () => Promise.resolve({ status: 'started' }) });
 
       render(<Home />);
-      await waitFor(() => expect(screen.getByRole('option')).toBeInTheDocument());
 
-      fireEvent.click(screen.getByText('Start Session'));
+      await act(async () => {
+        fireEvent.click(screen.getByText('Start Session'));
+      });
 
       await waitFor(() => {
         expect(mockFetch).toHaveBeenCalledWith(
@@ -180,8 +182,6 @@ describe('TICKET-017 QA: Acceptance Criteria Validation', () => {
     });
 
     it('useSSE starts as null (no session) before any session is created', () => {
-      mockFetch.mockResolvedValueOnce({ json: () => Promise.resolve([]) });
-
       render(<Home />);
 
       // Initially called with null (no session)
@@ -192,7 +192,6 @@ describe('TICKET-017 QA: Acceptance Criteria Validation', () => {
       const callOrder: string[] = [];
 
       mockFetch
-        .mockResolvedValueOnce({ json: () => Promise.resolve(['call-1']) })
         .mockImplementationOnce(async (url: string) => {
           callOrder.push(`create: ${url}`);
           return { json: () => Promise.resolve({ sessionId: 'sess-sequence' }) };
@@ -203,9 +202,10 @@ describe('TICKET-017 QA: Acceptance Criteria Validation', () => {
         });
 
       render(<Home />);
-      await waitFor(() => expect(screen.getByRole('option')).toBeInTheDocument());
 
-      fireEvent.click(screen.getByText('Start Session'));
+      await act(async () => {
+        fireEvent.click(screen.getByText('Start Session'));
+      });
 
       await waitFor(() => {
         expect(callOrder).toHaveLength(2);
@@ -224,14 +224,14 @@ describe('TICKET-017 QA: Acceptance Criteria Validation', () => {
 describe('TICKET-017 QA: Edge Cases', () => {
   it('handles session IDs with special characters', async () => {
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['call-1']) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'sess-abc_123-def' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ status: 'started' }) });
 
     render(<Home />);
-    await waitFor(() => expect(screen.getByRole('option')).toBeInTheDocument());
 
-    fireEvent.click(screen.getByText('Start Session'));
+    await act(async () => {
+      fireEvent.click(screen.getByText('Start Session'));
+    });
 
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith(
@@ -241,50 +241,40 @@ describe('TICKET-017 QA: Edge Cases', () => {
     });
   });
 
-  it('sends selected fixture in create request body', async () => {
+  it('sends callType in create request body', async () => {
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['fixture-alpha', 'fixture-beta']) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'sess-fixture' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ status: 'started' }) });
 
     render(<Home />);
-    await waitFor(() => expect(screen.getAllByRole('option')).toHaveLength(2));
 
-    fireEvent.click(screen.getByText('Start Session'));
+    await act(async () => {
+      fireEvent.click(screen.getByText('Start Session'));
+    });
 
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith(
         '/api/sessions',
         expect.objectContaining({
           method: 'POST',
-          body: JSON.stringify({ fixtureId: 'fixture-alpha' }),
+          body: JSON.stringify({ callType: 'discovery' }),
         }),
       );
     });
   });
 
   it('disables start button while session is loading', async () => {
-    let resolveCreate: (value: unknown) => void;
-    const createPromise = new Promise((resolve) => { resolveCreate = resolve; });
-
-    mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['call-1']) })
-      .mockImplementationOnce(() => createPromise);
+    mockFetch.mockImplementationOnce(() => new Promise(() => {})); // never resolves
 
     render(<Home />);
-    await waitFor(() => expect(screen.getByRole('option')).toBeInTheDocument());
 
-    const button = screen.getByText('Start Session');
-    fireEvent.click(button);
+    await act(async () => {
+      fireEvent.click(screen.getByText('Start Session'));
+    });
 
     // While loading, button text changes and is disabled
     await waitFor(() => {
       expect(screen.getByText('Starting...')).toBeDisabled();
-    });
-
-    // Resolve to clean up
-    await act(async () => {
-      resolveCreate!({ json: () => Promise.resolve({ sessionId: 'sess-resolved' }) });
     });
   });
 });

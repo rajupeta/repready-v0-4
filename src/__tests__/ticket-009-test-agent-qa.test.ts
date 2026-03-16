@@ -151,7 +151,7 @@ describe('Test Agent QA — AC2: POST /api/sessions/[id]/start', () => {
   let sessionId: string;
 
   beforeEach(() => {
-    sessionId = sessionManager.createSession('discovery-call-001');
+    sessionId = sessionManager.createSession('discovery-call-001', 'discovery');
   });
 
   it('returns 200 { status: "started" } for idle session', async () => {
@@ -209,7 +209,7 @@ describe('Test Agent QA — AC2: POST /api/sessions/[id]/start', () => {
 
 describe('Test Agent QA — AC3: GET /api/sessions/[id]/scorecard', () => {
   it('returns scorecard JSON for completed session', async () => {
-    const sessionId = sessionManager.createSession('discovery-call-001');
+    const sessionId = sessionManager.createSession('discovery-call-001', 'discovery');
     sessionManager.startSession(sessionId);
     await new Promise((r) => setTimeout(r, 50));
     expect(sessionManager.getSession(sessionId)!.status).toBe('completed');
@@ -233,7 +233,7 @@ describe('Test Agent QA — AC3: GET /api/sessions/[id]/scorecard', () => {
   });
 
   it('returns 400 for idle (not completed) session', async () => {
-    const sessionId = sessionManager.createSession('discovery-call-001');
+    const sessionId = sessionManager.createSession('discovery-call-001', 'discovery');
 
     const res = await getScorecard(new NextRequest('http://localhost'), params(sessionId));
     expect(res.status).toBe(400);
@@ -246,7 +246,7 @@ describe('Test Agent QA — AC3: GET /api/sessions/[id]/scorecard', () => {
   });
 
   it('scorecard entries array and score are structurally valid', async () => {
-    const sessionId = sessionManager.createSession('discovery-call-001');
+    const sessionId = sessionManager.createSession('discovery-call-001', 'discovery');
     sessionManager.startSession(sessionId);
     await new Promise((r) => setTimeout(r, 50));
 
@@ -258,7 +258,7 @@ describe('Test Agent QA — AC3: GET /api/sessions/[id]/scorecard', () => {
   });
 
   it('response Content-Type is application/json', async () => {
-    const sessionId = sessionManager.createSession('discovery-call-001');
+    const sessionId = sessionManager.createSession('discovery-call-001', 'discovery');
     const res = await getScorecard(new NextRequest('http://localhost'), params(sessionId));
     expect(res.headers.get('content-type')).toContain('application/json');
   });

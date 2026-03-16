@@ -222,7 +222,7 @@ describe('TICKET-016: Wire real dependencies into session-manager-instance', () 
       const { sessionManager } = await import('@/lib/session-manager-instance');
 
       // Step 1: Create session
-      const sessionId = sessionManager.createSession('discovery-call');
+      const sessionId = sessionManager.createSession('discovery-call', 'discovery');
       expect(typeof sessionId).toBe('string');
       expect(sessionId.length).toBeGreaterThan(0);
 
@@ -253,7 +253,7 @@ describe('TICKET-016: Wire real dependencies into session-manager-instance', () 
       const { sessionManager } = await import('@/lib/session-manager-instance');
       const { eventBus } = await import('@/lib/event-bus-instance');
 
-      const sessionId = sessionManager.createSession('discovery-call');
+      const sessionId = sessionManager.createSession('discovery-call', 'discovery');
       const events: any[] = [];
 
       // Subscribe to events
@@ -281,7 +281,7 @@ describe('TICKET-016: Wire real dependencies into session-manager-instance', () 
 
     it('PlaybackService.loadFixture() is called during startSession', async () => {
       const { sessionManager } = await import('@/lib/session-manager-instance');
-      const sessionId = sessionManager.createSession('discovery-call');
+      const sessionId = sessionManager.createSession('discovery-call', 'discovery');
 
       sessionManager.startSession(sessionId);
       await new Promise((resolve) => setTimeout(resolve, 50));
@@ -291,7 +291,7 @@ describe('TICKET-016: Wire real dependencies into session-manager-instance', () 
 
     it('PlaybackService.start() is called with callbacks', async () => {
       const { sessionManager } = await import('@/lib/session-manager-instance');
-      const sessionId = sessionManager.createSession('discovery-call');
+      const sessionId = sessionManager.createSession('discovery-call', 'discovery');
 
       sessionManager.startSession(sessionId);
       await new Promise((resolve) => setTimeout(resolve, 50));
@@ -304,7 +304,7 @@ describe('TICKET-016: Wire real dependencies into session-manager-instance', () 
 
     it('getScorecard returns scorecard after session completes', async () => {
       const { sessionManager } = await import('@/lib/session-manager-instance');
-      const sessionId = sessionManager.createSession('discovery-call');
+      const sessionId = sessionManager.createSession('discovery-call', 'discovery');
 
       // Before start — no scorecard
       expect(sessionManager.getScorecard(sessionId)).toBeUndefined();
@@ -327,7 +327,7 @@ describe('TICKET-016: Wire real dependencies into session-manager-instance', () 
 
     it('rejects starting an already-active session', async () => {
       const { sessionManager } = await import('@/lib/session-manager-instance');
-      const sessionId = sessionManager.createSession('discovery-call');
+      const sessionId = sessionManager.createSession('discovery-call', 'discovery');
 
       sessionManager.startSession(sessionId);
 
@@ -341,8 +341,8 @@ describe('TICKET-016: Wire real dependencies into session-manager-instance', () 
     it('multiple sessions can be created independently', async () => {
       const { sessionManager } = await import('@/lib/session-manager-instance');
 
-      const id1 = sessionManager.createSession('discovery-call');
-      const id2 = sessionManager.createSession('demo-call');
+      const id1 = sessionManager.createSession('discovery-call', 'discovery');
+      const id2 = sessionManager.createSession('demo-call', 'demo');
 
       expect(id1).not.toBe(id2);
       expect(sessionManager.getSession(id1)!.fixtureId).toBe('discovery-call');
@@ -373,7 +373,7 @@ describe('TICKET-016: Wire real dependencies into session-manager-instance', () 
       expect(sm1).toBe(sm2);
 
       // Creating a session in sm1 should be visible in sm2
-      const id = sm1.createSession('test-fixture');
+      const id = sm1.createSession('test-fixture', 'discovery');
       expect(sm2.getSession(id)).toBeDefined();
     });
 
@@ -384,7 +384,7 @@ describe('TICKET-016: Wire real dependencies into session-manager-instance', () 
       const { sessionManager } = await import('@/lib/session-manager-instance');
       const { eventBus } = await import('@/lib/event-bus-instance');
 
-      const sessionId = sessionManager.createSession('discovery-call');
+      const sessionId = sessionManager.createSession('discovery-call', 'discovery');
       const events: any[] = [];
       eventBus.subscribe(sessionId, (e: any) => events.push(e));
 

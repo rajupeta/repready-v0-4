@@ -94,7 +94,7 @@ describe('POST /api/sessions/[id]/start', () => {
   let sessionId: string;
 
   beforeEach(() => {
-    sessionId = sessionManager.createSession('discovery-call-001');
+    sessionId = sessionManager.createSession('discovery-call-001', 'discovery');
   });
 
   it('returns 200 for idle session', async () => {
@@ -151,7 +151,7 @@ describe('GET /api/sessions/[id]/scorecard', () => {
   });
 
   it('returns 400 for session that is not completed', async () => {
-    const sessionId = sessionManager.createSession('discovery-call-001');
+    const sessionId = sessionManager.createSession('discovery-call-001', 'discovery');
 
     const response = await getScorecard(
       new NextRequest('http://localhost:3000'),
@@ -165,7 +165,7 @@ describe('GET /api/sessions/[id]/scorecard', () => {
 
   it('returns scorecard JSON for completed session', async () => {
     // Create and start session — the stub deps complete immediately
-    const sessionId = sessionManager.createSession('discovery-call-001');
+    const sessionId = sessionManager.createSession('discovery-call-001', 'discovery');
     sessionManager.startSession(sessionId);
 
     // Wait for async scorecard generation to complete

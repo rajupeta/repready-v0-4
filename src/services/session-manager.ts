@@ -6,6 +6,7 @@ import {
   CoachingPrompt,
   Session,
   Scorecard,
+  CallType,
 } from '@/types';
 
 export interface IRulesEngine {
@@ -62,12 +63,13 @@ export class SessionManager {
     this.deps = deps;
   }
 
-  createSession(fixtureId: string): string {
+  createSession(fixtureId: string, callType: CallType): string {
     const id = crypto.randomUUID();
     const session: Session = {
       id,
       status: 'idle',
       fixtureId,
+      callType,
       transcript: [],
       events: [],
     };
