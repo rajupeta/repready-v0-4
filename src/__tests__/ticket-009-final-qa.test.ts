@@ -18,6 +18,7 @@ import { EventBus } from '@/services/event-bus';
 jest.mock('@/services/playback-service', () => ({
   PlaybackService: jest.fn().mockImplementation(() => ({
     loadFixture: jest.fn(),
+    loadLines: jest.fn(),
     start: jest.fn().mockImplementation(
       (_onLine: unknown, onComplete: () => void) => {
         onComplete();
@@ -211,6 +212,7 @@ describe('TICKET-009 Final QA — SessionManager direct', () => {
       rules: [],
       createPlaybackService: () => ({
         loadFixture: () => {},
+        loadLines: () => {},
         start: (_onLine: (line: TranscriptLine) => void, onComplete: () => void) => {
           onComplete();
         },
@@ -249,19 +251,19 @@ describe('TICKET-009 Final QA — SessionManager direct', () => {
     expect(sm.getScorecard(id)).toBeUndefined();
   });
 
-  it('startSession throws for non-existent session', () => {
-    expect(() => sm.startSession('no-such')).toThrow('not found');
+  it('startSession throws for non-existent session', async () => {
+    await expect(sm.startSession('no-such')).rejects.toThrow('not found');
   });
 
-  it('startSession throws for already-started session', () => {
+  it('startSession throws for already-started session', async () => {
     const id = sm.createSession('test');
-    sm.startSession(id);
-    expect(() => sm.startSession(id)).toThrow('not idle');
+    await sm.startSession(id);
+    await expect(sm.startSession(id)).rejects.toThrow('not idle');
   });
 
   it('completed session has scorecard with expected shape', async () => {
     const id = sm.createSession('test');
-    sm.startSession(id);
+    await sm.startSession(id);
     await new Promise((r) => setTimeout(r, 50));
 
     const scorecard = sm.getScorecard(id);

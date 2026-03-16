@@ -10,6 +10,7 @@ import { ScorecardService } from '@/services/scorecard-service';
 import { PlaybackService } from '@/services/playback-service';
 import { TranscriptService } from '@/services/transcript-service';
 import { ClaudeService } from '@/services/claude-service';
+import { TranscriptGeneratorService } from '@/services/transcript-generator-service';
 import { coachingRules } from '@/rules/coaching-rules';
 
 const globalForSessionManager = globalThis as unknown as {
@@ -21,12 +22,14 @@ function createDeps(): SessionManagerDeps {
   const rulesEngine = new RulesEngine(coachingRules);
   const coachingService = new CoachingService(claudeService);
   const scorecardService = new ScorecardService(claudeService);
+  const transcriptGeneratorService = new TranscriptGeneratorService();
 
   return {
     eventBus,
     rulesEngine,
     coachingService,
     scorecardService,
+    transcriptGeneratorService,
     rules: coachingRules,
     createPlaybackService: (fixtureId: string) => new PlaybackService(fixtureId),
     createTranscriptService: (

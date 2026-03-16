@@ -18,6 +18,10 @@ export class PlaybackService {
     this.lines = JSON.parse(raw) as FixtureLine[];
   }
 
+  loadLines(lines: FixtureLine[]): void {
+    this.lines = lines;
+  }
+
   start(
     onLine: (line: TranscriptLine) => void,
     onComplete: () => void

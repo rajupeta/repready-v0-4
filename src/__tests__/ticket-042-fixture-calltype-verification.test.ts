@@ -40,6 +40,7 @@ function createMockDeps(
     rules: [],
     createPlaybackService: jest.fn(() => ({
       loadFixture: jest.fn(),
+      loadLines: jest.fn(),
       start: jest.fn(),
       stop: jest.fn(),
     })),

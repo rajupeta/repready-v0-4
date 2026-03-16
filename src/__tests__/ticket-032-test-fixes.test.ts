@@ -65,6 +65,7 @@ function createMockDeps(
     rules: [createMockRule()],
     createPlaybackService: jest.fn(() => ({
       loadFixture: jest.fn(),
+      loadLines: jest.fn(),
       start: jest.fn(),
       stop: jest.fn(),
     })),

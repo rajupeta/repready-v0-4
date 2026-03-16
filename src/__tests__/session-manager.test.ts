@@ -79,6 +79,7 @@ function createMockDeps(overrides: Partial<SessionManagerDeps> = {}): SessionMan
 
   const mockPlayback: MockPlaybackService = {
     loadFixture: jest.fn(),
+    loadLines: jest.fn(),
     start: jest.fn((onLine, onComplete) => {
       mockPlayback._onLine = onLine;
       mockPlayback._onComplete = onComplete;
@@ -138,70 +139,71 @@ describe('SessionManager', () => {
   });
 
   describe('startSession', () => {
-    it('throws if session does not exist', () => {
+    it('throws if session does not exist', async () => {
       const deps = createMockDeps();
       const manager = new SessionManager(deps);
 
-      expect(() => manager.startSession('nonexistent')).toThrow(
+      await expect(manager.startSession('nonexistent')).rejects.toThrow(
         'Session nonexistent not found',
       );
     });
 
-    it('throws if session is not idle', () => {
+    it('throws if session is not idle', async () => {
       const deps = createMockDeps();
       const manager = new SessionManager(deps);
 
       const id = manager.createSession('discovery-call-001');
-      manager.startSession(id);
+      await manager.startSession(id);
 
-      expect(() => manager.startSession(id)).toThrow('is not idle');
+      await expect(manager.startSession(id)).rejects.toThrow('is not idle');
     });
 
-    it('transitions session status from idle to active', () => {
+    it('transitions session status from idle to active', async () => {
       const deps = createMockDeps();
       const manager = new SessionManager(deps);
 
       const id = manager.createSession('discovery-call-001');
-      manager.startSession(id);
+      await manager.startSession(id);
 
       expect(manager.getSession(id)!.status).toBe('active');
     });
 
-    it('resets rules engine cooldowns', () => {
+    it('resets rules engine cooldowns', async () => {
       const deps = createMockDeps();
       const manager = new SessionManager(deps);
 
       const id = manager.createSession('discovery-call-001');
-      manager.startSession(id);
+      await manager.startSession(id);
 
       expect(deps.rulesEngine.resetCooldowns).toHaveBeenCalled();
     });
 
-    it('creates PlaybackService with the correct fixtureId', () => {
+    it('creates PlaybackService with the correct fixtureId', async () => {
       const deps = createMockDeps();
       const manager = new SessionManager(deps);
 
       const id = manager.createSession('discovery-call-001');
-      manager.startSession(id);
+      await manager.startSession(id);
 
       expect(deps.createPlaybackService).toHaveBeenCalledWith('discovery-call-001');
     });
 
-    it('creates TranscriptService with an onLineAdded callback', () => {
+    it('creates TranscriptService with an onLineAdded callback', async () => {
       const deps = createMockDeps();
       const manager = new SessionManager(deps);
 
       const id = manager.createSession('discovery-call-001');
-      manager.startSession(id);
+      await manager.startSession(id);
 
       expect(deps.createTranscriptService).toHaveBeenCalledWith(
         expect.any(Function),
       );
     });
 
-    it('loads fixture and starts playback', () => {
+    it('loads fixture and starts playback', async () => {
       const mockPlayback: MockPlaybackService = {
         loadFixture: jest.fn(),
+        loadLines: jest.fn(),
         start: jest.fn(),
         stop: jest.fn(),
       };
@@ -211,7 +213,7 @@ describe('SessionManager', () => {
       const manager = new SessionManager(deps);
 
       const id = manager.createSession('discovery-call-001');
-      manager.startSession(id);
+      await manager.startSession(id);
 
       expect(mockPlayback.loadFixture).toHaveBeenCalled();
       expect(mockPlayback.start).toHaveBeenCalledWith(
@@ -222,7 +224,7 @@ describe('SessionManager', () => {
   });
 
   describe('transcript pipeline', () => {
-    it('emits transcript SSE event when a line is added', () => {
+    it('emits transcript SSE event when a line is added', async () => {
       const emittedEvents: { sessionId: string; event: SSEEvent }[] = [];
       const mockEventBus = {
         emit: jest.fn((sessionId: string, event: SSEEvent) => {
@@ -235,6 +237,7 @@ describe('SessionManager', () => {
 
       const mockPlayback: MockPlaybackService = {
         loadFixture: jest.fn(),
+        loadLines: jest.fn(),
         start: jest.fn((onLine, onComplete) => {
           mockPlayback._onLine = onLine;
           mockPlayback._onComplete = onComplete;
@@ -249,7 +252,7 @@ describe('SessionManager', () => {
       const manager = new SessionManager(deps);
 
       const id = manager.createSession('discovery-call-001');
-      manager.startSession(id);
+      await manager.startSession(id);
 
       const line: TranscriptLine = {
         speaker: 'rep',
@@ -266,9 +269,10 @@ describe('SessionManager', () => {
       expect(transcriptEvents[0].event.data).toEqual({ line });
     });
 
-    it('adds lines to the session transcript', () => {
+    it('adds lines to the session transcript', async () => {
       const mockPlayback: MockPlaybackService = {
         loadFixture: jest.fn(),
+        loadLines: jest.fn(),
         start: jest.fn((onLine, onComplete) => {
           mockPlayback._onLine = onLine;
           mockPlayback._onComplete = onComplete;
@@ -282,7 +286,7 @@ describe('SessionManager', () => {
       const manager = new SessionManager(deps);
 
       const id = manager.createSession('discovery-call-001');
-      manager.startSession(id);
+      await manager.startSession(id);
 
       const line1: TranscriptLine = {
         speaker: 'rep',
@@ -304,9 +308,10 @@ describe('SessionManager', () => {
       expect(session!.transcript[1]).toEqual(line2);
     });
 
-    it('evaluates rules for each line', () => {
+    it('evaluates rules for each line', async () => {
       const mockPlayback: MockPlaybackService = {
         loadFixture: jest.fn(),
+        loadLines: jest.fn(),
         start: jest.fn((onLine, onComplete) => {
           mockPlayback._onLine = onLine;
           mockPlayback._onComplete = onComplete;
@@ -320,7 +325,7 @@ describe('SessionManager', () => {
       const manager = new SessionManager(deps);
 
       const id = manager.createSession('discovery-call-001');
-      manager.startSession(id);
+      await manager.startSession(id);
 
       mockPlayback._onLine!({
         speaker: 'rep',
@@ -351,6 +356,7 @@ describe('SessionManager', () => {
 
       const mockPlayback: MockPlaybackService = {
         loadFixture: jest.fn(),
+        loadLines: jest.fn(),
         start: jest.fn((onLine, onComplete) => {
           mockPlayback._onLine = onLine;
           mockPlayback._onComplete = onComplete;
@@ -374,7 +380,7 @@ describe('SessionManager', () => {
       const manager = new SessionManager(deps);
 
       const id = manager.createSession('discovery-call-001');
-      manager.startSession(id);
+      await manager.startSession(id);
 
       mockPlayback._onLine!({
         speaker: 'rep',
@@ -402,6 +408,7 @@ describe('SessionManager', () => {
 
       const mockPlayback: MockPlaybackService = {
         loadFixture: jest.fn(),
+        loadLines: jest.fn(),
         start: jest.fn((onLine, onComplete) => {
           mockPlayback._onLine = onLine;
           mockPlayback._onComplete = onComplete;
@@ -424,7 +431,7 @@ describe('SessionManager', () => {
       const manager = new SessionManager(deps);
 
       const id = manager.createSession('discovery-call-001');
-      manager.startSession(id);
+      await manager.startSession(id);
 
       // Should not throw
       mockPlayback._onLine!({
@@ -455,6 +462,7 @@ describe('SessionManager', () => {
 
       const mockPlayback: MockPlaybackService = {
         loadFixture: jest.fn(),
+        loadLines: jest.fn(),
         start: jest.fn((onLine, onComplete) => {
           mockPlayback._onLine = onLine;
           mockPlayback._onComplete = onComplete;
@@ -472,7 +480,7 @@ describe('SessionManager', () => {
       const manager = new SessionManager(deps);
 
       const id = manager.createSession('discovery-call-001');
-      manager.startSession(id);
+      await manager.startSession(id);
 
       // Feed some lines
       mockPlayback._onLine!({
@@ -516,6 +524,7 @@ describe('SessionManager', () => {
 
       const mockPlayback: MockPlaybackService = {
         loadFixture: jest.fn(),
+        loadLines: jest.fn(),
         start: jest.fn((onLine, onComplete) => {
           mockPlayback._onLine = onLine;
           mockPlayback._onComplete = onComplete;
@@ -535,7 +544,7 @@ describe('SessionManager', () => {
       const manager = new SessionManager(deps);
 
       const id = manager.createSession('discovery-call-001');
-      manager.startSession(id);
+      await manager.startSession(id);
       mockPlayback._onComplete!();
 
       await new Promise((r) => setTimeout(r, 10));
@@ -571,6 +580,7 @@ describe('SessionManager', () => {
 
       const mockPlayback: MockPlaybackService = {
         loadFixture: jest.fn(),
+        loadLines: jest.fn(),
         start: jest.fn((onLine, onComplete) => {
           mockPlayback._onLine = onLine;
           mockPlayback._onComplete = onComplete;
@@ -604,7 +614,7 @@ describe('SessionManager', () => {
       expect(manager.getSession(id)!.status).toBe('idle');
 
       // Step 2: Start session
-      manager.startSession(id);
+      await manager.startSession(id);
       expect(manager.getSession(id)!.status).toBe('active');
 
       // Step 3: Lines flow

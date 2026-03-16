@@ -31,6 +31,7 @@ export interface Session {
   status: 'idle' | 'active' | 'completed';
   fixtureId: string;
   callType: CallType;
+  dynamic?: boolean;
   transcript: TranscriptLine[];
   events: SSEEvent[];
   scorecard?: Scorecard;

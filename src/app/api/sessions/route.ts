@@ -6,7 +6,7 @@ import type { CallType } from '@/types';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { fixtureId, callType } = body;
+    const { fixtureId, callType, dynamic } = body;
 
     // Normalize inputs: only accept valid string values
     const validFixtureId =
@@ -17,6 +17,7 @@ export async function POST(request: NextRequest) {
       typeof callType === 'string' && VALID_CALL_TYPES.includes(callType as CallType)
         ? (callType as CallType)
         : undefined;
+    const useDynamic = dynamic === true;
 
     // At least one must be provided
     if (!validFixtureId && !validCallType) {
@@ -27,7 +28,7 @@ export async function POST(request: NextRequest) {
     }
 
     const resolved = resolveFixture(validCallType, validFixtureId);
-    const sessionId = sessionManager.createSession(resolved.fixtureId, resolved.callType);
+    const sessionId = sessionManager.createSession(resolved.fixtureId, resolved.callType, useDynamic);
     return NextResponse.json({ sessionId }, { status: 201 });
   } catch {
     return NextResponse.json(
