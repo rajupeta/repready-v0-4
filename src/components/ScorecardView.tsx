@@ -27,9 +27,9 @@ export default function ScorecardView({ scorecard, onClose }: ScorecardViewProps
         {onClose && (
           <button
             onClick={onClose}
-            className="rounded-lg px-4 py-1.5 text-sm font-medium text-gray-500 transition hover:bg-gray-100 hover:text-gray-900"
+            className="rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
           >
-            Close
+            New Session
           </button>
         )}
       </div>

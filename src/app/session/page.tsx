@@ -147,7 +147,13 @@ export default function Home() {
         <div className="mx-auto h-full max-w-7xl">
           {/* Scorecard replaces split view when session completes */}
           {scorecard ? (
-            <ScorecardView scorecard={scorecard} />
+            <ScorecardView
+              scorecard={scorecard}
+              onClose={() => {
+                setSessionId(null);
+                setSessionStatus('idle');
+              }}
+            />
           ) : (
             <div className="grid h-full grid-cols-1 gap-6 md:grid-cols-2">
               <TranscriptPanel lines={lines} />
