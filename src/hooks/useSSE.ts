@@ -51,7 +51,16 @@ export function useSSE(sessionId: string | null): UseSSEReturn {
 
     es.addEventListener('coaching_prompt', (event: MessageEvent) => {
       const { prompt } = JSON.parse(event.data) as { prompt: CoachingPrompt };
-      setPrompts((prev) => [...prev, prompt]);
+      setPrompts((prev) => {
+        const existingIdx = prev.findIndex((p) => p.ruleId === prompt.ruleId);
+        if (existingIdx >= 0) {
+          // Replace existing prompt for this rule with the latest one
+          const updated = [...prev];
+          updated[existingIdx] = prompt;
+          return updated;
+        }
+        return [...prev, prompt];
+      });
     });
 
     es.addEventListener('session_complete', (event: MessageEvent) => {

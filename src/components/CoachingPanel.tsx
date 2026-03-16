@@ -22,9 +22,9 @@ export default function CoachingPanel({ prompts }: CoachingPanelProps) {
     <div className="flex h-full flex-col rounded-xl border border-gray-200 bg-white p-5 shadow-md">
       <h2 className="mb-4 text-lg font-semibold text-gray-900">Coaching</h2>
       <div className="flex-1 space-y-3 overflow-y-auto pr-1">
-        {sorted.map((prompt, index) => (
+        {sorted.map((prompt) => (
           <div
-            key={index}
+            key={prompt.ruleId}
             className="rounded-lg border-l-4 border-amber-500 bg-amber-50 p-4 shadow-sm"
           >
             <h3 className="text-sm font-bold text-amber-900">
