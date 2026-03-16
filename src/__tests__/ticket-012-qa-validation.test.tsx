@@ -117,8 +117,8 @@ describe('useSSE hook — QA validation', () => {
   it('handles transcript events and accumulates lines in order', () => {
     render(<SSETestHarness sessionId="s1" />);
     act(() => {
-      MockEventSource.latest().simulateEvent('transcript', { speaker: 'rep', text: 'Hi', timestamp: 100 });
-      MockEventSource.latest().simulateEvent('transcript', { speaker: 'prospect', text: 'Hello', timestamp: 200 });
+      MockEventSource.latest().simulateEvent('transcript', { line: { speaker: 'rep', text: 'Hi', timestamp: 100 } });
+      MockEventSource.latest().simulateEvent('transcript', { line: { speaker: 'prospect', text: 'Hello', timestamp: 200 } });
     });
     const lines = JSON.parse(screen.getByTestId('h-lines').textContent!);
     expect(lines).toHaveLength(2);
@@ -130,10 +130,10 @@ describe('useSSE hook — QA validation', () => {
     render(<SSETestHarness sessionId="s1" />);
     act(() => {
       MockEventSource.latest().simulateEvent('coaching_prompt', {
-        ruleId: 'r1', ruleName: 'Empathy', message: 'Show empathy', timestamp: 1,
+        prompt: { ruleId: 'r1', ruleName: 'Empathy', message: 'Show empathy', timestamp: 1 },
       });
       MockEventSource.latest().simulateEvent('coaching_prompt', {
-        ruleId: 'r2', ruleName: 'Open Qs', message: 'Ask open', timestamp: 2,
+        prompt: { ruleId: 'r2', ruleName: 'Open Qs', message: 'Ask open', timestamp: 2 },
       });
     });
     const prompts = JSON.parse(screen.getByTestId('h-prompts').textContent!);
@@ -146,7 +146,7 @@ describe('useSSE hook — QA validation', () => {
     render(<SSETestHarness sessionId="s1" />);
     const sc = { overallScore: 88, summary: 'Great', entries: [] };
     act(() => {
-      MockEventSource.latest().simulateEvent('session_complete', sc);
+      MockEventSource.latest().simulateEvent('session_complete', { scorecard: sc });
     });
     const scorecard = JSON.parse(screen.getByTestId('h-scorecard').textContent!);
     expect(scorecard.overallScore).toBe(88);
@@ -188,8 +188,8 @@ describe('useSSE hook — QA validation', () => {
   it('resets all state when sessionId becomes null', () => {
     const { rerender } = render(<SSETestHarness sessionId="s1" />);
     act(() => {
-      MockEventSource.latest().simulateEvent('transcript', { speaker: 'rep', text: 'X', timestamp: 1 });
-      MockEventSource.latest().simulateEvent('coaching_prompt', { ruleId: 'r', ruleName: 'R', message: 'M', timestamp: 1 });
+      MockEventSource.latest().simulateEvent('transcript', { line: { speaker: 'rep', text: 'X', timestamp: 1 } });
+      MockEventSource.latest().simulateEvent('coaching_prompt', { prompt: { ruleId: 'r', ruleName: 'R', message: 'M', timestamp: 1 } });
     });
     expect(JSON.parse(screen.getByTestId('h-lines').textContent!)).toHaveLength(1);
 

@@ -99,9 +99,7 @@ describe('useSSE hook', () => {
     render(<TestComponent sessionId="abc-123" />);
     act(() => {
       MockEventSource.latest().simulateEvent('transcript', {
-        speaker: 'rep',
-        text: 'Hello',
-        timestamp: 1000,
+        line: { speaker: 'rep', text: 'Hello', timestamp: 1000 },
       });
     });
     const lines = JSON.parse(screen.getByTestId('lines').textContent!);
@@ -113,10 +111,12 @@ describe('useSSE hook', () => {
     render(<TestComponent sessionId="abc-123" />);
     act(() => {
       MockEventSource.latest().simulateEvent('coaching_prompt', {
-        ruleId: 'r1',
-        ruleName: 'Active Listening',
-        message: 'Reflect back',
-        timestamp: 1000,
+        prompt: {
+          ruleId: 'r1',
+          ruleName: 'Active Listening',
+          message: 'Reflect back',
+          timestamp: 1000,
+        },
       });
     });
     const prompts = JSON.parse(screen.getByTestId('prompts').textContent!);
@@ -127,9 +127,11 @@ describe('useSSE hook', () => {
   it('sets scorecard on session_complete event', () => {
     render(<TestComponent sessionId="abc-123" />);
     const scorecardData = {
-      overallScore: 75,
-      summary: 'Good job',
-      entries: [],
+      scorecard: {
+        overallScore: 75,
+        summary: 'Good job',
+        entries: [],
+      },
     };
     act(() => {
       MockEventSource.latest().simulateEvent('session_complete', scorecardData);
@@ -172,9 +174,7 @@ describe('useSSE hook', () => {
     const { rerender } = render(<TestComponent sessionId="abc-123" />);
     act(() => {
       MockEventSource.latest().simulateEvent('transcript', {
-        speaker: 'rep',
-        text: 'Hello',
-        timestamp: 1000,
+        line: { speaker: 'rep', text: 'Hello', timestamp: 1000 },
       });
     });
     expect(JSON.parse(screen.getByTestId('lines').textContent!)).toHaveLength(1);
@@ -199,19 +199,13 @@ describe('useSSE hook', () => {
     render(<TestComponent sessionId="abc-123" />);
     act(() => {
       MockEventSource.latest().simulateEvent('transcript', {
-        speaker: 'rep',
-        text: 'Line 1',
-        timestamp: 1000,
+        line: { speaker: 'rep', text: 'Line 1', timestamp: 1000 },
       });
       MockEventSource.latest().simulateEvent('transcript', {
-        speaker: 'prospect',
-        text: 'Line 2',
-        timestamp: 2000,
+        line: { speaker: 'prospect', text: 'Line 2', timestamp: 2000 },
       });
       MockEventSource.latest().simulateEvent('transcript', {
-        speaker: 'rep',
-        text: 'Line 3',
-        timestamp: 3000,
+        line: { speaker: 'rep', text: 'Line 3', timestamp: 3000 },
       });
     });
     const lines = JSON.parse(screen.getByTestId('lines').textContent!);
