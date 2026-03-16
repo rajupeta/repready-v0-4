@@ -353,8 +353,8 @@ describe('TICKET-015 Test Agent QA: README.md Comprehensive Validation', () => {
       expect(techText).toMatch(/Claude/i);
     });
 
-    it('mentions claude-3-5-haiku-20241022 model', () => {
-      expect(techText).toContain('claude-3-5-haiku-20241022');
+    it('mentions claude-haiku-4-5-20251001 model', () => {
+      expect(techText).toContain('claude-haiku-4-5-20251001');
     });
 
     it('mentions SSE', () => {
