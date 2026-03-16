@@ -16,6 +16,7 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.2.1",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.2",
@@ -27,7 +28,9 @@
     "eslint-config-next": "^15.1.0",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
-    "ts-jest": "^29.2.5",
+    "postcss": "^8.5.8",
+    "tailwindcss": "^4.2.1",
+    "ts-jest": "file:ts-jest-29.4.6.tgz",
     "typescript": "^5.7.0"
   }
 }

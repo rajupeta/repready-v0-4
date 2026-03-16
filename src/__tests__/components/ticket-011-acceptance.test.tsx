@@ -68,16 +68,16 @@ describe('TICKET-011: file structure and directives', () => {
 // ---- TranscriptPanel acceptance criteria ----
 
 describe('TICKET-011: TranscriptPanel renders lines with color-coded speaker labels', () => {
-  it('rep speaker gets blue badge (bg-blue-100 text-blue-800)', () => {
+  it('rep speaker gets blue badge (bg-blue-600 text-white)', () => {
     render(<TranscriptPanel lines={[{ speaker: 'rep', text: 'Hello' }]} />);
     const badge = screen.getByText('Rep');
-    expect(badge).toHaveClass('bg-blue-100', 'text-blue-800');
+    expect(badge).toHaveClass('bg-blue-600', 'text-white');
   });
 
-  it('prospect speaker gets gray badge (bg-gray-100 text-gray-800)', () => {
+  it('prospect speaker gets gray badge (bg-gray-500 text-white)', () => {
     render(<TranscriptPanel lines={[{ speaker: 'prospect', text: 'Hi' }]} />);
     const badge = screen.getByText('Prospect');
-    expect(badge).toHaveClass('bg-gray-100', 'text-gray-800');
+    expect(badge).toHaveClass('bg-gray-500', 'text-white');
   });
 
   it('renders text content next to each badge', () => {
@@ -104,11 +104,11 @@ describe('TICKET-011: TranscriptPanel renders lines with color-coded speaker lab
 });
 
 describe('TICKET-011: TranscriptPanel auto-scrolls to bottom', () => {
-  it('scroll container exists with overflow-y-auto and max-h-96', () => {
+  it('scroll container exists with overflow-y-auto and flex-1', () => {
     render(<TranscriptPanel lines={[{ speaker: 'rep', text: 'Scroll me' }]} />);
     const container = screen.getByText('Scroll me').closest('.overflow-y-auto');
     expect(container).not.toBeNull();
-    expect(container).toHaveClass('max-h-96');
+    expect(container).toHaveClass('flex-1');
   });
 
   it('re-render with additional lines still renders all content', () => {
@@ -186,13 +186,13 @@ describe('TICKET-011: CoachingPanel renders prompts as styled cards', () => {
 
     // Card container
     const card = screen.getByText('Empathy').closest('div');
-    expect(card).toHaveClass('bg-amber-50', 'border-amber-200');
+    expect(card).toHaveClass('bg-amber-50', 'border-amber-500');
 
     // Header text color
-    expect(screen.getByText('Empathy')).toHaveClass('text-amber-800');
+    expect(screen.getByText('Empathy')).toHaveClass('text-amber-900');
 
     // Message text color
-    expect(screen.getByText('Show understanding')).toHaveClass('text-amber-700');
+    expect(screen.getByText('Show understanding')).toHaveClass('text-amber-800');
   });
 
   it('most recent prompt appears at top', () => {
@@ -247,7 +247,7 @@ describe('TICKET-011: ScorecardView displays overall score with color coding', (
   it('score is displayed as large prominent number', () => {
     render(<ScorecardView scorecard={baseScorecard} />);
     const score = screen.getByText('75');
-    expect(score).toHaveClass('text-6xl', 'font-bold');
+    expect(score).toHaveClass('text-7xl', 'font-extrabold');
   });
 
   it('green (text-green-600) for score >= 70', () => {
@@ -347,10 +347,10 @@ describe('TICKET-011: ScorecardView summary and close button', () => {
     expect(screen.getByText('Overall solid performance with room to grow.')).toBeInTheDocument();
   });
 
-  it('summary is in a styled container (bg-gray-50)', () => {
+  it('summary is in a styled container (bg-blue-50)', () => {
     render(<ScorecardView scorecard={scorecard} />);
     const summary = screen.getByText('Overall solid performance with room to grow.');
-    expect(summary.closest('.bg-gray-50')).not.toBeNull();
+    expect(summary.closest('.bg-blue-50')).not.toBeNull();
   });
 
   it('renders close button when onClose is provided', () => {
