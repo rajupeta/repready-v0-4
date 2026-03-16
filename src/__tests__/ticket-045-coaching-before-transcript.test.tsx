@@ -185,6 +185,7 @@ describe('TICKET-045: Coaching prompts should not fire before transcript starts'
           ruleName: 'Talk Ratio',
           message: 'Let the prospect speak more',
           timestamp: 3500,
+          triggerLineIndex: 2,
         },
       ],
     });

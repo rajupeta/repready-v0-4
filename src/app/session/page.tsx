@@ -25,6 +25,9 @@ export default function Home() {
 
   const { lines, prompts, scorecard, sessionComplete, isConnected } = useSSE(sessionId);
 
+  // Only show coaching prompts after their triggering transcript line is visible
+  const visiblePrompts = prompts.filter(p => p.triggerLineIndex > 0 && p.triggerLineIndex <= lines.length);
+
   // Fetch call types on mount
   useEffect(() => {
     fetch('/api/fixtures')
@@ -226,7 +229,7 @@ export default function Home() {
           <div className="grid h-full grid-cols-1 gap-6 md:grid-cols-2">
             <TranscriptPanel lines={lines} />
             <CoachingPanel
-              prompts={prompts}
+              prompts={visiblePrompts}
               sessionCompleted={sessionStatus === 'completed'}
               scorecardLoading={scorecardLoading}
               onGenerateScorecard={handleGenerateScorecard}
