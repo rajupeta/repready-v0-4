@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import Home from '@/app/session/page';
 
@@ -33,6 +33,8 @@ beforeEach(() => {
 
 afterEach(() => {
   jest.restoreAllMocks();
+  mockFetch.mockReset();
+  mockUseSSE.mockReset();
 });
 
 describe('TICKET-012 edge cases', () => {
@@ -89,28 +91,21 @@ describe('TICKET-012 edge cases', () => {
   });
 
   it('shows "Live" indicator when session is active', async () => {
-    // Start with loading state to trigger active transition
-    let sseReturn = { ...defaultSSE(), isConnected: false };
-    mockUseSSE.mockImplementation(() => sseReturn);
+    // SSE reports connected — sessionStatus transitions from loading to active
+    mockUseSSE.mockReturnValue({ ...defaultSSE(), isConnected: true });
     mockFetch
       .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 's1' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: true }) });
 
-    const { rerender } = render(<Home />);
+    render(<Home />);
     await waitFor(() => {
       expect(screen.getByRole('option', { name: 'Discovery Call' })).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByText('Start Session'));
-    await waitFor(() => {
-      expect(screen.getByText('Starting...')).toBeInTheDocument();
+    await act(async () => {
+      fireEvent.click(screen.getByText('Start Session'));
     });
-
-    // Simulate SSE connection opening
-    sseReturn = { ...defaultSSE(), isConnected: true };
-    mockUseSSE.mockImplementation(() => sseReturn);
-    rerender(<Home />);
 
     await waitFor(() => {
       expect(screen.getByText('Live')).toBeInTheDocument();

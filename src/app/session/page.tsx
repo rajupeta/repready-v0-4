@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSSE } from '@/hooks/useSSE';
 import TranscriptPanel from '@/components/TranscriptPanel';
 import CoachingPanel from '@/components/CoachingPanel';
@@ -21,6 +21,7 @@ export default function Home() {
   const [showScorecard, setShowScorecard] = useState(false);
   const [scorecardData, setScorecardData] = useState<import('@/types').Scorecard | null>(null);
   const [scorecardLoading, setScorecardLoading] = useState(false);
+  const pendingStartIdRef = useRef<string | null>(null);
 
   const { lines, prompts, scorecard, sessionComplete, isConnected } = useSSE(sessionId);
 
@@ -38,6 +39,18 @@ export default function Home() {
         // silently handle fetch errors on mount
       });
   }, []);
+
+  // Start session only after SSE connection is established
+  // This prevents coaching prompts from firing before the client receives transcript lines
+  useEffect(() => {
+    if (isConnected && pendingStartIdRef.current) {
+      const id = pendingStartIdRef.current;
+      pendingStartIdRef.current = null;
+      fetch(`/api/sessions/${id}/start`, { method: 'POST' }).catch(() => {
+        setSessionStatus('idle');
+      });
+    }
+  }, [isConnected]);
 
   // Track connection status
   useEffect(() => {
@@ -67,11 +80,11 @@ export default function Home() {
       const session = await createRes.json();
       const id = session.sessionId;
 
-      // Start session
-      await fetch(`/api/sessions/${id}/start`, { method: 'POST' });
-
-      // Connect SSE
+      // Connect SSE FIRST — must subscribe before starting playback
+      // so no transcript or coaching events are missed
+      pendingStartIdRef.current = id;
       setSessionId(id);
+      // The useEffect above will call /start once the SSE connection is established
     } catch {
       setSessionStatus('idle');
     }

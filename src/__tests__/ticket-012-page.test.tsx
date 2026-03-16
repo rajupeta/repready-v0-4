@@ -60,11 +60,19 @@ describe('Main page — acceptance criteria', () => {
     expect(screen.getByText('Start Session')).toBeInTheDocument();
   });
 
-  it('Start Session button creates and starts a session', async () => {
+  it('Start Session button creates session, connects SSE, then starts', async () => {
+    // Return isConnected: true once a sessionId is provided (simulates SSE connecting)
+    mockUseSSE.mockImplementation((sid: string | null) => {
+      if (sid) return { ...defaultSSE(), isConnected: true };
+      return defaultSSE();
+    });
+
     mockFetch
       .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'session-1' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: true }) });
+
+    const { act } = await import('@testing-library/react');
 
     render(<Home />);
 
@@ -72,22 +80,29 @@ describe('Main page — acceptance criteria', () => {
       expect(screen.getByRole('option', { name: 'Discovery Call' })).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByText('Start Session'));
+    await act(async () => {
+      fireEvent.click(screen.getByText('Start Session'));
+    });
 
+    // POST /api/sessions
     await waitFor(() => {
-      // POST /api/sessions
       expect(mockFetch).toHaveBeenCalledWith('/api/sessions', expect.objectContaining({
         method: 'POST',
         body: JSON.stringify({ callType: 'discovery' }),
       }));
-      // POST /api/sessions/session-1/start
+    });
+
+    // useSSE should be called with the session id (SSE connects BEFORE start)
+    await waitFor(() => {
+      expect(mockUseSSE).toHaveBeenCalledWith('session-1');
+    });
+
+    // POST /start is called after SSE connects (via useEffect)
+    await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith('/api/sessions/session-1/start', expect.objectContaining({
         method: 'POST',
       }));
     });
-
-    // useSSE should be called with the session id
-    expect(mockUseSSE).toHaveBeenCalledWith('session-1');
   });
 
   it('passes useSSE lines to TranscriptPanel', () => {
