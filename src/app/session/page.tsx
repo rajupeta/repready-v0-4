@@ -80,21 +80,36 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="flex h-screen flex-col bg-gray-100">
       {/* Header */}
-      <header className="border-b border-gray-200 bg-white px-6 py-4">
-        <h1 className="text-2xl font-bold text-gray-900">RepReady</h1>
-        <p className="text-sm text-gray-500">AI Sales Coaching</p>
+      <header className="border-b border-gray-200 bg-white px-6 py-4 shadow-sm">
+        <div className="mx-auto flex max-w-7xl items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">RepReady</h1>
+            <p className="text-sm text-gray-500">AI Sales Coaching</p>
+          </div>
+          {sessionStatus === 'active' && (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-700">
+              <span className="h-2 w-2 rounded-full bg-green-500" />
+              Live
+            </span>
+          )}
+          {sessionStatus === 'completed' && (
+            <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-600">
+              Session Complete
+            </span>
+          )}
+        </div>
       </header>
 
       {/* Controls */}
-      <div className="mx-auto max-w-7xl px-6 py-6">
-        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+      <div className="border-b border-gray-200 bg-white px-6 py-3 shadow-sm">
+        <div className="mx-auto flex max-w-7xl flex-col gap-3 sm:flex-row sm:items-center">
           <select
             value={selectedFixture}
             onChange={(e) => setSelectedFixture(e.target.value)}
             disabled={sessionStatus === 'loading' || sessionStatus === 'active'}
-            className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none"
+            className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             aria-label="Select fixture"
           >
             {fixtures.map((f) => (
@@ -111,36 +126,35 @@ export default function Home() {
               sessionStatus === 'loading' ||
               sessionStatus === 'active'
             }
-            className="rounded-lg bg-blue-600 px-6 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg bg-blue-600 px-6 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {sessionStatus === 'loading' ? 'Starting...' : 'Start Session'}
           </button>
 
           {sessionStatus === 'active' && (
-            <>
-              <button
-                onClick={handleEndCall}
-                className="rounded-lg bg-red-600 px-6 py-2 text-sm font-medium text-white hover:bg-red-700"
-              >
-                End Call
-              </button>
-              <span className="text-sm text-green-600">Live</span>
-            </>
-          )}
-          {sessionStatus === 'completed' && (
-            <span className="text-sm text-gray-500">Session Complete</span>
+            <button
+              onClick={handleEndCall}
+              className="rounded-lg bg-red-600 px-6 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700"
+            >
+              End Call
+            </button>
           )}
         </div>
+      </div>
 
-        {/* Scorecard replaces split view when session completes */}
-        {scorecard ? (
-          <ScorecardView scorecard={scorecard} />
-        ) : (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <TranscriptPanel lines={lines} />
-            <CoachingPanel prompts={prompts} />
-          </div>
-        )}
+      {/* Main content area — fills remaining viewport */}
+      <div className="min-h-0 flex-1 px-6 py-6">
+        <div className="mx-auto h-full max-w-7xl">
+          {/* Scorecard replaces split view when session completes */}
+          {scorecard ? (
+            <ScorecardView scorecard={scorecard} />
+          ) : (
+            <div className="grid h-full grid-cols-1 gap-6 md:grid-cols-2">
+              <TranscriptPanel lines={lines} />
+              <CoachingPanel prompts={prompts} />
+            </div>
+          )}
+        </div>
       </div>
     </main>
   );
