@@ -26,7 +26,7 @@ function defaultSSE() {
 beforeEach(() => {
   mockUseSSE.mockReturnValue(defaultSSE());
   mockFetch.mockResolvedValue({
-    json: () => Promise.resolve(['discovery-call-001']),
+    json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]),
   });
 });
 
@@ -49,12 +49,12 @@ describe('TICKET-012 edge cases', () => {
 
   it('returns to idle state on session creation failure', async () => {
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['discovery-call-001']) })
+      .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockRejectedValueOnce(new Error('Server error'));
 
     render(<Home />);
     await waitFor(() => {
-      expect(screen.getByRole('option', { name: 'discovery-call-001' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: 'Discovery Call' })).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByText('Start Session'));
@@ -70,19 +70,19 @@ describe('TICKET-012 edge cases', () => {
   it('disables fixture selector and start button during active session', async () => {
     mockUseSSE.mockReturnValue({ ...defaultSSE(), isConnected: true });
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['discovery-call-001']) })
+      .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 's1' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: true }) });
 
     render(<Home />);
     await waitFor(() => {
-      expect(screen.getByRole('option', { name: 'discovery-call-001' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: 'Discovery Call' })).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByText('Start Session'));
 
     await waitFor(() => {
-      const select = screen.getByLabelText('Select fixture');
+      const select = screen.getByLabelText('Select call type');
       expect(select).toBeDisabled();
     });
   });
@@ -92,13 +92,13 @@ describe('TICKET-012 edge cases', () => {
     let sseReturn = { ...defaultSSE(), isConnected: false };
     mockUseSSE.mockImplementation(() => sseReturn);
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['discovery-call-001']) })
+      .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 's1' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: true }) });
 
     const { rerender } = render(<Home />);
     await waitFor(() => {
-      expect(screen.getByRole('option', { name: 'discovery-call-001' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: 'Discovery Call' })).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByText('Start Session'));

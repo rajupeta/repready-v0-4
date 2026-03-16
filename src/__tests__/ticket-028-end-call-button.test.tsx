@@ -28,7 +28,7 @@ function defaultSSE() {
 beforeEach(() => {
   mockUseSSE.mockReturnValue(defaultSSE());
   mockFetch.mockResolvedValue({
-    json: () => Promise.resolve(['discovery-call-001']),
+    json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]),
   });
 });
 
@@ -40,7 +40,7 @@ describe('TICKET-028: End Call button', () => {
   it('End Call button is NOT visible when session is idle', async () => {
     render(<Home />);
     await waitFor(() => {
-      expect(screen.getByRole('option', { name: 'discovery-call-001' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: 'Discovery Call' })).toBeInTheDocument();
     });
     expect(screen.queryByText('End Call')).not.toBeInTheDocument();
   });
@@ -53,14 +53,14 @@ describe('TICKET-028: End Call button', () => {
     });
 
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['discovery-call-001']) })
+      .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'session-1' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: true }) });
 
     render(<Home />);
 
     await waitFor(() => {
-      expect(screen.getByRole('option', { name: 'discovery-call-001' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: 'Discovery Call' })).toBeInTheDocument();
     });
 
     await act(async () => {
@@ -79,7 +79,7 @@ describe('TICKET-028: End Call button', () => {
     });
 
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['discovery-call-001']) })
+      .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'session-42' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: true }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ status: 'ended' }) });
@@ -87,7 +87,7 @@ describe('TICKET-028: End Call button', () => {
     render(<Home />);
 
     await waitFor(() => {
-      expect(screen.getByRole('option', { name: 'discovery-call-001' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: 'Discovery Call' })).toBeInTheDocument();
     });
 
     await act(async () => {
@@ -127,13 +127,13 @@ describe('TICKET-028: End Call button', () => {
 
   it('End Call button is NOT visible during loading state', async () => {
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['discovery-call-001']) })
+      .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockImplementationOnce(() => new Promise(() => {})); // Never resolves
 
     render(<Home />);
 
     await waitFor(() => {
-      expect(screen.getByRole('option', { name: 'discovery-call-001' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: 'Discovery Call' })).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByText('Start Session'));

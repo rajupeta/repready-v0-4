@@ -63,7 +63,7 @@ const talkRatio: CoachingRule = {
   description:
     "Rep speaks more than 65% of lines in the rolling window.",
   cooldownMs: 30000,
-  callTypes: ["discovery", "demo", "objection-handling", "follow-up"],
+  callTypes: ["discovery", "demo", "objection-handling", "follow-up", "pricing", "cold-call"],
   severity: "medium",
   detect(window: TranscriptLine[]): boolean {
     if (window.length === 0) return false;
@@ -78,7 +78,7 @@ const longMonologue: CoachingRule = {
   description:
     "Rep has 4+ consecutive lines without the prospect speaking in the window.",
   cooldownMs: 45000,
-  callTypes: ["discovery", "demo", "objection-handling", "follow-up"],
+  callTypes: ["discovery", "demo", "objection-handling", "follow-up", "pricing", "cold-call"],
   severity: "medium",
   detect(window: TranscriptLine[]): boolean {
     let consecutive = 0;
@@ -100,7 +100,7 @@ const noQuestions: CoachingRule = {
   description:
     "Among rep lines in the window, none contain a question mark or question words (what/how/why/etc).",
   cooldownMs: 60000,
-  callTypes: ["discovery", "demo", "follow-up"],
+  callTypes: ["discovery", "demo", "follow-up", "cold-call"],
   severity: "high",
   detect(window: TranscriptLine[]): boolean {
     const repLines = window.filter((l) => l.speaker === "rep");
@@ -117,7 +117,7 @@ const fillerWords: CoachingRule = {
   description:
     "Latest rep line contains 3+ filler words including hedging language (\"I think maybe\", \"sort of\").",
   cooldownMs: 20000,
-  callTypes: ["discovery", "demo", "objection-handling", "follow-up"],
+  callTypes: ["discovery", "demo", "objection-handling", "follow-up", "pricing", "cold-call"],
   severity: "low",
   detect(window: TranscriptLine[]): boolean {
     // Find the latest rep line in the window
@@ -136,7 +136,7 @@ const featureDump: CoachingRule = {
   description:
     "3+ consecutive rep lines mention product/feature keywords without any questions.",
   cooldownMs: 45000,
-  callTypes: ["demo", "discovery"],
+  callTypes: ["demo", "discovery", "cold-call"],
   severity: "medium",
   detect(window: TranscriptLine[]): boolean {
     let consecutive = 0;
@@ -162,7 +162,7 @@ const noNextSteps: CoachingRule = {
   description:
     "Prospect expresses interest but rep doesn't propose a next step. Checks last 5 lines and midpoint of window.",
   cooldownMs: 90000,
-  callTypes: ["discovery", "demo", "objection-handling", "follow-up"],
+  callTypes: ["discovery", "demo", "objection-handling", "follow-up", "pricing", "cold-call"],
   severity: "high",
   detect(window: TranscriptLine[]): boolean {
     // Check last 5 lines
@@ -205,7 +205,7 @@ const objectionDeflected: CoachingRule = {
   description:
     "Prospect raises an objection but rep deflects instead of addressing it directly.",
   cooldownMs: 60000,
-  callTypes: ["objection-handling", "demo", "discovery"],
+  callTypes: ["objection-handling", "demo", "discovery", "pricing"],
   severity: "high",
   detect(window: TranscriptLine[]): boolean {
     // Look for prospect objection followed by rep NOT addressing it
@@ -233,7 +233,7 @@ const competitorNotExplored: CoachingRule = {
   description:
     "Prospect mentions a competitor or alternative but rep doesn't explore it further.",
   cooldownMs: 60000,
-  callTypes: ["discovery", "demo", "objection-handling"],
+  callTypes: ["discovery", "demo", "objection-handling", "pricing"],
   severity: "medium",
   detect(window: TranscriptLine[]): boolean {
     // Look for prospect mentioning a competitor followed by rep NOT exploring

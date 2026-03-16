@@ -6,7 +6,7 @@ export interface TranscriptLine {
   timestamp?: number;
 }
 
-export type CallType = 'discovery' | 'demo' | 'objection-handling' | 'follow-up';
+export type CallType = 'discovery' | 'demo' | 'objection-handling' | 'follow-up' | 'pricing' | 'cold-call';
 export type Severity = 'low' | 'medium' | 'high';
 
 export interface CoachingRule {

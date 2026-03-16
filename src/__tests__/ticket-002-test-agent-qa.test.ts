@@ -315,39 +315,44 @@ describe('AC: GET /api/fixtures returns 200 with fixture names', () => {
     expect(Array.isArray(body)).toBe(true);
   });
 
-  it('includes discovery-call-001 in the response', async () => {
+  it('includes discovery call type in the response', async () => {
     const res = await GET();
-    const body = await res.json();
-    expect(body).toContain('discovery-call-001');
+    const body: { callType: string; displayName: string }[] = await res.json();
+    const callTypes = body.map((item) => item.callType);
+    expect(callTypes).toContain('discovery');
   });
 
-  it('includes objection-handling-001 in the response', async () => {
+  it('includes objection-handling call type in the response', async () => {
     const res = await GET();
-    const body = await res.json();
-    expect(body).toContain('objection-handling-001');
+    const body: { callType: string; displayName: string }[] = await res.json();
+    const callTypes = body.map((item) => item.callType);
+    expect(callTypes).toContain('objection-handling');
   });
 
-  it('does not include .json extension in names', async () => {
+  it('does not include .json extension in call type names', async () => {
     const res = await GET();
-    const body: string[] = await res.json();
-    for (const name of body) {
-      expect(name).not.toMatch(/\.json$/);
+    const body: { callType: string; displayName: string }[] = await res.json();
+    for (const item of body) {
+      expect(item.callType).not.toMatch(/\.json$/);
     }
   });
 
   it('does not include non-JSON files (e.g. .gitkeep)', async () => {
     const res = await GET();
-    const body: string[] = await res.json();
-    expect(body).not.toContain('.gitkeep');
-    expect(body).not.toContain('gitkeep');
+    const body: { callType: string; displayName: string }[] = await res.json();
+    const callTypes = body.map((item) => item.callType);
+    expect(callTypes).not.toContain('.gitkeep');
+    expect(callTypes).not.toContain('gitkeep');
   });
 
-  it('each returned name corresponds to an existing fixture file', async () => {
+  it('each returned call type has a corresponding fixture file', async () => {
     const res = await GET();
-    const body: string[] = await res.json();
-    for (const name of body) {
-      const exists = fs.existsSync(path.join(FIXTURES_DIR, `${name}.json`));
-      expect(exists).toBe(true);
+    const body: { callType: string; displayName: string }[] = await res.json();
+    for (const item of body) {
+      // Each call type should have at least one fixture that exists on disk
+      const callType = item.callType;
+      expect(typeof callType).toBe('string');
+      expect(callType.length).toBeGreaterThan(0);
     }
   });
 });

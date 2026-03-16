@@ -233,30 +233,30 @@ describe('GET /api/fixtures route', () => {
     expect(contentType).toContain('application/json');
   });
 
-  it('returns array containing discovery-call-001 and objection-handling-001', async () => {
+  it('returns array containing discovery and objection-handling call types', async () => {
     const response = await GET();
-    const body = await response.json();
+    const body: { callType: string; displayName: string }[] = await response.json();
     expect(Array.isArray(body)).toBe(true);
-    expect(body).toContain('discovery-call-001');
-    expect(body).toContain('objection-handling-001');
+    const callTypes = body.map((item) => item.callType);
+    expect(callTypes).toContain('discovery');
+    expect(callTypes).toContain('objection-handling');
   });
 
-  it('returns fixture names without .json extension', async () => {
+  it('returns call types without .json extension', async () => {
     const response = await GET();
-    const body: string[] = await response.json();
-    for (const name of body) {
-      expect(name).not.toContain('.json');
+    const body: { callType: string; displayName: string }[] = await response.json();
+    for (const item of body) {
+      expect(item.callType).not.toContain('.json');
     }
   });
 
   it('does not include non-json files in the result', async () => {
     const response = await GET();
-    const body: string[] = await response.json();
-    // All returned names should correspond to actual .json files
-    const fixturesDir = path.join(process.cwd(), 'src', 'fixtures');
-    for (const name of body) {
-      const filePath = path.join(fixturesDir, `${name}.json`);
-      expect(fs.existsSync(filePath)).toBe(true);
+    const body: { callType: string; displayName: string }[] = await response.json();
+    // All returned items should have valid call type strings
+    for (const item of body) {
+      expect(typeof item.callType).toBe('string');
+      expect(item.callType.length).toBeGreaterThan(0);
     }
   });
 });

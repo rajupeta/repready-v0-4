@@ -28,7 +28,7 @@ function defaultSSE() {
 beforeEach(() => {
   mockUseSSE.mockReturnValue(defaultSSE());
   mockFetch.mockResolvedValue({
-    json: () => Promise.resolve(['discovery-call-001', 'objection-handling']),
+    json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}, {callType: 'objection-handling', displayName: 'Objection Handling'}]),
   });
 });
 
@@ -49,8 +49,8 @@ describe('Main page — acceptance criteria', () => {
       expect(mockFetch).toHaveBeenCalledWith('/api/fixtures');
     });
     await waitFor(() => {
-      expect(screen.getByRole('option', { name: 'discovery-call-001' })).toBeInTheDocument();
-      expect(screen.getByRole('option', { name: 'objection-handling' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: 'Discovery Call' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: 'Objection Handling' })).toBeInTheDocument();
     });
   });
 
@@ -61,14 +61,14 @@ describe('Main page — acceptance criteria', () => {
 
   it('Start Session button creates and starts a session', async () => {
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['discovery-call-001']) })
+      .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'session-1' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: true }) });
 
     render(<Home />);
 
     await waitFor(() => {
-      expect(screen.getByRole('option', { name: 'discovery-call-001' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: 'Discovery Call' })).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByText('Start Session'));
@@ -77,7 +77,7 @@ describe('Main page — acceptance criteria', () => {
       // POST /api/sessions
       expect(mockFetch).toHaveBeenCalledWith('/api/sessions', expect.objectContaining({
         method: 'POST',
-        body: JSON.stringify({ fixtureId: 'discovery-call-001' }),
+        body: JSON.stringify({ callType: 'discovery' }),
       }));
       // POST /api/sessions/session-1/start
       expect(mockFetch).toHaveBeenCalledWith('/api/sessions/session-1/start', expect.objectContaining({
@@ -153,12 +153,12 @@ describe('Main page — acceptance criteria', () => {
   it('disables Start Session button when loading', async () => {
     // Make fetch never resolve for session creation to keep loading state
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['discovery-call-001']) })
+      .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockImplementationOnce(() => new Promise(() => {}));
 
     render(<Home />);
     await waitFor(() => {
-      expect(screen.getByRole('option', { name: 'discovery-call-001' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: 'Discovery Call' })).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByText('Start Session'));
