@@ -1,5 +1,6 @@
 import { EventBus } from '@/services/event-bus';
 import { SSEEvent } from '@/types/sse';
+import type { FixtureLine } from '@/types/transcript';
 import {
   TranscriptLine,
   CoachingRule,
@@ -35,6 +36,7 @@ export interface ITranscriptService {
 
 export interface IPlaybackService {
   loadFixture(): void;
+  loadLines(lines: FixtureLine[]): void;
   start(
     onLine: (line: TranscriptLine) => void,
     onComplete: () => void,
@@ -42,11 +44,16 @@ export interface IPlaybackService {
   stop(): void;
 }
 
+export interface ITranscriptGeneratorService {
+  generateTranscript(callType: CallType): Promise<FixtureLine[]>;
+}
+
 export interface SessionManagerDeps {
   eventBus: EventBus;
   rulesEngine: IRulesEngine;
   coachingService: ICoachingService;
   scorecardService: IScorecardService;
+  transcriptGeneratorService?: ITranscriptGeneratorService;
   rules: CoachingRule[];
   createPlaybackService: (fixtureId: string) => IPlaybackService;
   createTranscriptService: (
@@ -63,13 +70,14 @@ export class SessionManager {
     this.deps = deps;
   }
 
-  createSession(fixtureId: string, callType?: CallType): string {
+  createSession(fixtureId: string, callType?: CallType, dynamic?: boolean): string {
     const id = crypto.randomUUID();
     const session: Session = {
       id,
       status: 'idle',
       fixtureId,
       callType: callType || 'discovery',
+      dynamic: dynamic || false,
       transcript: [],
       events: [],
     };
@@ -77,7 +85,7 @@ export class SessionManager {
     return id;
   }
 
-  startSession(sessionId: string): void {
+  async startSession(sessionId: string): Promise<void> {
     const session = this.sessions.get(sessionId);
     if (!session) {
       throw new Error(`Session ${sessionId} not found`);
@@ -127,7 +135,19 @@ export class SessionManager {
 
     const playbackService = this.deps.createPlaybackService(session.fixtureId);
     this.playbackServices.set(sessionId, playbackService);
-    playbackService.loadFixture();
+
+    // If dynamic mode is enabled, attempt to generate transcript via Claude
+    if (session.dynamic && this.deps.transcriptGeneratorService) {
+      try {
+        const lines = await this.deps.transcriptGeneratorService.generateTranscript(session.callType);
+        playbackService.loadLines(lines);
+      } catch {
+        // Fallback to static fixture if generation fails
+        playbackService.loadFixture();
+      }
+    } else {
+      playbackService.loadFixture();
+    }
 
     playbackService.start(
       (line: TranscriptLine) => transcriptService.addLine(line),

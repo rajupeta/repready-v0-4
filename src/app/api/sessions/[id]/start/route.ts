@@ -23,7 +23,7 @@ export async function POST(
       );
     }
 
-    sessionManager.startSession(id);
+    await sessionManager.startSession(id);
     return NextResponse.json({ status: 'started' }, { status: 200 });
   } catch {
     return NextResponse.json(

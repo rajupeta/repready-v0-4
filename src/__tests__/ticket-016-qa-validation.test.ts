@@ -15,10 +15,12 @@ import type { SSEEvent } from '@/types/sse';
 const mockLoadFixture = jest.fn();
 const mockStart = jest.fn();
 const mockStop = jest.fn();
+const mockLoadLines = jest.fn();
 jest.mock('@/services/playback-service', () => ({
   PlaybackService: jest.fn().mockImplementation((fixtureId: string) => ({
     _fixtureId: fixtureId,
     loadFixture: mockLoadFixture,
+    loadLines: mockLoadLines,
     start: mockStart.mockImplementation(
       (onLine: (line: TranscriptLine) => void, onComplete: () => void) => {
         // Emit a few transcript lines synchronously for testing
@@ -232,7 +234,7 @@ describe('TICKET-016: Wire real dependencies into session-manager-instance', () 
       expect(session!.transcript).toEqual([]);
 
       // Step 2: Start session
-      sessionManager.startSession(sessionId);
+      await sessionManager.startSession(sessionId);
 
       // The mock PlaybackService fires lines synchronously, so after start
       // the session should transition through active to completed
@@ -260,7 +262,7 @@ describe('TICKET-016: Wire real dependencies into session-manager-instance', () 
       eventBus.subscribe(sessionId, handler);
 
       // Start session
-      sessionManager.startSession(sessionId);
+      await sessionManager.startSession(sessionId);
 
       // Wait for async operations
       await new Promise((resolve) => setTimeout(resolve, 100));
@@ -282,7 +284,7 @@ describe('TICKET-016: Wire real dependencies into session-manager-instance', () 
       const { sessionManager } = await import('@/lib/session-manager-instance');
       const sessionId = sessionManager.createSession('discovery-call-001');
 
-      sessionManager.startSession(sessionId);
+      await sessionManager.startSession(sessionId);
       await new Promise((resolve) => setTimeout(resolve, 50));
 
       expect(mockLoadFixture).toHaveBeenCalled();
@@ -292,7 +294,7 @@ describe('TICKET-016: Wire real dependencies into session-manager-instance', () 
       const { sessionManager } = await import('@/lib/session-manager-instance');
       const sessionId = sessionManager.createSession('discovery-call-001');
 
-      sessionManager.startSession(sessionId);
+      await sessionManager.startSession(sessionId);
       await new Promise((resolve) => setTimeout(resolve, 50));
 
       expect(mockStart).toHaveBeenCalledWith(
@@ -308,7 +310,7 @@ describe('TICKET-016: Wire real dependencies into session-manager-instance', () 
       // Before start — no scorecard
       expect(sessionManager.getScorecard(sessionId)).toBeUndefined();
 
-      sessionManager.startSession(sessionId);
+      await sessionManager.startSession(sessionId);
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       const scorecard = sessionManager.getScorecard(sessionId);
@@ -319,7 +321,7 @@ describe('TICKET-016: Wire real dependencies into session-manager-instance', () 
 
     it('rejects starting a non-existent session', async () => {
       const { sessionManager } = await import('@/lib/session-manager-instance');
-      expect(() => sessionManager.startSession('nonexistent-id')).toThrow(
+      await expect(sessionManager.startSession('nonexistent-id')).rejects.toThrow(
         'Session nonexistent-id not found',
       );
     });
@@ -328,9 +330,9 @@ describe('TICKET-016: Wire real dependencies into session-manager-instance', () 
       const { sessionManager } = await import('@/lib/session-manager-instance');
       const sessionId = sessionManager.createSession('discovery-call-001');
 
-      sessionManager.startSession(sessionId);
+      await sessionManager.startSession(sessionId);
 
-      expect(() => sessionManager.startSession(sessionId)).toThrow(
+      await expect(sessionManager.startSession(sessionId)).rejects.toThrow(
         /not idle/,
       );
     });
@@ -387,7 +389,7 @@ describe('TICKET-016: Wire real dependencies into session-manager-instance', () 
       const events: SSEEvent[] = [];
       eventBus.subscribe(sessionId, (e: SSEEvent) => events.push(e));
 
-      sessionManager.startSession(sessionId);
+      await sessionManager.startSession(sessionId);
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       // Session should still complete

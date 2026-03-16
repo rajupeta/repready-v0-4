@@ -46,6 +46,7 @@ function createTestSessionManager(opts?: {
     rules,
     createPlaybackService: () => ({
       loadFixture: () => {},
+      loadLines: () => {},
       start: (
         onLine: (line: TranscriptLine) => void,
         onComplete: () => void,
@@ -99,7 +100,7 @@ describe('TICKET-022 QA Validation: GET /api/sessions/[id]/events', () => {
       });
 
       const sessionId = sm.createSession('discovery-call-001');
-      sm.startSession(sessionId);
+      await sm.startSession(sessionId);
       await new Promise((r) => setTimeout(r, 50));
 
       const events = sm.getEvents(sessionId);
@@ -137,7 +138,7 @@ describe('TICKET-022 QA Validation: GET /api/sessions/[id]/events', () => {
     it('events include session_complete even when scorecard generation fails', async () => {
       const sm = createTestSessionManager({ failScorecard: true });
       const sessionId = sm.createSession('discovery-call-001');
-      sm.startSession(sessionId);
+      await sm.startSession(sessionId);
       await new Promise((r) => setTimeout(r, 50));
 
       const events = sm.getEvents(sessionId);
@@ -156,7 +157,7 @@ describe('TICKET-022 QA Validation: GET /api/sessions/[id]/events', () => {
       const session1 = sm.createSession('discovery-call-001');
       const session2 = sm.createSession('discovery-call-001');
 
-      sm.startSession(session1);
+      await sm.startSession(session1);
       await new Promise((r) => setTimeout(r, 50));
 
       // Session 1 should have events
@@ -174,7 +175,7 @@ describe('TICKET-022 QA Validation: GET /api/sessions/[id]/events', () => {
       });
 
       const sessionId = sm.createSession('discovery-call-001');
-      sm.startSession(sessionId);
+      await sm.startSession(sessionId);
       await new Promise((r) => setTimeout(r, 50));
 
       const events1 = sm.getEvents(sessionId)!;
@@ -229,7 +230,7 @@ describe('TICKET-022 QA Validation: GET /api/sessions/[id]/events', () => {
       });
 
       const sessionId = sm.createSession('discovery-call-001');
-      sm.startSession(sessionId);
+      await sm.startSession(sessionId);
       await new Promise((r) => setTimeout(r, 50));
 
       const events = sm.getEvents(sessionId)!;
@@ -261,8 +262,8 @@ describe('TICKET-022 QA Validation: GET /api/sessions/[id]/events', () => {
       const session2 = sm.createSession('discovery-call-001');
       const session3 = sm.createSession('discovery-call-001');
 
-      sm.startSession(session1);
-      sm.startSession(session2);
+      await sm.startSession(session1);
+      await sm.startSession(session2);
       await new Promise((r) => setTimeout(r, 50));
 
       // Sessions 1 and 2 have events, session 3 does not
@@ -307,7 +308,7 @@ describe('TICKET-022 QA Validation: GET /api/sessions/[id]/events', () => {
       });
 
       const sessionId = sm.createSession('discovery-call-001');
-      sm.startSession(sessionId);
+      await sm.startSession(sessionId);
       await new Promise((r) => setTimeout(r, 50));
 
       const session = sm.getSession(sessionId);
