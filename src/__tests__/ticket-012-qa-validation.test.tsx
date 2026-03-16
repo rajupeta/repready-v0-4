@@ -17,7 +17,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import Home from '@/app/page';
+import Home from '@/app/session/page';
 import { useSSE } from '@/hooks/useSSE';
 
 // ----- Mock useSSE -----
