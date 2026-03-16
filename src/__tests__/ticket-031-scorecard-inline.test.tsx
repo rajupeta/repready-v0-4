@@ -82,7 +82,7 @@ describe('TICKET-031: Scorecard renders inline not as modal overlay (updated for
       scorecard: mockScorecard,
       sessionComplete: true,
       lines: [{ speaker: 'rep', text: 'Hello prospect' }],
-      prompts: [{ ruleId: 'r1', ruleName: 'Test Rule', message: 'Test msg', timestamp: 1 }],
+      prompts: [{ ruleId: 'r1', ruleName: 'Test Rule', message: 'Test msg', timestamp: 1, triggerLineIndex: 1 }],
     });
     render(<Home />);
 

@@ -295,8 +295,11 @@ describe('Main page — QA validation', () => {
   it('AC5: coaching prompts from useSSE render in CoachingPanel', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
+      lines: [
+        { speaker: 'rep', text: 'Line 1', timestamp: 1 },
+      ],
       prompts: [
-        { ruleId: 'r1', ruleName: 'Active Listening', message: 'Try reflecting back', timestamp: 1 },
+        { ruleId: 'r1', ruleName: 'Active Listening', message: 'Try reflecting back', timestamp: 1, triggerLineIndex: 1 },
       ],
     });
     render(<Home />);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useSSE } from '@/hooks/useSSE';
 import TranscriptPanel from '@/components/TranscriptPanel';
 import CoachingPanel from '@/components/CoachingPanel';
@@ -23,6 +23,12 @@ export default function Home() {
   const [scorecardLoading, setScorecardLoading] = useState(false);
 
   const { lines, prompts, scorecard, sessionComplete, isConnected } = useSSE(sessionId);
+
+  // Only show coaching prompts whose triggering transcript line is already visible
+  const visiblePrompts = useMemo(
+    () => prompts.filter((p) => p.triggerLineIndex > 0 && p.triggerLineIndex <= lines.length),
+    [prompts, lines.length]
+  );
 
   // Fetch call types on mount
   useEffect(() => {
@@ -189,7 +195,7 @@ export default function Home() {
           <div className="grid h-full grid-cols-1 gap-6 md:grid-cols-2">
             <TranscriptPanel lines={lines} />
             <CoachingPanel
-              prompts={prompts}
+              prompts={visiblePrompts}
               sessionCompleted={sessionStatus === 'completed'}
               scorecardLoading={scorecardLoading}
               onGenerateScorecard={handleGenerateScorecard}

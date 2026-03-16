@@ -3,9 +3,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { TranscriptLine, CoachingPrompt, Scorecard } from '@/types';
 
+export interface CoachingPromptWithTrigger extends CoachingPrompt {
+  triggerLineIndex: number;
+}
+
 interface UseSSEReturn {
   lines: TranscriptLine[];
-  prompts: CoachingPrompt[];
+  prompts: CoachingPromptWithTrigger[];
   scorecard: Scorecard | null;
   sessionComplete: boolean;
   isConnected: boolean;
@@ -13,11 +17,12 @@ interface UseSSEReturn {
 
 export function useSSE(sessionId: string | null): UseSSEReturn {
   const [lines, setLines] = useState<TranscriptLine[]>([]);
-  const [prompts, setPrompts] = useState<CoachingPrompt[]>([]);
+  const [prompts, setPrompts] = useState<CoachingPromptWithTrigger[]>([]);
   const [scorecard, setScorecard] = useState<Scorecard | null>(null);
   const [sessionComplete, setSessionComplete] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const eventSourceRef = useRef<EventSource | null>(null);
+  const lineCountRef = useRef(0);
 
   const cleanup = useCallback(() => {
     if (eventSourceRef.current) {
@@ -34,6 +39,7 @@ export function useSSE(sessionId: string | null): UseSSEReturn {
       setPrompts([]);
       setScorecard(null);
       setSessionComplete(false);
+      lineCountRef.current = 0;
       return;
     }
 
@@ -49,20 +55,24 @@ export function useSSE(sessionId: string | null): UseSSEReturn {
 
     es.addEventListener('transcript', (event: MessageEvent) => {
       const { line } = JSON.parse(event.data) as { line: TranscriptLine };
+      lineCountRef.current += 1;
       setLines((prev) => [...prev, line]);
     });
 
     es.addEventListener('coaching_prompt', (event: MessageEvent) => {
       const { prompt } = JSON.parse(event.data) as { prompt: CoachingPrompt };
+      const promptWithTrigger: CoachingPromptWithTrigger = {
+        ...prompt,
+        triggerLineIndex: lineCountRef.current,
+      };
       setPrompts((prev) => {
         const existingIdx = prev.findIndex((p) => p.ruleId === prompt.ruleId);
         if (existingIdx >= 0) {
-          // Replace existing prompt for this rule with the latest one
           const updated = [...prev];
-          updated[existingIdx] = prompt;
+          updated[existingIdx] = promptWithTrigger;
           return updated;
         }
-        return [...prev, prompt];
+        return [...prev, promptWithTrigger];
       });
     });
 
