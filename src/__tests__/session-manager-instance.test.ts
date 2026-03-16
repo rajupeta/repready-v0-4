@@ -31,14 +31,14 @@ describe('session-manager-instance', () => {
 
   it('creates sessions and returns a valid session id', async () => {
     const { sessionManager } = await import('@/lib/session-manager-instance');
-    const id = sessionManager.createSession('discovery-call');
+    const id = sessionManager.createSession('discovery-call-001');
     expect(typeof id).toBe('string');
     expect(id.length).toBeGreaterThan(0);
 
     const session = sessionManager.getSession(id);
     expect(session).toBeDefined();
     expect(session!.status).toBe('idle');
-    expect(session!.fixtureId).toBe('discovery-call');
+    expect(session!.fixtureId).toBe('discovery-call-001');
   });
 
   it('wires real RulesEngine with coaching rules', async () => {
@@ -53,7 +53,7 @@ describe('session-manager-instance', () => {
     expect(coachingRules.length).toBe(8);
 
     // Creating a session works with real deps
-    const id = sessionManager.createSession('discovery-call');
+    const id = sessionManager.createSession('discovery-call-001');
     expect(sessionManager.getSession(id)).toBeDefined();
   });
 
