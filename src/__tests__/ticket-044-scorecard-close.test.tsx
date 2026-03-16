@@ -46,97 +46,98 @@ afterEach(() => {
   jest.restoreAllMocks();
 });
 
-describe('TICKET-044: Scorecard has close/new session button — user is not trapped', () => {
-  it('AC1: user is never trapped — New Session button is visible when scorecard shows', () => {
+describe('TICKET-044: Scorecard has close/new session button — user is not trapped (updated for TICKET-049)', () => {
+  it('AC1: Generate Scorecard button appears when session completes', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
       scorecard: mockScorecard,
     });
     render(<Home />);
+
+    expect(screen.getByText('Generate Scorecard')).toBeInTheDocument();
+  });
+
+  it('AC1: New Session button is visible in scorecard slide-out panel', () => {
+    mockUseSSE.mockReturnValue({
+      ...defaultSSE(),
+      scorecard: mockScorecard,
+    });
+    render(<Home />);
+
+    // Open the slide-out
+    fireEvent.click(screen.getByText('Generate Scorecard'));
 
     expect(screen.getByText('New Session')).toBeInTheDocument();
   });
 
-  it('AC2: New Session button is functional — clicking it dismisses scorecard', async () => {
-    // Start with scorecard visible
-    mockUseSSE.mockReturnValue({
-      ...defaultSSE(),
-      scorecard: mockScorecard,
-    });
-    const { rerender } = render(<Home />);
-
-    // Scorecard should be visible
-    expect(screen.getByText('82')).toBeInTheDocument();
-    expect(screen.getByText('New Session')).toBeInTheDocument();
-
-    // After clicking New Session, the useSSE will be called with null sessionId
-    // which means scorecard goes away. Simulate this by updating mock.
-    act(() => {
-      fireEvent.click(screen.getByText('New Session'));
-    });
-
-    // After click, useSSE should be called with null (session reset)
-    // The last call to mockUseSSE should have null as the sessionId
-    const lastCall = mockUseSSE.mock.calls[mockUseSSE.mock.calls.length - 1];
-    expect(lastCall[0]).toBeNull();
-  });
-
-  it('AC3: scorecard displays as full-width inline (not modal)', () => {
+  it('AC2: New Session button resets the session', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
       scorecard: mockScorecard,
     });
     render(<Home />);
 
-    // No fixed overlay
-    expect(document.querySelector('.fixed.inset-0')).toBeNull();
-    // No backdrop
-    expect(document.querySelector('.bg-black\\/50')).toBeNull();
-
-    // Scorecard content visible inline
-    expect(screen.getByText('Scorecard')).toBeInTheDocument();
-    expect(screen.getByText('82')).toBeInTheDocument();
-
-    // No modal/dialog role
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-  });
-
-  it('AC4: after dismissing, user can start a new session', async () => {
-    // Start with scorecard
-    mockUseSSE.mockReturnValue({
-      ...defaultSSE(),
-      scorecard: mockScorecard,
-    });
-    render(<Home />);
+    // Open slide-out
+    fireEvent.click(screen.getByText('Generate Scorecard'));
 
     // Click New Session
     act(() => {
       fireEvent.click(screen.getByText('New Session'));
     });
 
-    // Now mock returns no scorecard (session reset)
-    mockUseSSE.mockReturnValue(defaultSSE());
-
-    // Re-render to apply state changes — the Start Session button should be enabled
-    // The fixture dropdown and Start Session button should be available
-    // Since the component re-renders after state change, check that the split grid returns
-    // The sessionId was set to null, so useSSE(null) returns default state
+    // After click, useSSE should be called with null (session reset)
+    const lastCall = mockUseSSE.mock.calls[mockUseSSE.mock.calls.length - 1];
+    expect(lastCall[0]).toBeNull();
   });
 
-  it('scorecard is not rendered as a dialog or modal element', () => {
+  it('AC3: scorecard slide-out has close button to dismiss', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
       scorecard: mockScorecard,
     });
     render(<Home />);
 
-    // Walk up from the scorecard heading to ensure no fixed/modal ancestor
-    const heading = screen.getByText('Scorecard');
-    let el: HTMLElement | null = heading;
-    while (el) {
-      expect(el.className).not.toContain('fixed');
-      expect(el.className).not.toContain('z-50');
-      el = el.parentElement;
-    }
+    // Open slide-out
+    fireEvent.click(screen.getByText('Generate Scorecard'));
+
+    // Close button exists
+    const closeButton = screen.getByTestId('scorecard-close-button');
+    expect(closeButton).toBeInTheDocument();
+
+    // Click close
+    fireEvent.click(closeButton);
+
+    // Slide-out should be closed (translate-x-full)
+    const panel = screen.getByTestId('scorecard-slideout');
+    expect(panel.className).toContain('translate-x-full');
+  });
+
+  it('AC4: after dismissing slideout, user can reopen it', () => {
+    mockUseSSE.mockReturnValue({
+      ...defaultSSE(),
+      scorecard: mockScorecard,
+    });
+    render(<Home />);
+
+    // Open, close, then reopen
+    fireEvent.click(screen.getByText('Generate Scorecard'));
+    fireEvent.click(screen.getByTestId('scorecard-close-button'));
+    fireEvent.click(screen.getByText('Generate Scorecard'));
+
+    const panel = screen.getByTestId('scorecard-slideout');
+    expect(panel.className).toContain('translate-x-0');
+  });
+
+  it('scorecard slide-out uses dialog role for accessibility', () => {
+    mockUseSSE.mockReturnValue({
+      ...defaultSSE(),
+      scorecard: mockScorecard,
+    });
+    render(<Home />);
+
+    // Open slide-out
+    fireEvent.click(screen.getByText('Generate Scorecard'));
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 });

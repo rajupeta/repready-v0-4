@@ -268,8 +268,8 @@ describe('Main page — test-agent acceptance', () => {
     expect(screen.getByText('No coaching prompts yet')).toBeInTheDocument();
   });
 
-  // AC 6: ScorecardView renders inline on session_complete (TICKET-031: no modal overlay)
-  it('AC6: scorecard renders inline with correct data', () => {
+  // AC 6: Scorecard available via slide-out panel (TICKET-049 supersedes TICKET-031)
+  it('AC6: scorecard data available and Generate Scorecard button shown', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
       scorecard: {
@@ -283,10 +283,14 @@ describe('Main page — test-agent acceptance', () => {
     });
     render(<Home />);
 
-    // No modal overlay
+    // No full-screen modal overlay
     expect(document.querySelector('.fixed.inset-0.z-50')).toBeNull();
 
-    // Score content rendered inline
+    // Generate Scorecard button appears
+    expect(screen.getByText('Generate Scorecard')).toBeInTheDocument();
+
+    // Click to open slide-out and verify content
+    fireEvent.click(screen.getByText('Generate Scorecard'));
     expect(screen.getByText('78')).toBeInTheDocument();
     expect(screen.getByText('Good session')).toBeInTheDocument();
     expect(screen.getByText('Discovery')).toBeInTheDocument();
@@ -295,16 +299,14 @@ describe('Main page — test-agent acceptance', () => {
     expect(screen.getByText('needs-work')).toBeInTheDocument();
   });
 
-  it('AC6: scorecard replaces split view when session completes', () => {
+  it('AC6: transcript and coaching stay visible when session completes (TICKET-049)', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
       scorecard: { overallScore: 50, summary: 'OK', entries: [] },
     });
     render(<Home />);
-    // Split grid should not be visible when scorecard is shown
-    expect(document.querySelector('.grid.grid-cols-1.md\\:grid-cols-2')).toBeNull();
-    // Scorecard content is visible
-    expect(screen.getByText('50')).toBeInTheDocument();
+    // Split grid remains visible — scorecard is in a slide-out panel
+    expect(document.querySelector('.grid.grid-cols-1.md\\:grid-cols-2')).not.toBeNull();
   });
 
   // AC 7: useSSE cleanup on unmount (tested in hook section above)

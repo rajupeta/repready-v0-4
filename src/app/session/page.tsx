@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSSE } from '@/hooks/useSSE';
 import TranscriptPanel from '@/components/TranscriptPanel';
 import CoachingPanel from '@/components/CoachingPanel';
-import ScorecardView from '@/components/ScorecardView';
+import ScorecardSlideOut from '@/components/ScorecardSlideOut';
 
 type SessionStatus = 'idle' | 'loading' | 'active' | 'completed';
 
@@ -13,6 +13,7 @@ export default function Home() {
   const [selectedFixture, setSelectedFixture] = useState<string>('');
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [sessionStatus, setSessionStatus] = useState<SessionStatus>('idle');
+  const [showScorecard, setShowScorecard] = useState(false);
 
   const { lines, prompts, scorecard, isConnected } = useSSE(sessionId);
 
@@ -79,6 +80,12 @@ export default function Home() {
     }
   }
 
+  function handleNewSession() {
+    setShowScorecard(false);
+    setSessionId(null);
+    setSessionStatus('idle');
+  }
+
   return (
     <main className="flex h-screen flex-col bg-gray-100">
       {/* Header */}
@@ -142,26 +149,29 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Main content area — fills remaining viewport */}
+      {/* Main content area — transcript + coaching always visible */}
       <div className="min-h-0 flex-1 px-6 py-6">
         <div className="mx-auto h-full max-w-7xl">
-          {/* Scorecard replaces split view when session completes */}
-          {scorecard ? (
-            <ScorecardView
-              scorecard={scorecard}
-              onClose={() => {
-                setSessionId(null);
-                setSessionStatus('idle');
-              }}
+          <div className="grid h-full grid-cols-1 gap-6 md:grid-cols-2">
+            <TranscriptPanel lines={lines} />
+            <CoachingPanel
+              prompts={prompts}
+              sessionCompleted={sessionStatus === 'completed'}
+              onGenerateScorecard={() => setShowScorecard(true)}
             />
-          ) : (
-            <div className="grid h-full grid-cols-1 gap-6 md:grid-cols-2">
-              <TranscriptPanel lines={lines} />
-              <CoachingPanel prompts={prompts} />
-            </div>
-          )}
+          </div>
         </div>
       </div>
+
+      {/* Scorecard slide-out panel */}
+      {scorecard && (
+        <ScorecardSlideOut
+          scorecard={scorecard}
+          isOpen={showScorecard}
+          onClose={() => setShowScorecard(false)}
+          onNewSession={handleNewSession}
+        />
+      )}
     </main>
   );
 }
