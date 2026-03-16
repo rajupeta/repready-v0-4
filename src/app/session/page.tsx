@@ -93,9 +93,10 @@ export default function Home() {
   }
 
   async function handleEndCall() {
-    if (!sessionId) return;
+    if (!sessionId || sessionStatus !== 'active') return;
     if (!window.confirm('Are you sure you want to end this call?')) return;
 
+    setSessionStatus('completed');
     try {
       await fetch(`/api/sessions/${sessionId}/end`, { method: 'POST' });
     } catch {

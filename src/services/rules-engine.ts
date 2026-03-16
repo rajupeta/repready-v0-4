@@ -9,6 +9,9 @@ export class RulesEngine {
   }
 
   evaluate(newLine: TranscriptLine, window: TranscriptLine[], sessionId?: string): CoachingRule[] {
+    // Don't evaluate until enough conversation context exists
+    if (window.length < 4) return [];
+
     const now = Date.now();
     const triggered: CoachingRule[] = [];
     const key = sessionId ?? '__default__';
