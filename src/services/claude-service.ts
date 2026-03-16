@@ -24,6 +24,19 @@ Also provide an "overallScore" from 0-100 representing the overall call quality,
 
 Respond with a JSON object containing "entries" (array of assessments), "overallScore" (number), and "summary" (string). Return ONLY the JSON object, no other text.`;
 
+/**
+ * Strip markdown code fences from Claude responses.
+ * Handles ```json ... ```, ``` ... ```, and raw JSON.
+ */
+export function stripCodeFences(text: string): string {
+  const trimmed = text.trim();
+  const match = trimmed.match(/^```(?:\w*)\s*\n?([\s\S]*?)\n?\s*```$/);
+  if (match) {
+    return match[1].trim();
+  }
+  return trimmed;
+}
+
 export class ClaudeService {
   private client: Anthropic;
   private model: string;
@@ -64,7 +77,7 @@ export class ClaudeService {
         return [];
       }
 
-      const parsed = JSON.parse(content.text) as Array<{
+      const parsed = JSON.parse(stripCodeFences(content.text)) as Array<{
         ruleId: string;
         ruleName: string;
         message: string;
@@ -111,7 +124,7 @@ export class ClaudeService {
         return this.defaultScorecard(rules);
       }
 
-      const parsed = JSON.parse(content.text) as Scorecard;
+      const parsed = JSON.parse(stripCodeFences(content.text)) as Scorecard;
       return parsed;
     } catch (error) {
       console.warn("ClaudeService.generateScorecard failed:", error);
