@@ -71,6 +71,16 @@ export default function Home() {
     }
   }
 
+  async function handleEndCall() {
+    if (!sessionId) return;
+
+    try {
+      await fetch(`/api/sessions/${sessionId}/end`, { method: 'POST' });
+    } catch {
+      // SSE session_complete event will handle the status transition
+    }
+  }
+
   return (
     <main className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -109,7 +119,15 @@ export default function Home() {
           </button>
 
           {sessionStatus === 'active' && (
-            <span className="text-sm text-green-600">Live</span>
+            <>
+              <button
+                onClick={handleEndCall}
+                className="rounded-lg bg-red-600 px-6 py-2 text-sm font-medium text-white hover:bg-red-700"
+              >
+                End Call
+              </button>
+              <span className="text-sm text-green-600">Live</span>
+            </>
           )}
           {sessionStatus === 'completed' && (
             <span className="text-sm text-gray-500">Session Complete</span>
