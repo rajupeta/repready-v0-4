@@ -108,7 +108,7 @@ describe('Main page — acceptance criteria', () => {
     expect(screen.getByText('Reflect back')).toBeInTheDocument();
   });
 
-  it('shows ScorecardView inline when scorecard arrives', () => {
+  it('shows Generate Scorecard button when scorecard arrives (TICKET-049 slide-out)', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
       scorecard: {
@@ -118,13 +118,13 @@ describe('Main page — acceptance criteria', () => {
       },
     });
     render(<Home />);
-    expect(screen.getByText('80')).toBeInTheDocument();
-    expect(screen.getByText('Great call')).toBeInTheDocument();
-    // No modal overlay
+    // Generate Scorecard button appears
+    expect(screen.getByText('Generate Scorecard')).toBeInTheDocument();
+    // No full-screen modal overlay
     expect(document.querySelector('.fixed.inset-0.z-50')).toBeNull();
   });
 
-  it('scorecard replaces split view when session completes', () => {
+  it('transcript and coaching stay visible when session completes (TICKET-049)', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
       scorecard: {
@@ -134,9 +134,8 @@ describe('Main page — acceptance criteria', () => {
       },
     });
     render(<Home />);
-    expect(screen.getByText('80')).toBeInTheDocument();
-    // Split grid should not be visible
-    expect(document.querySelector('.grid.grid-cols-1.md\\:grid-cols-2')).toBeNull();
+    // Split grid remains visible
+    expect(document.querySelector('.grid.grid-cols-1.md\\:grid-cols-2')).not.toBeNull();
   });
 
   it('uses responsive layout with grid classes', () => {
