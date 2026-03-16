@@ -4,7 +4,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import Home from '@/app/page';
+import Home from '@/app/session/page';
 
 const mockUseSSE = jest.fn();
 jest.mock('@/hooks/useSSE', () => ({
@@ -156,7 +156,7 @@ describe('TICKET-012 edge cases', () => {
     expect(screen.getByText('Discovery')).toBeInTheDocument();
   });
 
-  it('scorecard overlay renders with backdrop that covers full viewport', () => {
+  it('scorecard renders inline without modal overlay (TICKET-031)', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
       scorecard: {
@@ -168,10 +168,10 @@ describe('TICKET-012 edge cases', () => {
       },
     });
     render(<Home />);
-    // Check overlay has fixed positioning and covers full viewport
-    const overlay = document.querySelector('.fixed.inset-0.z-50');
-    expect(overlay).not.toBeNull();
-    // Check backdrop has semi-transparent bg
-    expect(overlay?.className).toContain('bg-gray-50/95');
+    // No fixed overlay
+    expect(document.querySelector('.fixed.inset-0.z-50')).toBeNull();
+    // Scorecard content is visible inline
+    expect(screen.getByText('90')).toBeInTheDocument();
+    expect(screen.getByText('Excellent')).toBeInTheDocument();
   });
 });

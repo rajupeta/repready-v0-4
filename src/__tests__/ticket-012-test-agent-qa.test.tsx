@@ -10,7 +10,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import Home from '@/app/page';
+import Home from '@/app/session/page';
 import { useSSE } from '@/hooks/useSSE';
 
 // ---------- Mock useSSE ----------
@@ -268,8 +268,8 @@ describe('Main page — test-agent acceptance', () => {
     expect(screen.getByText('No coaching prompts yet')).toBeInTheDocument();
   });
 
-  // AC 6: ScorecardView overlay on session_complete
-  it('AC6: scorecard renders as fixed overlay with backdrop', () => {
+  // AC 6: ScorecardView renders inline on session_complete (TICKET-031: no modal overlay)
+  it('AC6: scorecard renders inline with correct data', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
       scorecard: {
@@ -283,12 +283,10 @@ describe('Main page — test-agent acceptance', () => {
     });
     render(<Home />);
 
-    // Overlay structure
-    const overlay = document.querySelector('.fixed.inset-0.z-50');
-    expect(overlay).not.toBeNull();
-    expect(overlay!.className).toContain('bg-gray-50/95');
+    // No modal overlay
+    expect(document.querySelector('.fixed.inset-0.z-50')).toBeNull();
 
-    // Score content
+    // Score content rendered inline
     expect(screen.getByText('78')).toBeInTheDocument();
     expect(screen.getByText('Good session')).toBeInTheDocument();
     expect(screen.getByText('Discovery')).toBeInTheDocument();
@@ -297,15 +295,16 @@ describe('Main page — test-agent acceptance', () => {
     expect(screen.getByText('needs-work')).toBeInTheDocument();
   });
 
-  it('AC6: Close button dismisses scorecard overlay', () => {
+  it('AC6: scorecard replaces split view when session completes', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
       scorecard: { overallScore: 50, summary: 'OK', entries: [] },
     });
     render(<Home />);
-    expect(document.querySelector('.fixed.inset-0.z-50')).not.toBeNull();
-    fireEvent.click(screen.getByText('Close'));
-    expect(document.querySelector('.fixed.inset-0.z-50')).toBeNull();
+    // Split grid should not be visible when scorecard is shown
+    expect(document.querySelector('.grid.grid-cols-1.md\\:grid-cols-2')).toBeNull();
+    // Scorecard content is visible
+    expect(screen.getByText('50')).toBeInTheDocument();
   });
 
   // AC 7: useSSE cleanup on unmount (tested in hook section above)

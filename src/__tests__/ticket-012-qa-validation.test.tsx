@@ -17,7 +17,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import Home from '@/app/page';
+import Home from '@/app/session/page';
 import { useSSE } from '@/hooks/useSSE';
 
 // ----- Mock useSSE -----
@@ -309,8 +309,8 @@ describe('Main page — QA validation', () => {
     expect(screen.getByText('No coaching prompts yet')).toBeInTheDocument();
   });
 
-  // --- AC 6: ScorecardView appears as overlay when session completes ---
-  it('AC6: scorecard overlay appears with correct data', () => {
+  // --- AC 6: ScorecardView renders inline when session completes (TICKET-031) ---
+  it('AC6: scorecard renders inline with correct data', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
       scorecard: {
@@ -324,12 +324,10 @@ describe('Main page — QA validation', () => {
     });
     render(<Home />);
 
-    // Overlay structure
-    const overlay = document.querySelector('.fixed.inset-0.z-50');
-    expect(overlay).not.toBeNull();
-    expect(overlay!.className).toContain('bg-gray-50/95');
+    // No modal overlay
+    expect(document.querySelector('.fixed.inset-0.z-50')).toBeNull();
 
-    // Score and summary
+    // Score and summary rendered inline
     expect(screen.getByText('72')).toBeInTheDocument();
     expect(screen.getByText('Solid performance')).toBeInTheDocument();
 
@@ -340,16 +338,15 @@ describe('Main page — QA validation', () => {
     expect(screen.getByText('needs-work')).toBeInTheDocument();
   });
 
-  it('AC6: Close button hides the scorecard overlay', () => {
+  it('AC6: scorecard replaces split view when session completes', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
       scorecard: { overallScore: 50, summary: 'OK', entries: [] },
     });
     render(<Home />);
     expect(screen.getByText('50')).toBeInTheDocument();
-
-    fireEvent.click(screen.getByText('Close'));
-    expect(screen.queryByText('50')).not.toBeInTheDocument();
+    // Split grid should not be visible
+    expect(document.querySelector('.grid.grid-cols-1.md\\:grid-cols-2')).toBeNull();
   });
 
   // --- AC 7: useSSE hook cleans up EventSource on unmount (tested in hook section above) ---

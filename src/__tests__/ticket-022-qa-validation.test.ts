@@ -98,7 +98,7 @@ describe('TICKET-022 QA Validation: GET /api/sessions/[id]/events', () => {
         ],
       });
 
-      const sessionId = sm.createSession('discovery-call');
+      const sessionId = sm.createSession('discovery-call-001');
       sm.startSession(sessionId);
       await new Promise((r) => setTimeout(r, 50));
 
@@ -136,7 +136,7 @@ describe('TICKET-022 QA Validation: GET /api/sessions/[id]/events', () => {
 
     it('events include session_complete even when scorecard generation fails', async () => {
       const sm = createTestSessionManager({ failScorecard: true });
-      const sessionId = sm.createSession('discovery-call');
+      const sessionId = sm.createSession('discovery-call-001');
       sm.startSession(sessionId);
       await new Promise((r) => setTimeout(r, 50));
 
@@ -153,8 +153,8 @@ describe('TICKET-022 QA Validation: GET /api/sessions/[id]/events', () => {
         lines: [{ speaker: 'rep', text: 'Hello' }],
       });
 
-      const session1 = sm.createSession('discovery-call');
-      const session2 = sm.createSession('discovery-call');
+      const session1 = sm.createSession('discovery-call-001');
+      const session2 = sm.createSession('discovery-call-001');
 
       sm.startSession(session1);
       await new Promise((r) => setTimeout(r, 50));
@@ -173,7 +173,7 @@ describe('TICKET-022 QA Validation: GET /api/sessions/[id]/events', () => {
         lines: [{ speaker: 'rep', text: 'Test' }],
       });
 
-      const sessionId = sm.createSession('discovery-call');
+      const sessionId = sm.createSession('discovery-call-001');
       sm.startSession(sessionId);
       await new Promise((r) => setTimeout(r, 50));
 
@@ -195,7 +195,7 @@ describe('TICKET-022 QA Validation: GET /api/sessions/[id]/events', () => {
       const { sessionManager } = await import(
         '@/lib/session-manager-instance'
       );
-      const sessionId = sessionManager.createSession('discovery-call');
+      const sessionId = sessionManager.createSession('discovery-call-001');
 
       const response = await getEvents(
         new NextRequest('http://localhost:3000/api/sessions/' + sessionId + '/events'),
@@ -228,7 +228,7 @@ describe('TICKET-022 QA Validation: GET /api/sessions/[id]/events', () => {
         ],
       });
 
-      const sessionId = sm.createSession('discovery-call');
+      const sessionId = sm.createSession('discovery-call-001');
       sm.startSession(sessionId);
       await new Promise((r) => setTimeout(r, 50));
 
@@ -257,9 +257,9 @@ describe('TICKET-022 QA Validation: GET /api/sessions/[id]/events', () => {
         ],
       });
 
-      const session1 = sm.createSession('discovery-call');
-      const session2 = sm.createSession('discovery-call');
-      const session3 = sm.createSession('discovery-call');
+      const session1 = sm.createSession('discovery-call-001');
+      const session2 = sm.createSession('discovery-call-001');
+      const session3 = sm.createSession('discovery-call-001');
 
       sm.startSession(session1);
       sm.startSession(session2);
@@ -288,7 +288,7 @@ describe('TICKET-022 QA Validation: GET /api/sessions/[id]/events', () => {
   describe('Session Type Integration', () => {
     it('Session type includes events field', async () => {
       const sm = createTestSessionManager();
-      const sessionId = sm.createSession('discovery-call');
+      const sessionId = sm.createSession('discovery-call-001');
       const session = sm.getSession(sessionId);
 
       expect(session).toBeDefined();
@@ -306,7 +306,7 @@ describe('TICKET-022 QA Validation: GET /api/sessions/[id]/events', () => {
         ],
       });
 
-      const sessionId = sm.createSession('discovery-call');
+      const sessionId = sm.createSession('discovery-call-001');
       sm.startSession(sessionId);
       await new Promise((r) => setTimeout(r, 50));
 

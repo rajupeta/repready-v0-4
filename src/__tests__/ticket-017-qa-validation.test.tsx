@@ -11,7 +11,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import Home from '@/app/page';
+import Home from '@/app/session/page';
 
 // Mock useSSE hook
 const mockUseSSE = jest.fn();
@@ -294,7 +294,7 @@ describe('TICKET-017 QA: Code Shape Verification', () => {
     // Static verification — read the source to confirm the fix
     const fs = await import('fs');
     const path = await import('path');
-    const pagePath = path.resolve(__dirname, '../app/page.tsx');
+    const pagePath = path.resolve(__dirname, '../app/session/page.tsx');
     const source = fs.readFileSync(pagePath, 'utf-8');
 
     // Must contain session.sessionId
