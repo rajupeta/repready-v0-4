@@ -25,12 +25,13 @@ global.fetch = mockFetch;
 
 beforeEach(() => {
   jest.clearAllMocks();
-  mockUseSSE.mockReturnValue({
+  // Simulate SSE connecting once a sessionId is provided
+  mockUseSSE.mockImplementation((sid: string | null) => ({
     lines: [],
     prompts: [],
     scorecard: null,
-    isConnected: false,
-  });
+    isConnected: !!sid,
+  }));
 });
 
 describe('TICKET-017 QA: Acceptance Criteria Validation', () => {
@@ -44,7 +45,11 @@ describe('TICKET-017 QA: Acceptance Criteria Validation', () => {
       render(<Home />);
       await waitFor(() => expect(screen.getByRole('option')).toBeInTheDocument());
 
+      await act(async () => {
+        await act(async () => {
       fireEvent.click(screen.getByText('Start Session'));
+    });
+      });
 
       await waitFor(() => {
         expect(mockFetch).toHaveBeenCalledWith(
@@ -68,7 +73,11 @@ describe('TICKET-017 QA: Acceptance Criteria Validation', () => {
       render(<Home />);
       await waitFor(() => expect(screen.getByRole('option')).toBeInTheDocument());
 
+      await act(async () => {
+        await act(async () => {
       fireEvent.click(screen.getByText('Start Session'));
+    });
+      });
 
       await waitFor(() => {
         // Should use sessionId, not id
@@ -95,7 +104,11 @@ describe('TICKET-017 QA: Acceptance Criteria Validation', () => {
       const { container } = render(<Home />);
       await waitFor(() => expect(screen.getByRole('option')).toBeInTheDocument());
 
+      await act(async () => {
+        await act(async () => {
       fireEvent.click(screen.getByText('Start Session'));
+    });
+      });
 
       await waitFor(() => {
         expect(mockFetch).toHaveBeenCalledTimes(3);
@@ -114,7 +127,11 @@ describe('TICKET-017 QA: Acceptance Criteria Validation', () => {
       render(<Home />);
       await waitFor(() => expect(screen.getByRole('option')).toBeInTheDocument());
 
+      await act(async () => {
+        await act(async () => {
       fireEvent.click(screen.getByText('Start Session'));
+    });
+      });
 
       await waitFor(() => {
         expect(mockFetch).toHaveBeenCalledTimes(3);
@@ -134,7 +151,11 @@ describe('TICKET-017 QA: Acceptance Criteria Validation', () => {
       render(<Home />);
       await waitFor(() => expect(screen.getByRole('option')).toBeInTheDocument());
 
+      await act(async () => {
+        await act(async () => {
       fireEvent.click(screen.getByText('Start Session'));
+    });
+      });
 
       // Should revert to idle state (button re-enabled)
       await waitFor(() => {
@@ -153,7 +174,11 @@ describe('TICKET-017 QA: Acceptance Criteria Validation', () => {
       render(<Home />);
       await waitFor(() => expect(screen.getByRole('option')).toBeInTheDocument());
 
+      await act(async () => {
+        await act(async () => {
       fireEvent.click(screen.getByText('Start Session'));
+    });
+      });
 
       await waitFor(() => {
         expect(mockUseSSE).toHaveBeenCalledWith('sess-sse-test');
@@ -169,7 +194,11 @@ describe('TICKET-017 QA: Acceptance Criteria Validation', () => {
       render(<Home />);
       await waitFor(() => expect(screen.getByRole('option')).toBeInTheDocument());
 
+      await act(async () => {
+        await act(async () => {
       fireEvent.click(screen.getByText('Start Session'));
+    });
+      });
 
       await waitFor(() => {
         expect(mockFetch).toHaveBeenCalledWith(
@@ -188,7 +217,7 @@ describe('TICKET-017 QA: Acceptance Criteria Validation', () => {
       expect(mockUseSSE).toHaveBeenCalledWith(null);
     });
 
-    it('correctly sequences: create → start → SSE connect', async () => {
+    it('correctly sequences: create → SSE connect → start', async () => {
       const callOrder: string[] = [];
 
       mockFetch
@@ -205,7 +234,11 @@ describe('TICKET-017 QA: Acceptance Criteria Validation', () => {
       render(<Home />);
       await waitFor(() => expect(screen.getByRole('option')).toBeInTheDocument());
 
+      await act(async () => {
+        await act(async () => {
       fireEvent.click(screen.getByText('Start Session'));
+    });
+      });
 
       await waitFor(() => {
         expect(callOrder).toHaveLength(2);
@@ -231,7 +264,9 @@ describe('TICKET-017 QA: Edge Cases', () => {
     render(<Home />);
     await waitFor(() => expect(screen.getByRole('option')).toBeInTheDocument());
 
-    fireEvent.click(screen.getByText('Start Session'));
+    await act(async () => {
+      fireEvent.click(screen.getByText('Start Session'));
+    });
 
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith(
@@ -250,7 +285,9 @@ describe('TICKET-017 QA: Edge Cases', () => {
     render(<Home />);
     await waitFor(() => expect(screen.getAllByRole('option')).toHaveLength(2));
 
-    fireEvent.click(screen.getByText('Start Session'));
+    await act(async () => {
+      fireEvent.click(screen.getByText('Start Session'));
+    });
 
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith(
@@ -269,7 +306,8 @@ describe('TICKET-017 QA: Edge Cases', () => {
 
     mockFetch
       .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
-      .mockImplementationOnce(() => createPromise);
+      .mockImplementationOnce(() => createPromise)
+      .mockResolvedValueOnce({ json: () => Promise.resolve({ status: 'started' }) });
 
     render(<Home />);
     await waitFor(() => expect(screen.getByRole('option')).toBeInTheDocument());
