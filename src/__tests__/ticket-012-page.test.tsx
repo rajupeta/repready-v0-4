@@ -21,6 +21,7 @@ function defaultSSE() {
     lines: [],
     prompts: [],
     scorecard: null,
+    sessionComplete: false,
     isConnected: false,
   };
 }
@@ -111,6 +112,7 @@ describe('Main page — acceptance criteria', () => {
   it('shows Generate Scorecard button when scorecard arrives (TICKET-049 slide-out)', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
+      sessionComplete: true,
       scorecard: {
         overallScore: 80,
         summary: 'Great call',
@@ -127,6 +129,7 @@ describe('Main page — acceptance criteria', () => {
   it('transcript and coaching stay visible when session completes (TICKET-049)', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
+      sessionComplete: true,
       scorecard: {
         overallScore: 80,
         summary: 'Great call',

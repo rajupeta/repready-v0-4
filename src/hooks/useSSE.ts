@@ -7,6 +7,7 @@ interface UseSSEReturn {
   lines: TranscriptLine[];
   prompts: CoachingPrompt[];
   scorecard: Scorecard | null;
+  sessionComplete: boolean;
   isConnected: boolean;
 }
 
@@ -14,6 +15,7 @@ export function useSSE(sessionId: string | null): UseSSEReturn {
   const [lines, setLines] = useState<TranscriptLine[]>([]);
   const [prompts, setPrompts] = useState<CoachingPrompt[]>([]);
   const [scorecard, setScorecard] = useState<Scorecard | null>(null);
+  const [sessionComplete, setSessionComplete] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const eventSourceRef = useRef<EventSource | null>(null);
 
@@ -31,6 +33,7 @@ export function useSSE(sessionId: string | null): UseSSEReturn {
       setLines([]);
       setPrompts([]);
       setScorecard(null);
+      setSessionComplete(false);
       return;
     }
 
@@ -64,8 +67,11 @@ export function useSSE(sessionId: string | null): UseSSEReturn {
     });
 
     es.addEventListener('session_complete', (event: MessageEvent) => {
-      const { scorecard } = JSON.parse(event.data) as { scorecard: Scorecard };
-      setScorecard(scorecard);
+      const data = JSON.parse(event.data) as { scorecard?: Scorecard };
+      if (data.scorecard) {
+        setScorecard(data.scorecard);
+      }
+      setSessionComplete(true);
     });
 
     es.addEventListener('heartbeat', () => {
@@ -82,5 +88,5 @@ export function useSSE(sessionId: string | null): UseSSEReturn {
     };
   }, [sessionId, cleanup]);
 
-  return { lines, prompts, scorecard, isConnected };
+  return { lines, prompts, scorecard, sessionComplete, isConnected };
 }

@@ -21,6 +21,7 @@ function defaultSSE() {
     lines: [],
     prompts: [],
     scorecard: null,
+    sessionComplete: false,
     isConnected: false,
   };
 }
@@ -51,6 +52,7 @@ describe('TICKET-044: Scorecard has close/new session button — user is not tra
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
       scorecard: mockScorecard,
+      sessionComplete: true,
     });
     render(<Home />);
 
@@ -61,6 +63,7 @@ describe('TICKET-044: Scorecard has close/new session button — user is not tra
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
       scorecard: mockScorecard,
+      sessionComplete: true,
     });
     render(<Home />);
 
@@ -74,6 +77,7 @@ describe('TICKET-044: Scorecard has close/new session button — user is not tra
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
       scorecard: mockScorecard,
+      sessionComplete: true,
     });
     render(<Home />);
 
@@ -94,6 +98,7 @@ describe('TICKET-044: Scorecard has close/new session button — user is not tra
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
       scorecard: mockScorecard,
+      sessionComplete: true,
     });
     render(<Home />);
 
@@ -116,6 +121,7 @@ describe('TICKET-044: Scorecard has close/new session button — user is not tra
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
       scorecard: mockScorecard,
+      sessionComplete: true,
     });
     render(<Home />);
 
@@ -132,6 +138,7 @@ describe('TICKET-044: Scorecard has close/new session button — user is not tra
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
       scorecard: mockScorecard,
+      sessionComplete: true,
     });
     render(<Home />);
 
