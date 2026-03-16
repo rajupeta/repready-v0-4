@@ -1,3 +1,32 @@
+import type { TranscriptLine } from '@/types';
+
+// Mock PlaybackService to complete synchronously (no real file I/O or timers)
+jest.mock('@/services/playback-service', () => ({
+  PlaybackService: jest.fn().mockImplementation(() => ({
+    loadFixture: jest.fn(),
+    start: jest.fn().mockImplementation(
+      (onLine: (line: TranscriptLine) => void, onComplete: () => void) => {
+        onLine({ speaker: 'rep', text: 'Hello there.', timestamp: Date.now() });
+        onLine({ speaker: 'prospect', text: 'Hi, tell me more.', timestamp: Date.now() });
+        onComplete();
+      },
+    ),
+    stop: jest.fn(),
+  })),
+}));
+
+// Mock ClaudeService to avoid needing an API key
+jest.mock('@/services/claude-service', () => ({
+  ClaudeService: jest.fn().mockImplementation(() => ({
+    getCoachingPrompts: jest.fn().mockResolvedValue([]),
+    generateScorecard: jest.fn().mockResolvedValue({
+      entries: [],
+      overallScore: 75,
+      summary: 'Good performance',
+    }),
+  })),
+}));
+
 import { NextRequest } from 'next/server';
 import { sessionManager } from '@/lib/session-manager-instance';
 import { GET as getEvents } from '@/app/api/sessions/[id]/events/route';
@@ -19,7 +48,7 @@ describe('GET /api/sessions/[id]/events', () => {
   });
 
   it('returns empty events array for idle session', async () => {
-    const sessionId = sessionManager.createSession('discovery-call', 'discovery');
+    const sessionId = sessionManager.createSession('discovery-call-001', 'discovery');
 
     const response = await getEvents(
       new NextRequest('http://localhost:3000'),
@@ -32,7 +61,7 @@ describe('GET /api/sessions/[id]/events', () => {
   });
 
   it('returns events for a completed session', async () => {
-    const sessionId = sessionManager.createSession('discovery-call', 'discovery');
+    const sessionId = sessionManager.createSession('discovery-call-001', 'discovery');
     sessionManager.startSession(sessionId);
 
     // Wait for async completion (stub deps complete immediately)
@@ -59,7 +88,7 @@ describe('GET /api/sessions/[id]/events', () => {
   });
 
   it('returns events in chronological order', async () => {
-    const sessionId = sessionManager.createSession('discovery-call', 'discovery');
+    const sessionId = sessionManager.createSession('discovery-call-001', 'discovery');
     sessionManager.startSession(sessionId);
 
     await new Promise((resolve) => setTimeout(resolve, 50));
@@ -82,7 +111,7 @@ describe('GET /api/sessions/[id]/events', () => {
   });
 
   it('events array is a snapshot (not a live reference)', async () => {
-    const sessionId = sessionManager.createSession('discovery-call', 'discovery');
+    const sessionId = sessionManager.createSession('discovery-call-001', 'discovery');
 
     const response1 = await getEvents(
       new NextRequest('http://localhost:3000'),
@@ -113,13 +142,13 @@ describe('SessionManager.getEvents', () => {
   });
 
   it('returns empty array for new session', () => {
-    const sessionId = sessionManager.createSession('discovery-call', 'discovery');
+    const sessionId = sessionManager.createSession('discovery-call-001', 'discovery');
     const events = sessionManager.getEvents(sessionId);
     expect(events).toEqual([]);
   });
 
   it('stores events durably during session execution', async () => {
-    const sessionId = sessionManager.createSession('discovery-call', 'discovery');
+    const sessionId = sessionManager.createSession('discovery-call-001', 'discovery');
     sessionManager.startSession(sessionId);
 
     await new Promise((resolve) => setTimeout(resolve, 50));
@@ -161,7 +190,7 @@ describe('GET /api/sessions/[id]/events — route parameter handling', () => {
 
 describe('GET /api/sessions/[id]/events — HTTP method and error handling', () => {
   it('returns JSON content-type header on 200', async () => {
-    const sessionId = sessionManager.createSession('discovery-call', 'discovery');
+    const sessionId = sessionManager.createSession('discovery-call-001', 'discovery');
     const response = await getEvents(
       new NextRequest('http://localhost:3000'),
       makeParams(sessionId),
@@ -182,7 +211,7 @@ describe('GET /api/sessions/[id]/events — HTTP method and error handling', () 
   });
 
   it('handles multiple sequential requests to the same session', async () => {
-    const sessionId = sessionManager.createSession('discovery-call', 'discovery');
+    const sessionId = sessionManager.createSession('discovery-call-001', 'discovery');
 
     const response1 = await getEvents(
       new NextRequest('http://localhost:3000'),
@@ -202,7 +231,7 @@ describe('GET /api/sessions/[id]/events — HTTP method and error handling', () 
   });
 
   it('returns events with correct type field values', async () => {
-    const sessionId = sessionManager.createSession('discovery-call', 'discovery');
+    const sessionId = sessionManager.createSession('discovery-call-001', 'discovery');
     sessionManager.startSession(sessionId);
     await new Promise((resolve) => setTimeout(resolve, 50));
 
@@ -219,7 +248,7 @@ describe('GET /api/sessions/[id]/events — HTTP method and error handling', () 
   });
 
   it('returns events containing data property for every event', async () => {
-    const sessionId = sessionManager.createSession('discovery-call', 'discovery');
+    const sessionId = sessionManager.createSession('discovery-call-001', 'discovery');
     sessionManager.startSession(sessionId);
     await new Promise((resolve) => setTimeout(resolve, 50));
 

@@ -50,7 +50,7 @@ describe('session-manager-instance', () => {
 
     // Access the deps indirectly: the sessionManager should use real rules.
     // We verify by checking that coachingRules are the ones loaded.
-    expect(coachingRules.length).toBe(6);
+    expect(coachingRules.length).toBe(8);
 
     // Creating a session works with real deps
     const id = sessionManager.createSession('discovery-call', 'discovery');
@@ -74,7 +74,7 @@ describe('session-manager-instance', () => {
   });
 
   it('injects all 6 coaching rules', async () => {
-    expect(coachingRules).toHaveLength(6);
+    expect(coachingRules).toHaveLength(8);
 
     const ruleIds = coachingRules.map((r) => r.ruleId);
     expect(ruleIds).toContain('talk-ratio');
@@ -83,6 +83,8 @@ describe('session-manager-instance', () => {
     expect(ruleIds).toContain('filler-words');
     expect(ruleIds).toContain('feature-dump');
     expect(ruleIds).toContain('no-next-steps');
+    expect(ruleIds).toContain('objection-deflected');
+    expect(ruleIds).toContain('competitor-not-explored');
   });
 
   it('createPlaybackService returns a real PlaybackService', async () => {

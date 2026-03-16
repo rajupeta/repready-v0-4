@@ -8,6 +8,35 @@
  * 4. Covered by tests (this file)
  */
 
+import type { TranscriptLine } from '@/types';
+
+// Mock PlaybackService to complete synchronously (no real file I/O or timers)
+jest.mock('@/services/playback-service', () => ({
+  PlaybackService: jest.fn().mockImplementation(() => ({
+    loadFixture: jest.fn(),
+    start: jest.fn().mockImplementation(
+      (onLine: (line: TranscriptLine) => void, onComplete: () => void) => {
+        onLine({ speaker: 'rep', text: 'Hello there.', timestamp: Date.now() });
+        onLine({ speaker: 'prospect', text: 'Hi, tell me more.', timestamp: Date.now() });
+        onComplete();
+      },
+    ),
+    stop: jest.fn(),
+  })),
+}));
+
+// Mock ClaudeService to avoid needing an API key
+jest.mock('@/services/claude-service', () => ({
+  ClaudeService: jest.fn().mockImplementation(() => ({
+    getCoachingPrompts: jest.fn().mockResolvedValue([]),
+    generateScorecard: jest.fn().mockResolvedValue({
+      entries: [],
+      overallScore: 75,
+      summary: 'Good performance',
+    }),
+  })),
+}));
+
 import { NextRequest } from 'next/server';
 import { sessionManager } from '@/lib/session-manager-instance';
 import { POST as endSession } from '@/app/api/sessions/[id]/end/route';
@@ -20,7 +49,7 @@ describe('TICKET-021 — POST /api/sessions/[id]/end', () => {
   let sessionId: string;
 
   beforeEach(() => {
-    sessionId = sessionManager.createSession('discovery-call', 'discovery');
+    sessionId = sessionManager.createSession('discovery-call-001', 'discovery');
   });
 
   it('returns 200 { status: "ended" } for an active session', async () => {

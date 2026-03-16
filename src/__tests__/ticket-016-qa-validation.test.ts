@@ -8,7 +8,8 @@
  * - Full session lifecycle works end-to-end with mocked external APIs
  */
 
-import { TranscriptLine, CoachingRule } from '@/types';
+import { TranscriptLine } from '@/types';
+import type { SSEEvent } from '@/types/sse';
 
 // Mock PlaybackService to avoid real file I/O and timers but verify it is instantiated
 const mockLoadFixture = jest.fn();
@@ -84,22 +85,22 @@ describe('TICKET-016: Wire real dependencies into session-manager-instance', () 
       expect(typeof eventBus.unsubscribe).toBe('function');
       expect(typeof eventBus.removeAllListeners).toBe('function');
       // Verify it actually works: subscribe, emit, receive
-      const received: any[] = [];
-      const handler = (evt: any) => received.push(evt);
+      const received: SSEEvent[] = [];
+      const handler = (evt: SSEEvent) => received.push(evt);
       eventBus.subscribe('test-session', handler);
-      eventBus.emit('test-session', { type: 'test', data: {} } as any);
+      eventBus.emit('test-session', { type: 'transcript', data: {} } as SSEEvent);
       expect(received).toHaveLength(1);
-      expect(received[0].type).toBe('test');
+      expect(received[0].type).toBe('transcript');
       eventBus.unsubscribe('test-session', handler);
       // After unsubscribe, no more events
-      eventBus.emit('test-session', { type: 'test2', data: {} } as any);
+      eventBus.emit('test-session', { type: 'heartbeat', data: {} } as SSEEvent);
       expect(received).toHaveLength(1);
     });
 
     it('uses real RulesEngine with all 6 coaching rules', () => {
       const engine = new RulesEngine(coachingRules);
       expect(engine).toBeInstanceOf(RulesEngine);
-      expect(coachingRules).toHaveLength(6);
+      expect(coachingRules).toHaveLength(8);
 
       // Verify evaluate works (not a no-op stub)
       const result = engine.evaluate([]);
@@ -118,13 +119,13 @@ describe('TICKET-016: Wire real dependencies into session-manager-instance', () 
     });
 
     it('uses real CoachingService (wrapping ClaudeService)', () => {
-      const coaching = new CoachingService({ getCoachingPrompts: mockGetCoachingPrompts } as any);
+      const coaching = new CoachingService({ getCoachingPrompts: mockGetCoachingPrompts, generateScorecard: mockGenerateScorecard });
       expect(coaching).toBeInstanceOf(CoachingService);
       expect(typeof coaching.processTriggeredRules).toBe('function');
     });
 
     it('uses real ScorecardService (wrapping ClaudeService)', () => {
-      const scorecard = new ScorecardService({ generateScorecard: mockGenerateScorecard } as any);
+      const scorecard = new ScorecardService({ getCoachingPrompts: mockGetCoachingPrompts, generateScorecard: mockGenerateScorecard });
       expect(scorecard).toBeInstanceOf(ScorecardService);
       expect(typeof scorecard.generate).toBe('function');
     });
@@ -254,10 +255,10 @@ describe('TICKET-016: Wire real dependencies into session-manager-instance', () 
       const { eventBus } = await import('@/lib/event-bus-instance');
 
       const sessionId = sessionManager.createSession('discovery-call', 'discovery');
-      const events: any[] = [];
+      const events: SSEEvent[] = [];
 
       // Subscribe to events
-      const handler = (event: any) => events.push(event);
+      const handler = (event: SSEEvent) => events.push(event);
       eventBus.subscribe(sessionId, handler);
 
       // Start session
@@ -385,8 +386,8 @@ describe('TICKET-016: Wire real dependencies into session-manager-instance', () 
       const { eventBus } = await import('@/lib/event-bus-instance');
 
       const sessionId = sessionManager.createSession('discovery-call', 'discovery');
-      const events: any[] = [];
-      eventBus.subscribe(sessionId, (e: any) => events.push(e));
+      const events: SSEEvent[] = [];
+      eventBus.subscribe(sessionId, (e: SSEEvent) => events.push(e));
 
       sessionManager.startSession(sessionId);
       await new Promise((resolve) => setTimeout(resolve, 100));
@@ -398,10 +399,10 @@ describe('TICKET-016: Wire real dependencies into session-manager-instance', () 
       // session_complete event should include error info
       const completeEvent = events.find(e => e.type === 'session_complete');
       expect(completeEvent).toBeDefined();
-      expect(completeEvent.data.error).toBe('Scorecard generation failed');
+      expect(completeEvent!.data.error).toBe('Scorecard generation failed');
     });
 
-    it('coaching rules array passed to deps contains all 6 rule IDs', () => {
+    it('coaching rules array passed to deps contains all 8 rule IDs', () => {
       const expectedRuleIds = [
         'talk-ratio',
         'long-monologue',
@@ -409,6 +410,8 @@ describe('TICKET-016: Wire real dependencies into session-manager-instance', () 
         'filler-words',
         'feature-dump',
         'no-next-steps',
+        'objection-deflected',
+        'competitor-not-explored',
       ];
       const actualRuleIds = coachingRules.map(r => r.ruleId);
       expect(actualRuleIds).toEqual(expectedRuleIds);

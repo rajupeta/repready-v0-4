@@ -8,6 +8,18 @@
  * - Error path when endSession throws
  */
 
+// Mock ClaudeService to avoid needing an API key
+jest.mock('@/services/claude-service', () => ({
+  ClaudeService: jest.fn().mockImplementation(() => ({
+    getCoachingPrompts: jest.fn().mockResolvedValue([]),
+    generateScorecard: jest.fn().mockResolvedValue({
+      entries: [],
+      overallScore: 75,
+      summary: 'Good performance',
+    }),
+  })),
+}));
+
 import { NextRequest } from 'next/server';
 import { sessionManager } from '@/lib/session-manager-instance';
 import { POST as endSession } from '@/app/api/sessions/[id]/end/route';

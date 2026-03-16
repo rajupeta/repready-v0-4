@@ -204,7 +204,7 @@ describe("TICKET-027 Test Agent QA: Playback delay edge cases", () => {
 
       jest.advanceTimersByTime(2000);
       expect(lines[1].timestamp).toBeDefined();
-      expect(lines[1].timestamp).toBeGreaterThanOrEqual(lines[0].timestamp);
+      expect(lines[1].timestamp).toBeGreaterThanOrEqual(lines[0].timestamp!);
     } finally {
       Math.random = origRandom;
     }
