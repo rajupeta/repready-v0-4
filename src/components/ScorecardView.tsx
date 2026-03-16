@@ -21,8 +21,8 @@ function scoreColor(score: number): string {
 
 export default function ScorecardView({ scorecard, onClose }: ScorecardViewProps) {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-lg">
-      <div className="mb-6 flex items-center justify-between">
+    <div className="flex h-full w-full flex-col rounded-xl border border-gray-200 bg-white p-6 shadow-lg" data-testid="scorecard-inline">
+      <div className="mb-6 flex shrink-0 items-center justify-between">
         <h2 className="text-xl font-bold text-gray-900">Scorecard</h2>
         {onClose && (
           <button
@@ -34,14 +34,14 @@ export default function ScorecardView({ scorecard, onClose }: ScorecardViewProps
         )}
       </div>
 
-      <div className="mb-8 text-center">
+      <div className="mb-8 shrink-0 text-center">
         <div className={`text-7xl font-extrabold ${scoreColor(scorecard.overallScore)}`}>
           {scorecard.overallScore}
         </div>
         <p className="mt-2 text-sm font-medium text-gray-500">Overall Score</p>
       </div>
 
-      <div className="mb-6 space-y-3">
+      <div className="min-h-0 flex-1 space-y-3 overflow-y-auto">
         {scorecard.entries.map((entry) => (
           <div
             key={entry.ruleId}
@@ -64,7 +64,7 @@ export default function ScorecardView({ scorecard, onClose }: ScorecardViewProps
         ))}
       </div>
 
-      <div className="rounded-lg bg-blue-50 p-4">
+      <div className="mt-6 shrink-0 rounded-lg bg-blue-50 p-4">
         <p className="text-sm leading-relaxed text-gray-700">{scorecard.summary}</p>
       </div>
     </div>
