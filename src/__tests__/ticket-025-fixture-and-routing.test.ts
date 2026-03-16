@@ -12,7 +12,7 @@
 import fs from 'fs';
 import path from 'path';
 import { NextRequest } from 'next/server';
-import type { TranscriptLine, CallType } from '@/types';
+import type { TranscriptLine } from '@/types';
 import {
   resolveFixture,
   inferCallType,
