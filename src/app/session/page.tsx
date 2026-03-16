@@ -13,6 +13,7 @@ export default function Home() {
   const [selectedFixture, setSelectedFixture] = useState<string>('');
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [sessionStatus, setSessionStatus] = useState<SessionStatus>('idle');
+
   const { lines, prompts, scorecard, isConnected } = useSSE(sessionId);
 
   // Fetch fixtures on mount
@@ -131,7 +132,7 @@ export default function Home() {
           )}
         </div>
 
-        {/* Scorecard inline or Two-column grid */}
+        {/* Scorecard replaces split view when session completes */}
         {scorecard ? (
           <ScorecardView scorecard={scorecard} />
         ) : (

@@ -30,7 +30,7 @@
     "jest-environment-jsdom": "^29.7.0",
     "postcss": "^8.5.8",
     "tailwindcss": "^4.2.1",
-    "ts-jest": "file:ts-jest-29.4.6.tgz",
+    "ts-jest": "^29.4.6",
     "typescript": "^5.7.0"
   }
 }
