@@ -92,17 +92,17 @@ describe('ScorecardView', () => {
     expect(screen.getByText('Good performance overall with room for improvement.')).toBeInTheDocument();
   });
 
-  it('renders close button when onClose is provided', () => {
+  it('renders New Session button when onClose is provided', () => {
     const onClose = jest.fn();
     render(<ScorecardView scorecard={mockScorecard} onClose={onClose} />);
 
-    const closeButton = screen.getByText('Close');
-    fireEvent.click(closeButton);
+    const newSessionButton = screen.getByText('New Session');
+    fireEvent.click(newSessionButton);
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('does not render close button when onClose is not provided', () => {
+  it('does not render New Session button when onClose is not provided', () => {
     render(<ScorecardView scorecard={mockScorecard} />);
-    expect(screen.queryByText('Close')).not.toBeInTheDocument();
+    expect(screen.queryByText('New Session')).not.toBeInTheDocument();
   });
 });

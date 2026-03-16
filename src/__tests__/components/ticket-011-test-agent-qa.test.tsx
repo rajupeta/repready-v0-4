@@ -344,19 +344,19 @@ describe('ScorecardView — acceptance criteria', () => {
     expect(summaryContainer).not.toBeNull();
   });
 
-  it('renders close button when onClose is provided and calls it on click', () => {
+  it('renders New Session button when onClose is provided and calls it on click', () => {
     const onClose = jest.fn();
     render(<ScorecardView scorecard={fullScorecard} onClose={onClose} />);
 
-    const closeBtn = screen.getByText('Close');
-    expect(closeBtn.tagName).toBe('BUTTON');
-    fireEvent.click(closeBtn);
+    const newSessionBtn = screen.getByText('New Session');
+    expect(newSessionBtn.tagName).toBe('BUTTON');
+    fireEvent.click(newSessionBtn);
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('does not render close button when onClose is omitted', () => {
+  it('does not render New Session button when onClose is omitted', () => {
     render(<ScorecardView scorecard={fullScorecard} />);
-    expect(screen.queryByText('Close')).not.toBeInTheDocument();
+    expect(screen.queryByText('New Session')).not.toBeInTheDocument();
   });
 
   it('uses Tailwind CSS and "use client" directive (renders in jsdom)', () => {
@@ -431,19 +431,19 @@ describe('ScorecardView — additional edge cases', () => {
     expect(screen.getByText('No data')).toBeInTheDocument();
   });
 
-  it('renders close button with correct styling', () => {
+  it('renders New Session button with correct styling', () => {
     const onClose = jest.fn();
     render(<ScorecardView scorecard={{ overallScore: 50, summary: 'Test', entries: [] }} onClose={onClose} />);
 
-    const closeBtn = screen.getByText('Close');
-    expect(closeBtn).toHaveClass('rounded-lg', 'text-sm', 'text-gray-500');
+    const newSessionBtn = screen.getByText('New Session');
+    expect(newSessionBtn).toHaveClass('rounded-lg', 'text-sm', 'font-semibold');
   });
 
   it('onClose button click does not fire multiple times for single click', () => {
     const onClose = jest.fn();
     render(<ScorecardView scorecard={{ overallScore: 50, summary: 'Test', entries: [] }} onClose={onClose} />);
 
-    fireEvent.click(screen.getByText('Close'));
+    fireEvent.click(screen.getByText('New Session'));
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
