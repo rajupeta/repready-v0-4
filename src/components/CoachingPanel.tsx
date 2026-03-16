@@ -14,9 +14,8 @@ export default function CoachingPanel({ prompts, sessionCompleted, scorecardLoad
     return (
       <div className="flex h-full flex-col rounded-xl border border-gray-200 bg-white p-5 shadow-md">
         <h2 className="mb-4 text-lg font-semibold text-gray-900">Coaching</h2>
-        <p className="text-sm text-gray-400">No coaching prompts yet</p>
         {sessionCompleted && onGenerateScorecard && (
-          <div className="mt-auto pt-4 border-t border-gray-200">
+          <div className="mb-4 pb-4 border-b border-gray-200">
             <button
               onClick={onGenerateScorecard}
               disabled={scorecardLoading}
@@ -27,6 +26,7 @@ export default function CoachingPanel({ prompts, sessionCompleted, scorecardLoad
             </button>
           </div>
         )}
+        <p className="text-sm text-gray-400">No coaching prompts yet</p>
       </div>
     );
   }
@@ -36,6 +36,18 @@ export default function CoachingPanel({ prompts, sessionCompleted, scorecardLoad
   return (
     <div className="flex h-full flex-col rounded-xl border border-gray-200 bg-white p-5 shadow-md">
       <h2 className="mb-4 text-lg font-semibold text-gray-900">Coaching</h2>
+      {sessionCompleted && onGenerateScorecard && (
+        <div className="mb-4 pb-4 border-b border-gray-200">
+          <button
+            onClick={onGenerateScorecard}
+            disabled={scorecardLoading}
+            className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            data-testid="generate-scorecard-button"
+          >
+            {scorecardLoading ? 'Generating...' : 'Generate Scorecard'}
+          </button>
+        </div>
+      )}
       <div className="flex-1 space-y-3 overflow-y-auto pr-1">
         {sorted.map((prompt) => (
           <div
@@ -49,18 +61,6 @@ export default function CoachingPanel({ prompts, sessionCompleted, scorecardLoad
           </div>
         ))}
       </div>
-      {sessionCompleted && onGenerateScorecard && (
-        <div className="mt-4 pt-4 border-t border-gray-200">
-          <button
-            onClick={onGenerateScorecard}
-            disabled={scorecardLoading}
-            className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-            data-testid="generate-scorecard-button"
-          >
-            {scorecardLoading ? 'Generating...' : 'Generate Scorecard'}
-          </button>
-        </div>
-      )}
     </div>
   );
 }

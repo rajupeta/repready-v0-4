@@ -68,6 +68,8 @@ export default function Home() {
 
   async function handleStartSession() {
     if (!selectedCallType) return;
+    // Clear previous session data
+    handleNewSession();
     setSessionStatus('loading');
 
     try {
@@ -92,6 +94,7 @@ export default function Home() {
 
   async function handleEndCall() {
     if (!sessionId) return;
+    if (!window.confirm('Are you sure you want to end this call?')) return;
 
     try {
       await fetch(`/api/sessions/${sessionId}/end`, { method: 'POST' });
@@ -191,6 +194,15 @@ export default function Home() {
               className="rounded-lg bg-red-600 px-6 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700"
             >
               End Call
+            </button>
+          )}
+
+          {sessionStatus === 'completed' && (
+            <button
+              onClick={handleNewSession}
+              className="rounded-lg bg-green-600 px-6 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700"
+            >
+              New Session
             </button>
           )}
         </div>
