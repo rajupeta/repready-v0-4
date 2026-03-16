@@ -21,7 +21,7 @@ function scoreColor(score: number): string {
 
 export default function ScorecardView({ scorecard, onClose }: ScorecardViewProps) {
   return (
-    <div className="rounded-xl bg-white p-6 shadow-lg">
+    <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-lg">
       <div className="mb-6 flex items-center justify-between">
         <h2 className="text-xl font-bold text-gray-900">Scorecard</h2>
         {onClose && (

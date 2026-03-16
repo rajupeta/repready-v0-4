@@ -9,7 +9,7 @@ interface CoachingPanelProps {
 export default function CoachingPanel({ prompts }: CoachingPanelProps) {
   if (prompts.length === 0) {
     return (
-      <div className="flex h-full flex-col rounded-xl bg-white p-5 shadow-md">
+      <div className="flex h-full flex-col rounded-xl border border-gray-200 bg-white p-5 shadow-md">
         <h2 className="mb-4 text-lg font-semibold text-gray-900">Coaching</h2>
         <p className="text-sm text-gray-400">No coaching prompts yet</p>
       </div>
@@ -19,7 +19,7 @@ export default function CoachingPanel({ prompts }: CoachingPanelProps) {
   const sorted = [...prompts].reverse();
 
   return (
-    <div className="flex h-full flex-col rounded-xl bg-white p-5 shadow-md">
+    <div className="flex h-full flex-col rounded-xl border border-gray-200 bg-white p-5 shadow-md">
       <h2 className="mb-4 text-lg font-semibold text-gray-900">Coaching</h2>
       <div className="flex-1 space-y-3 overflow-y-auto pr-1">
         {sorted.map((prompt, index) => (
