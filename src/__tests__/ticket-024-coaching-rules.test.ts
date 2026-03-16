@@ -19,7 +19,7 @@ describe("TICKET-024: coaching rules — all 8 rules active with callTypes and s
   });
 
   it("each rule has required fields including callTypes and severity", () => {
-    const validCallTypes: CallType[] = ["discovery", "demo", "objection-handling", "follow-up"];
+    const validCallTypes: CallType[] = ["discovery", "demo", "objection-handling", "follow-up", "pricing", "cold-call"];
     const validSeverities: Severity[] = ["low", "medium", "high"];
 
     for (const rule of coachingRules) {
@@ -366,49 +366,49 @@ describe("TICKET-024: coaching rules — all 8 rules active with callTypes and s
   describe("callTypes and severity on all rules", () => {
     it("talk-ratio has callTypes and severity medium", () => {
       const rule = getRule("talk-ratio");
-      expect(rule.callTypes).toEqual(["discovery", "demo", "objection-handling", "follow-up"]);
+      expect(rule.callTypes).toEqual(["discovery", "demo", "objection-handling", "follow-up", "pricing", "cold-call"]);
       expect(rule.severity).toBe("medium");
     });
 
     it("long-monologue has callTypes and severity medium", () => {
       const rule = getRule("long-monologue");
-      expect(rule.callTypes).toEqual(["discovery", "demo", "objection-handling", "follow-up"]);
+      expect(rule.callTypes).toEqual(["discovery", "demo", "objection-handling", "follow-up", "pricing", "cold-call"]);
       expect(rule.severity).toBe("medium");
     });
 
     it("no-questions has callTypes and severity high", () => {
       const rule = getRule("no-questions");
-      expect(rule.callTypes).toEqual(["discovery", "demo", "follow-up"]);
+      expect(rule.callTypes).toEqual(["discovery", "demo", "follow-up", "cold-call"]);
       expect(rule.severity).toBe("high");
     });
 
     it("filler-words has callTypes and severity low", () => {
       const rule = getRule("filler-words");
-      expect(rule.callTypes).toEqual(["discovery", "demo", "objection-handling", "follow-up"]);
+      expect(rule.callTypes).toEqual(["discovery", "demo", "objection-handling", "follow-up", "pricing", "cold-call"]);
       expect(rule.severity).toBe("low");
     });
 
     it("feature-dump has callTypes and severity medium", () => {
       const rule = getRule("feature-dump");
-      expect(rule.callTypes).toEqual(["demo", "discovery"]);
+      expect(rule.callTypes).toEqual(["demo", "discovery", "cold-call"]);
       expect(rule.severity).toBe("medium");
     });
 
     it("no-next-steps has callTypes and severity high", () => {
       const rule = getRule("no-next-steps");
-      expect(rule.callTypes).toEqual(["discovery", "demo", "objection-handling", "follow-up"]);
+      expect(rule.callTypes).toEqual(["discovery", "demo", "objection-handling", "follow-up", "pricing", "cold-call"]);
       expect(rule.severity).toBe("high");
     });
 
     it("objection-deflected has callTypes and severity high", () => {
       const rule = getRule("objection-deflected");
-      expect(rule.callTypes).toEqual(["objection-handling", "demo", "discovery"]);
+      expect(rule.callTypes).toEqual(["objection-handling", "demo", "discovery", "pricing"]);
       expect(rule.severity).toBe("high");
     });
 
     it("competitor-not-explored has callTypes and severity medium", () => {
       const rule = getRule("competitor-not-explored");
-      expect(rule.callTypes).toEqual(["discovery", "demo", "objection-handling"]);
+      expect(rule.callTypes).toEqual(["discovery", "demo", "objection-handling", "pricing"]);
       expect(rule.severity).toBe("medium");
     });
   });

@@ -161,7 +161,7 @@ describe('AC3 — demo-call.json removed', () => {
   it('fixtures directory contains exactly the expected files', () => {
     const files = fs.readdirSync(fixturesDir).filter((f) => f.endsWith('.json'));
     expect(files.sort()).toEqual(
-      ['discovery-call-001.json', 'objection-handling-001.json'].sort(),
+      ['cold-call-001.json', 'demo-call-001.json', 'discovery-call-001.json', 'follow-up-call-001.json', 'objection-handling-001.json', 'pricing-call-001.json'].sort(),
     );
   });
 });
@@ -171,17 +171,19 @@ describe('AC3 — demo-call.json removed', () => {
 // ===========================================================================
 describe('AC4 — Call-type routing module', () => {
   describe('VALID_CALL_TYPES', () => {
-    it('exports exactly 4 call types', () => {
-      expect(VALID_CALL_TYPES).toHaveLength(4);
+    it('exports exactly 6 call types', () => {
+      expect(VALID_CALL_TYPES).toHaveLength(6);
     });
 
-    it('includes discovery, demo, objection-handling, follow-up', () => {
+    it('includes discovery, demo, objection-handling, follow-up, pricing, cold-call', () => {
       expect(VALID_CALL_TYPES).toEqual(
         expect.arrayContaining([
           'discovery',
           'demo',
           'objection-handling',
           'follow-up',
+          'pricing',
+          'cold-call',
         ]),
       );
     });
@@ -192,6 +194,8 @@ describe('AC4 — Call-type routing module', () => {
         'demo',
         'objection-handling',
         'follow-up',
+        'pricing',
+        'cold-call',
       ];
       for (const ct of expected) {
         expect(VALID_CALL_TYPES).toContain(ct);
@@ -402,33 +406,39 @@ describe('AC4 — SessionManager.createSession callType storage', () => {
 // AC5: No broken fixture references in codebase
 // ===========================================================================
 describe('AC5 — No broken fixture references', () => {
-  it('GET /api/fixtures returns only existing files', async () => {
+  it('GET /api/fixtures returns only valid call types with existing fixture files', async () => {
     const res = await getFixtures();
-    const names: string[] = await res.json();
-    expect(Array.isArray(names)).toBe(true);
-    for (const name of names) {
-      expect(
-        fs.existsSync(path.join(fixturesDir, `${name}.json`)),
-      ).toBe(true);
+    const items: { callType: string; displayName: string }[] = await res.json();
+    expect(Array.isArray(items)).toBe(true);
+    for (const item of items) {
+      const fixtures = getFixturesForCallType(item.callType as CallType);
+      for (const f of fixtures) {
+        expect(
+          fs.existsSync(path.join(fixturesDir, `${f}.json`)),
+        ).toBe(true);
+      }
     }
   });
 
-  it('GET /api/fixtures does not include demo-call', async () => {
+  it('GET /api/fixtures does not include demo-call as a call type', async () => {
     const res = await getFixtures();
-    const names: string[] = await res.json();
-    expect(names).not.toContain('demo-call');
+    const items: { callType: string; displayName: string }[] = await res.json();
+    const callTypes = items.map((i) => i.callType);
+    expect(callTypes).not.toContain('demo-call');
   });
 
-  it('GET /api/fixtures includes discovery-call-001', async () => {
+  it('GET /api/fixtures includes discovery call type', async () => {
     const res = await getFixtures();
-    const names: string[] = await res.json();
-    expect(names).toContain('discovery-call-001');
+    const items: { callType: string; displayName: string }[] = await res.json();
+    const callTypes = items.map((i) => i.callType);
+    expect(callTypes).toContain('discovery');
   });
 
-  it('GET /api/fixtures includes objection-handling-001', async () => {
+  it('GET /api/fixtures includes objection-handling call type', async () => {
     const res = await getFixtures();
-    const names: string[] = await res.json();
-    expect(names).toContain('objection-handling-001');
+    const items: { callType: string; displayName: string }[] = await res.json();
+    const callTypes = items.map((i) => i.callType);
+    expect(callTypes).toContain('objection-handling');
   });
 
   it('CALL_TYPE_FIXTURES map has no references to deleted fixtures', () => {

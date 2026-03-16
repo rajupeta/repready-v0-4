@@ -7,9 +7,40 @@ import { CallType } from '@/types';
 const CALL_TYPE_FIXTURES: Record<CallType, string[]> = {
   discovery: ['discovery-call-001'],
   'objection-handling': ['objection-handling-001'],
-  demo: ['discovery-call-001'],
-  'follow-up': ['discovery-call-001'],
+  demo: ['demo-call-001'],
+  'follow-up': ['follow-up-call-001'],
+  pricing: ['pricing-call-001'],
+  'cold-call': ['cold-call-001'],
 };
+
+/**
+ * Friendly display names for each call type, used in the UI dropdown.
+ */
+const CALL_TYPE_DISPLAY_NAMES: Record<CallType, string> = {
+  discovery: 'Discovery Call',
+  demo: 'Demo Call',
+  'objection-handling': 'Objection Handling',
+  'follow-up': 'Follow-Up Call',
+  pricing: 'Pricing Call',
+  'cold-call': 'Cold Call',
+};
+
+/**
+ * Returns the friendly display name for a call type.
+ */
+export function getCallTypeDisplayName(callType: CallType): string {
+  return CALL_TYPE_DISPLAY_NAMES[callType] ?? callType;
+}
+
+/**
+ * Returns all call types with their display names.
+ */
+export function getAllCallTypes(): { callType: CallType; displayName: string }[] {
+  return VALID_CALL_TYPES.map((ct) => ({
+    callType: ct,
+    displayName: CALL_TYPE_DISPLAY_NAMES[ct],
+  }));
+}
 
 /**
  * Returns the fixture IDs available for a given call type.
@@ -32,9 +63,11 @@ export function getDefaultFixture(callType: CallType): string | undefined {
  */
 export function inferCallType(fixtureId: string): CallType {
   if (fixtureId.startsWith('objection-handling')) return 'objection-handling';
+  if (fixtureId.startsWith('cold-call')) return 'cold-call';
+  if (fixtureId.startsWith('follow-up')) return 'follow-up';
   if (fixtureId.startsWith('discovery')) return 'discovery';
   if (fixtureId.startsWith('demo')) return 'demo';
-  if (fixtureId.startsWith('follow-up')) return 'follow-up';
+  if (fixtureId.startsWith('pricing')) return 'pricing';
   // Default to discovery if pattern doesn't match
   return 'discovery';
 }
@@ -74,4 +107,6 @@ export const VALID_CALL_TYPES: CallType[] = [
   'demo',
   'objection-handling',
   'follow-up',
+  'pricing',
+  'cold-call',
 ];

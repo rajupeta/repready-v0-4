@@ -348,7 +348,7 @@ describe('ScorecardView — acceptance criteria', () => {
     const onClose = jest.fn();
     render(<ScorecardView scorecard={fullScorecard} onClose={onClose} />);
 
-    const closeBtn = screen.getByText('Close');
+    const closeBtn = screen.getByText('New Session');
     expect(closeBtn.tagName).toBe('BUTTON');
     fireEvent.click(closeBtn);
     expect(onClose).toHaveBeenCalledTimes(1);
@@ -356,7 +356,7 @@ describe('ScorecardView — acceptance criteria', () => {
 
   it('does not render close button when onClose is omitted', () => {
     render(<ScorecardView scorecard={fullScorecard} />);
-    expect(screen.queryByText('Close')).not.toBeInTheDocument();
+    expect(screen.queryByText('New Session')).not.toBeInTheDocument();
   });
 
   it('uses Tailwind CSS and "use client" directive (renders in jsdom)', () => {
@@ -435,15 +435,15 @@ describe('ScorecardView — additional edge cases', () => {
     const onClose = jest.fn();
     render(<ScorecardView scorecard={{ overallScore: 50, summary: 'Test', entries: [] }} onClose={onClose} />);
 
-    const closeBtn = screen.getByText('Close');
-    expect(closeBtn).toHaveClass('rounded-lg', 'text-sm', 'text-gray-500');
+    const closeBtn = screen.getByText('New Session');
+    expect(closeBtn).toHaveClass('rounded-lg', 'text-sm', 'font-semibold');
   });
 
   it('onClose button click does not fire multiple times for single click', () => {
     const onClose = jest.fn();
     render(<ScorecardView scorecard={{ overallScore: 50, summary: 'Test', entries: [] }} onClose={onClose} />);
 
-    fireEvent.click(screen.getByText('Close'));
+    fireEvent.click(screen.getByText('New Session'));
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 

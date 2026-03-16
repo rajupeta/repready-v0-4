@@ -177,7 +177,7 @@ describe('Main page — test-agent acceptance', () => {
   beforeEach(() => {
     mockUseSSE.mockReturnValue(defaultSSE());
     mockFetch.mockResolvedValue({
-      json: () => Promise.resolve(['discovery-call-001', 'objection-handling']),
+      json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}, {callType: 'objection-handling', displayName: 'Objection Handling'}]),
     });
   });
   afterEach(() => jest.restoreAllMocks());
@@ -189,15 +189,15 @@ describe('Main page — test-agent acceptance', () => {
     await waitFor(() => {
       const opts = screen.getAllByRole('option');
       expect(opts).toHaveLength(2);
-      expect(opts[0]).toHaveTextContent('discovery-call-001');
-      expect(opts[1]).toHaveTextContent('objection-handling');
+      expect(opts[0]).toHaveTextContent('Discovery Call');
+      expect(opts[1]).toHaveTextContent('Objection Handling');
     });
   });
 
   // AC 2: Start Session creates and starts session
   it('AC2: Start Session POSTs to /api/sessions then /api/sessions/:id/start', async () => {
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['fix1']) })
+      .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'qa-sess' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: true }) });
 
@@ -208,7 +208,7 @@ describe('Main page — test-agent acceptance', () => {
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith('/api/sessions', expect.objectContaining({
         method: 'POST',
-        body: JSON.stringify({ fixtureId: 'fix1' }),
+        body: JSON.stringify({ callType: 'discovery' }),
       }));
       expect(mockFetch).toHaveBeenCalledWith('/api/sessions/qa-sess/start', { method: 'POST' });
     });
@@ -218,7 +218,7 @@ describe('Main page — test-agent acceptance', () => {
   // AC 3: SSE hook connects
   it('AC3: useSSE called with null initially, then sessionId after session start', async () => {
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['f']) })
+      .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'id1' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({}) });
 
@@ -341,7 +341,7 @@ describe('Main page — test-agent acceptance', () => {
 
   it('session creation failure resets to idle — button re-enabled', async () => {
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['f']) })
+      .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockRejectedValueOnce(new Error('500'));
 
     render(<Home />);
@@ -354,7 +354,7 @@ describe('Main page — test-agent acceptance', () => {
 
   it('button text changes to "Starting..." during loading', async () => {
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['f']) })
+      .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockImplementationOnce(() => new Promise(() => {}));
 
     render(<Home />);
@@ -366,7 +366,7 @@ describe('Main page — test-agent acceptance', () => {
   it('dropdown is disabled during active session', async () => {
     mockUseSSE.mockReturnValue({ ...defaultSSE(), isConnected: true });
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['f']) })
+      .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 's' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({}) });
 
@@ -374,7 +374,7 @@ describe('Main page — test-agent acceptance', () => {
     await waitFor(() => expect(screen.getByRole('option')).toBeInTheDocument());
     fireEvent.click(screen.getByText('Start Session'));
     await waitFor(() => {
-      expect(screen.getByLabelText('Select fixture')).toBeDisabled();
+      expect(screen.getByLabelText('Select call type')).toBeDisabled();
     });
   });
 
@@ -397,8 +397,8 @@ describe('Main page — test-agent acceptance', () => {
   it('auto-selects first fixture from the list', async () => {
     render(<Home />);
     await waitFor(() => {
-      const select = screen.getByLabelText('Select fixture') as HTMLSelectElement;
-      expect(select.value).toBe('discovery-call-001');
+      const select = screen.getByLabelText('Select call type') as HTMLSelectElement;
+      expect(select.value).toBe('discovery');
     });
   });
 

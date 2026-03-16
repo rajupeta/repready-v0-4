@@ -208,7 +208,7 @@ describe('Main page — QA validation', () => {
   beforeEach(() => {
     mockUseSSE.mockReturnValue(defaultSSE());
     mockFetch.mockResolvedValue({
-      json: () => Promise.resolve(['discovery-call-001', 'objection-handling']),
+      json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}, {callType: 'objection-handling', displayName: 'Objection Handling'}]),
     });
   });
 
@@ -221,23 +221,23 @@ describe('Main page — QA validation', () => {
     await waitFor(() => {
       const options = screen.getAllByRole('option');
       expect(options).toHaveLength(2);
-      expect(options[0]).toHaveTextContent('discovery-call-001');
-      expect(options[1]).toHaveTextContent('objection-handling');
+      expect(options[0]).toHaveTextContent('Discovery Call');
+      expect(options[1]).toHaveTextContent('Objection Handling');
     });
   });
 
   it('AC1: auto-selects first fixture', async () => {
     render(<Home />);
     await waitFor(() => {
-      const select = screen.getByLabelText('Select fixture') as HTMLSelectElement;
-      expect(select.value).toBe('discovery-call-001');
+      const select = screen.getByLabelText('Select call type') as HTMLSelectElement;
+      expect(select.value).toBe('discovery');
     });
   });
 
   // --- AC 2: Start Session button creates and starts a session ---
   it('AC2: clicking Start Session calls POST /api/sessions then POST /api/sessions/:id/start', async () => {
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['discovery-call-001']) })
+      .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'sess-99' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ ok: true }) });
 
@@ -249,7 +249,7 @@ describe('Main page — QA validation', () => {
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalledWith('/api/sessions', expect.objectContaining({
         method: 'POST',
-        body: JSON.stringify({ fixtureId: 'discovery-call-001' }),
+        body: JSON.stringify({ callType: 'discovery' }),
       }));
       expect(mockFetch).toHaveBeenCalledWith('/api/sessions/sess-99/start', { method: 'POST' });
     });
@@ -260,7 +260,7 @@ describe('Main page — QA validation', () => {
   // --- AC 3: SSE hook connects and receives real-time events ---
   it('AC3: useSSE is called with null initially, then sessionId after start', async () => {
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['fix1']) })
+      .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 'sid' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({}) });
 
@@ -383,7 +383,7 @@ describe('Main page — QA validation', () => {
 
   it('session creation failure resets to idle', async () => {
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['fix1']) })
+      .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockRejectedValueOnce(new Error('500'));
 
     render(<Home />);
@@ -397,7 +397,7 @@ describe('Main page — QA validation', () => {
 
   it('button shows "Starting..." during loading state', async () => {
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['fix1']) })
+      .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockImplementationOnce(() => new Promise(() => {})); // never resolves
 
     render(<Home />);
@@ -409,7 +409,7 @@ describe('Main page — QA validation', () => {
   it('dropdown and button are disabled during active session', async () => {
     mockUseSSE.mockReturnValue({ ...defaultSSE(), isConnected: true });
     mockFetch
-      .mockResolvedValueOnce({ json: () => Promise.resolve(['fix1']) })
+      .mockResolvedValueOnce({ json: () => Promise.resolve([{callType: 'discovery', displayName: 'Discovery Call'}]) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({ sessionId: 's' }) })
       .mockResolvedValueOnce({ json: () => Promise.resolve({}) });
 
@@ -418,7 +418,7 @@ describe('Main page — QA validation', () => {
 
     fireEvent.click(screen.getByText('Start Session'));
     await waitFor(() => {
-      expect(screen.getByLabelText('Select fixture')).toBeDisabled();
+      expect(screen.getByLabelText('Select call type')).toBeDisabled();
     });
   });
 

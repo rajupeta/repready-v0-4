@@ -230,12 +230,14 @@ describe('AC4: Call-type routing', () => {
   });
 
   describe('VALID_CALL_TYPES', () => {
-    it('contains all four call types', () => {
+    it('contains all call types', () => {
       expect(VALID_CALL_TYPES).toContain('discovery');
       expect(VALID_CALL_TYPES).toContain('demo');
       expect(VALID_CALL_TYPES).toContain('objection-handling');
       expect(VALID_CALL_TYPES).toContain('follow-up');
-      expect(VALID_CALL_TYPES).toHaveLength(4);
+      expect(VALID_CALL_TYPES).toContain('pricing');
+      expect(VALID_CALL_TYPES).toContain('cold-call');
+      expect(VALID_CALL_TYPES).toHaveLength(6);
     });
   });
 });
@@ -338,14 +340,21 @@ describe('AC5: No broken fixture references', () => {
     }
   });
 
-  it('GET /api/fixtures returns only files that exist', async () => {
+  it('GET /api/fixtures returns call types with display names', async () => {
     const { GET } = await import('@/app/api/fixtures/route');
     const response = await GET();
-    const names: string[] = await response.json();
+    const data: { callType: string; displayName: string }[] = await response.json();
 
-    for (const name of names) {
-      const filePath = path.join(fixturesDir, `${name}.json`);
-      expect(fs.existsSync(filePath)).toBe(true);
+    expect(data.length).toBeGreaterThanOrEqual(6);
+    for (const entry of data) {
+      expect(typeof entry.callType).toBe('string');
+      expect(typeof entry.displayName).toBe('string');
+      // Each call type should have a default fixture that exists
+      const fixtures = getFixturesForCallType(entry.callType as import('@/types').CallType);
+      for (const fixture of fixtures) {
+        const filePath = path.join(fixturesDir, `${fixture}.json`);
+        expect(fs.existsSync(filePath)).toBe(true);
+      }
     }
   });
 });

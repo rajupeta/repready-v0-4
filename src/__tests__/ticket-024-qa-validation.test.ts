@@ -42,7 +42,7 @@ describe("TICKET-024 QA: acceptance criteria validation", () => {
     });
 
     it("all rules have ruleId, name, description, cooldownMs, detect, callTypes, severity", () => {
-      const validCallTypes: CallType[] = ["discovery", "demo", "objection-handling", "follow-up"];
+      const validCallTypes: CallType[] = ["discovery", "demo", "objection-handling", "follow-up", "pricing", "cold-call"];
       const validSeverities: Severity[] = ["low", "medium", "high"];
 
       for (const rule of coachingRules) {

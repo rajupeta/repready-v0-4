@@ -356,19 +356,19 @@ describe('TICKET-011: ScorecardView summary and close button', () => {
   it('renders close button when onClose is provided', () => {
     const onClose = jest.fn();
     render(<ScorecardView scorecard={scorecard} onClose={onClose} />);
-    expect(screen.getByText('Close')).toBeInTheDocument();
+    expect(screen.getByText('New Session')).toBeInTheDocument();
   });
 
   it('close button calls onClose when clicked', () => {
     const onClose = jest.fn();
     render(<ScorecardView scorecard={scorecard} onClose={onClose} />);
-    fireEvent.click(screen.getByText('Close'));
+    fireEvent.click(screen.getByText('New Session'));
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   it('does not render close button when onClose is not provided', () => {
     render(<ScorecardView scorecard={scorecard} />);
-    expect(screen.queryByText('Close')).not.toBeInTheDocument();
+    expect(screen.queryByText('New Session')).not.toBeInTheDocument();
   });
 });
 
