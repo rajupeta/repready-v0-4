@@ -270,8 +270,11 @@ describe('Main page — test-agent acceptance', () => {
   it('AC5: coaching prompts render with rule name and message', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
+      lines: [
+        { speaker: 'rep', text: 'Line 1', timestamp: 1 },
+      ],
       prompts: [
-        { ruleId: 'r1', ruleName: 'Empathy Check', message: 'Acknowledge their concern', timestamp: 1 },
+        { ruleId: 'r1', ruleName: 'Empathy Check', message: 'Acknowledge their concern', timestamp: 1, triggerLineIndex: 1 },
       ],
     });
     render(<Home />);

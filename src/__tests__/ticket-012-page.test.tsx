@@ -117,7 +117,8 @@ describe('Main page — acceptance criteria', () => {
   it('passes useSSE prompts to CoachingPanel', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
-      prompts: [{ ruleId: 'r1', ruleName: 'Active Listening', message: 'Reflect back', timestamp: 1 }],
+      prompts: [{ ruleId: 'r1', ruleName: 'Active Listening', message: 'Reflect back', timestamp: 1, triggerLineIndex: 1 }],
+      lines: [{ speaker: 'rep' as const, text: 'Hello', timestamp: 1 }],
     });
     render(<Home />);
     expect(screen.getByText('Active Listening')).toBeInTheDocument();

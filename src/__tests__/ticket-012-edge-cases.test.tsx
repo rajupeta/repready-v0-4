@@ -141,10 +141,15 @@ describe('TICKET-012 edge cases', () => {
   it('accumulates multiple coaching prompts', () => {
     mockUseSSE.mockReturnValue({
       ...defaultSSE(),
+      lines: [
+        { speaker: 'rep', text: 'Line 1', timestamp: 1 },
+        { speaker: 'prospect', text: 'Line 2', timestamp: 2 },
+        { speaker: 'rep', text: 'Line 3', timestamp: 3 },
+      ],
       prompts: [
-        { ruleId: 'r1', ruleName: 'Active Listening', message: 'Reflect back', timestamp: 1 },
-        { ruleId: 'r2', ruleName: 'Open Questions', message: 'Ask open questions', timestamp: 2 },
-        { ruleId: 'r3', ruleName: 'Discovery', message: 'Dig deeper', timestamp: 3 },
+        { ruleId: 'r1', ruleName: 'Active Listening', message: 'Reflect back', timestamp: 1, triggerLineIndex: 1 },
+        { ruleId: 'r2', ruleName: 'Open Questions', message: 'Ask open questions', timestamp: 2, triggerLineIndex: 2 },
+        { ruleId: 'r3', ruleName: 'Discovery', message: 'Dig deeper', timestamp: 3, triggerLineIndex: 3 },
       ],
     });
     render(<Home />);

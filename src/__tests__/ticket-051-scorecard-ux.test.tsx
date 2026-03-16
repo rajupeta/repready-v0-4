@@ -54,7 +54,7 @@ describe('TICKET-051: Scorecard UX — keep transcript+coaching visible, scoreca
       sessionComplete: true,
       scorecard: mockScorecard,
       lines: [{ speaker: 'rep', text: 'Hi there' }],
-      prompts: [{ ruleId: 'r1', ruleName: 'Active Listening', message: 'Reflect back', timestamp: 1 }],
+      prompts: [{ ruleId: 'r1', ruleName: 'Active Listening', message: 'Reflect back', timestamp: 1, triggerLineIndex: 1 }],
     });
     render(<Home />);
 
@@ -119,7 +119,7 @@ describe('TICKET-051: Scorecard UX — keep transcript+coaching visible, scoreca
       sessionComplete: true,
       scorecard: mockScorecard,
       lines: [{ speaker: 'rep', text: 'Test transcript line' }],
-      prompts: [{ ruleId: 'r1', ruleName: 'Test Rule', message: 'Test coaching', timestamp: 1 }],
+      prompts: [{ ruleId: 'r1', ruleName: 'Test Rule', message: 'Test coaching', timestamp: 1, triggerLineIndex: 1 }],
     });
     render(<Home />);
 

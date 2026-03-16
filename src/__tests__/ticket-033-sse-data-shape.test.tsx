@@ -163,7 +163,7 @@ describe('TICKET-033: SSE data shape destructuring', () => {
       });
       const prompts = JSON.parse(screen.getByTestId('prompts').textContent!);
       expect(prompts).toHaveLength(1);
-      expect(prompts[0]).toEqual({
+      expect(prompts[0]).toMatchObject({
         ruleId: 'no-questions',
         ruleName: 'No Discovery Questions',
         message: 'Try asking an open-ended question.',
