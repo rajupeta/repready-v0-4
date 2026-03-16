@@ -121,6 +121,17 @@ export default function Home() {
         const data = await res.json();
         setScorecardData(data);
         setShowScorecard(true);
+      } else {
+        // Scorecard not ready yet — try ending session first to trigger generation
+        await fetch(`/api/sessions/${sessionId}/end`, { method: 'POST' }).catch(() => {});
+        // Wait a moment for scorecard to generate, then retry
+        await new Promise(r => setTimeout(r, 3000));
+        const retryRes = await fetch(`/api/sessions/${sessionId}/scorecard`);
+        if (retryRes.ok) {
+          const data = await retryRes.json();
+          setScorecardData(data);
+          setShowScorecard(true);
+        }
       }
     } catch {
       // silently handle fetch errors
