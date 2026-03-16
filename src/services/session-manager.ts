@@ -10,8 +10,8 @@ import {
 } from '@/types';
 
 export interface IRulesEngine {
-  evaluate(window: TranscriptLine[]): CoachingRule[];
-  resetCooldowns(): void;
+  evaluate(window: TranscriptLine[], sessionId?: string): CoachingRule[];
+  resetCooldowns(sessionId?: string): void;
 }
 
 export interface ICoachingService {
@@ -89,7 +89,7 @@ export class SessionManager {
     }
 
     session.status = 'active';
-    this.deps.rulesEngine.resetCooldowns();
+    this.deps.rulesEngine.resetCooldowns(sessionId);
 
     const emitAndStore = (event: SSEEvent) => {
       session.events.push(event);
@@ -105,7 +105,7 @@ export class SessionManager {
           data: { line },
         });
 
-        const triggered = this.deps.rulesEngine.evaluate(window);
+        const triggered = this.deps.rulesEngine.evaluate(window, sessionId);
 
         if (triggered.length > 0) {
           this.deps.coachingService
@@ -133,6 +133,7 @@ export class SessionManager {
       (line: TranscriptLine) => transcriptService.addLine(line),
       () => {
         this.playbackServices.delete(sessionId);
+        this.deps.rulesEngine.resetCooldowns(sessionId);
         this.deps.scorecardService
           .generate(session.transcript, this.deps.rules)
           .then((scorecard) => {
@@ -171,6 +172,7 @@ export class SessionManager {
       playbackService.stop();
       this.playbackServices.delete(sessionId);
     }
+    this.deps.rulesEngine.resetCooldowns(sessionId);
 
     try {
       const scorecard = await this.deps.scorecardService.generate(

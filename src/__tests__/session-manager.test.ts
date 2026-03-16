@@ -332,6 +332,7 @@ describe('SessionManager', () => {
         expect.arrayContaining([
           expect.objectContaining({ speaker: 'rep', text: 'Hello' }),
         ]),
+        id,
       );
     });
 
