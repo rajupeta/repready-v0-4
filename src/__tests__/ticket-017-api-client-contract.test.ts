@@ -10,7 +10,7 @@ import path from 'path';
 
 describe('TICKET-017: API/Client sessionId contract', () => {
   const apiRoutePath = path.resolve(__dirname, '../app/api/sessions/route.ts');
-  const pageClientPath = path.resolve(__dirname, '../app/page.tsx');
+  const pageClientPath = path.resolve(__dirname, '../app/session/page.tsx');
 
   let apiSource: string;
   let pageSource: string;
