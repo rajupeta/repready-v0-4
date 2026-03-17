@@ -1,0 +1,14 @@
+node_modules
+.next
+.git
+.gitignore
+*.md
+Dockerfile
+.dockerignore
+.env*
+.vercel
+jest.config.js
+tsconfig.jest.json
+src/__tests__
+ci-workflow
+scripts

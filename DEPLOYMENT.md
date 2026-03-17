@@ -1,73 +1,74 @@
-# Deployment Guide — RepReady on Vercel
+# Deployment Guide — RepReady on Render
 
-RepReady is deployed on [Vercel](https://vercel.com) via CLI. No Git repository is linked — code is deployed directly from local machine and source code stays private.
+RepReady is deployed on [Render](https://render.com) via Docker image. No Git repository is linked — only the built Docker image is pushed to Docker Hub, then Render pulls and runs it. Source code is never exposed to the hosting platform.
 
-**Production URL:** https://repready-v0-4.vercel.app
+**Production URL:** https://repready.onrender.com
+**Docker Image:** docker.io/rajupetap/repready:latest
+
+## Why Render (not Vercel)
+
+RepReady uses in-memory session state for real-time coaching. Vercel's serverless functions are stateless — each API call can run in a different function instance, losing session data. Render runs a single persistent process where in-memory state works correctly.
 
 ## Prerequisites
 
-1. **Create a Vercel account** at https://vercel.com (no credit card needed — sign up with GitHub, GitLab, or email)
-2. **Node.js 22+** installed
+1. **Docker** installed locally (`docker --version` to verify)
+2. **Docker Hub account** at https://hub.docker.com (free, for hosting the image)
+3. **Render account** at https://render.com (free, no credit card needed)
 
 ## Setup — Step by Step
 
-### 1. Install Vercel CLI
+### 1. Login to Docker Hub
 
 ```bash
-npm install -g vercel
+docker login
 ```
 
-### 2. Login to Vercel
+Enter your Docker Hub username and password (or access token).
+
+### 2. Build and Push the Docker Image
 
 ```bash
-npx vercel login
+DOCKER_USERNAME=yourusername ./scripts/deploy.sh
 ```
 
-This opens your browser for OAuth authentication. Once you see "Congratulations! You are now signed in." you're good to go.
+This builds the production image locally and pushes it to Docker Hub. Your source code is NOT included in the final image — only the compiled Next.js standalone output.
 
-Verify login:
-```bash
-npx vercel whoami
-```
-
-### 3. First-time Deploy
-
-From the project directory:
+Or manually:
 
 ```bash
-cd repready-v0-4
-npx vercel --yes
+docker build -t repready .
+docker tag repready yourusername/repready:latest
+docker push yourusername/repready:latest
 ```
 
-- The `--yes` flag auto-accepts default project settings (Next.js auto-detected)
-- This creates the project on Vercel, uploads code, builds, and deploys
-- A `.vercel/` directory is created locally to link the project (already in `.gitignore`)
-- First deploy goes to production automatically
+### 3. Create a Web Service on Render
+
+1. Go to https://dashboard.render.com
+2. Click **New** → **Web Service**
+3. Select **Deploy an existing image from a registry**
+4. Enter image URL: `docker.io/yourusername/repready:latest`
+5. Configure:
+   - **Name**: `repready`
+   - **Region**: Pick the closest to your users
+   - **Instance Type**: **Free**
+6. Click **Create Web Service**
 
 ### 4. Set Environment Variables
 
-Set the Anthropic API key (required for API routes):
+In the Render dashboard for your service:
 
+1. Go to **Environment** tab
+2. Add:
+   - `ANTHROPIC_API_KEY` = your Anthropic API key
+3. Click **Save Changes** (triggers a redeploy)
+
+### 5. Verify Deployment
+
+Once deployed, Render gives you a URL like `https://repready.onrender.com`.
+
+Test the health endpoint:
 ```bash
-npx vercel env add ANTHROPIC_API_KEY
-```
-
-- When prompted, select all environments: **Production**, **Preview**, **Development**
-- Paste your API key value when prompted
-- Keys are stored encrypted on Vercel and never exposed
-
-Add any other environment variables the same way:
-
-```bash
-npx vercel env add VARIABLE_NAME
-```
-
-### 5. Redeploy with Environment Variables
-
-After setting env vars, redeploy so they take effect:
-
-```bash
-npx vercel --prod
+curl https://repready.onrender.com/api/health
 ```
 
 ## Subsequent Deploys
@@ -75,56 +76,63 @@ npx vercel --prod
 After making code changes locally:
 
 ```bash
-npx vercel --prod
+DOCKER_USERNAME=yourusername ./scripts/deploy.sh
 ```
 
-This uploads, builds, and deploys to production in one command.
+Then in the Render dashboard, click **Manual Deploy** → **Deploy latest image** (or enable auto-deploy from the registry).
 
 ## Useful Commands
 
 | Command | Description |
 |---------|-------------|
-| `npx vercel` | Preview deployment (staging URL) |
-| `npx vercel --prod` | Production deployment |
-| `npx vercel whoami` | Check logged-in user |
-| `npx vercel env ls` | List environment variables |
-| `npx vercel env add KEY` | Add an environment variable |
-| `npx vercel env rm KEY` | Remove an environment variable |
-| `npx vercel logs <url>` | View deployment logs |
-| `npx vercel ls` | List all deployments |
-| `npx vercel inspect <url>` | View deployment details |
-| `npx vercel --prod --force` | Force a fresh build (no cache) |
+| `docker build -t repready .` | Build image locally |
+| `docker run -p 3000:10000 -e ANTHROPIC_API_KEY=sk-... repready` | Test locally |
+| `DOCKER_USERNAME=you ./scripts/deploy.sh` | Build + push to Docker Hub |
+| `docker images repready` | Check local image size |
 
-## Free Tier (Hobby Plan)
+## Free Tier Details
 
-- Unlimited deployments
-- 100GB bandwidth/month
-- Serverless function execution: 100GB-hours/month
-- No cold starts
+- **750 instance-hours/month** (enough for 1 service running 24/7)
+- Sleeps after **15 minutes** of inactivity
+- ~60 second cold start when waking up
 - Custom domains supported
 - HTTPS included
-- No credit card required
 
 ## Architecture
 
-- **No Dockerfile needed** — Vercel natively builds and serves Next.js
-- **No repo link** — deployed via CLI only, source code stays private
-- **Serverless** — API routes run as serverless functions automatically
-- **Edge network** — static assets served from CDN globally
+```
+Local machine                    Docker Hub                 Render
+┌──────────────┐   docker push   ┌──────────────┐   pull   ┌──────────────┐
+│ Source code   │───────────────→ │ Docker image  │────────→ │ Running app  │
+│ + Dockerfile  │                 │ (compiled     │         │ (single      │
+│              │                 │  only, no src) │         │  process)    │
+└──────────────┘                 └──────────────┘         └──────────────┘
+```
+
+- **Dockerfile**: Multi-stage build — final image contains only compiled output, no source
+- **next.config.ts**: `output: "standalone"` for minimal production bundle
+- **render.yaml**: Render service definition (optional, for Blueprint deploys)
+- **scripts/deploy.sh**: One-command build + push
+- **Port 10000**: Render's default port for free tier services
 
 ## Environment Variables
 
-Sensitive keys (like `ANTHROPIC_API_KEY`) are stored as encrypted environment variables on Vercel. They are never committed to the repository.
+Sensitive keys (like `ANTHROPIC_API_KEY`) are set in the Render dashboard under the **Environment** tab. They are encrypted and never committed to the repository.
 
-To list current variables:
+## Testing Locally with Docker
+
 ```bash
-npx vercel env ls
+docker build -t repready .
+docker run -p 3000:10000 -e ANTHROPIC_API_KEY=sk-ant-your-key repready
 ```
+
+Then open http://localhost:3000
 
 ## Troubleshooting
 
 - **Build fails**: Run `npm run build` locally first to check for errors
-- **API key issues**: Verify with `npx vercel env ls` that `ANTHROPIC_API_KEY` is set, then redeploy with `npx vercel --prod`
-- **Function timeout**: Vercel hobby plan has 60s max for serverless functions
-- **Stale deploy**: Run `npx vercel --prod --force` to force a fresh build with no cache
-- **Login expired**: Run `npx vercel login` again to re-authenticate
+- **App crashes on Render**: Check the **Logs** tab in Render dashboard
+- **API key issues**: Verify in Render dashboard → Environment tab
+- **Cold start slow**: Free tier sleeps after 15 min; first request takes ~60s to wake
+- **Port issues**: Render free tier requires port 10000 (configured in Dockerfile)
+- **Image too large**: Multi-stage build keeps it small; check with `docker images repready`
