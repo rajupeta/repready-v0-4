@@ -46,15 +46,10 @@ export default function Home() {
       });
   }, []);
 
-  // Start session only after SSE connection is established
-  // This prevents coaching prompts from firing before the client receives transcript lines
+  // Legacy ref cleanup — start is now fired immediately in handleStartSession
   useEffect(() => {
     if (isConnected && pendingStartIdRef.current) {
-      const id = pendingStartIdRef.current;
       pendingStartIdRef.current = null;
-      fetch(`/api/sessions/${id}/start`, { method: 'POST' }).catch(() => {
-        setSessionStatus('idle');
-      });
     }
   }, [isConnected]);
 
@@ -88,11 +83,12 @@ export default function Home() {
       const session = await createRes.json();
       const id = session.sessionId;
 
-      // Connect SSE FIRST — must subscribe before starting playback
-      // so no transcript or coaching events are missed
+      // Start session and SSE in parallel — SSE stream replays any missed events
       pendingStartIdRef.current = id;
       setSessionId(id);
-      // The useEffect above will call /start once the SSE connection is established
+      fetch(`/api/sessions/${id}/start`, { method: 'POST' }).catch(() => {
+        setSessionStatus('idle');
+      });
     } catch {
       setSessionStatus('idle');
     }

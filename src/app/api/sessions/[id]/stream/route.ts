@@ -17,7 +17,9 @@ export async function GET(
     );
   }
 
-  const stream = createSSEStream(id, eventBus);
+  // Replay any events emitted before client connected (e.g. if /start was called first)
+  const missedEvents = sessionManager.getEvents(id) || [];
+  const stream = createSSEStream(id, eventBus, missedEvents);
 
   return new Response(stream, {
     headers: {
